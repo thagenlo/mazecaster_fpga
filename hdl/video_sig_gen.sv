@@ -1,3 +1,9 @@
+/*
+CHANGES:
+Cathy: 
+    - added "very_last_pixel_out" signal that goes high for one cycle when the very last pixel at (1279, 719) is calculated
+*/
+
 module video_sig_gen
 #(
   parameter ACTIVE_H_PIXELS = 1280,
@@ -18,6 +24,7 @@ module video_sig_gen
   output logic hs_out, //horizontal sync out
   output logic ad_out, // active drawing indicator (low when in blanking or sync period, high when actively drawing)
   output logic nf_out, //single cycle enable signal
+  output logic very_last_pixel_out,
   output logic [5:0] fc_out); //frame
 
   localparam TOTAL_PIXELS = LINE_LENGTH * TOTAL_LINES; //figure this out
@@ -69,18 +76,17 @@ module video_sig_gen
             hcount_out <= 0;
             fc_out <= 0;
             nf_out <= 0;
+            very_last_pixel_out <= 0;
         end else begin
             // ad_out <= 1;
             case (vcount_out)
                 V_PORCH_START_INDEX: begin
                     case (hcount_out)
                         H_PORCH_START_INDEX-1: begin
-                            // nf_out <= 1; // right before new frame flag
                             nf_out <= 0;
                             hcount_out <= hcount_out + 1;
                         end
                         H_PORCH_START_INDEX: begin
-                            // ad_out <= 0; // right before entering blank period
                             nf_out <= 0;
                             hcount_out <= hcount_out + 1;
                         end
@@ -111,19 +117,19 @@ module video_sig_gen
                             hcount_out <= hcount_out + 1;
                         end
                     endcase
-                    // ad_out <= 0;
                 end
                 LAST_V_INDEX: begin
                     case (hcount_out)
                         LAST_H_INDEX: begin // (1649, 749) last pixel of entire display
                             vcount_out <= 0;
                             hcount_out <= 0;
-                            // ad_out <= 1;
+                            very_last_pixel_out <= 1;
                         end
                         default hcount_out <= hcount_out + 1;
                     endcase
                 end
                 default begin // for all other parts PROBLEM: will go back here and set 
+                    very_last_pixel_out <= 0;
                     case (hcount_out)
                         LAST_H_INDEX: begin
                             // if (vcount_out < V_PORCH_START_INDEX) ad_out <= 1;
