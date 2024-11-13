@@ -18,6 +18,7 @@ module video_sig_gen
 (
   input wire pixel_clk_in,
   input wire rst_in,
+  input wire video_gen_stop,
   output logic [$clog2(TOTAL_PIXELS)-1:0] hcount_out,
   output logic [$clog2(TOTAL_LINES)-1:0] vcount_out,
   output logic vs_out, //vertical sync out
@@ -75,6 +76,11 @@ module video_sig_gen
             vcount_out <= 0;
             hcount_out <= 0;
             fc_out <= 0;
+            nf_out <= 0;
+            very_last_pixel_out <= 0;
+        end else if (video_gen_stop) begin
+            vcount_out <= 0;
+            hcount_out <= 0;
             nf_out <= 0;
             very_last_pixel_out <= 0;
         end else begin

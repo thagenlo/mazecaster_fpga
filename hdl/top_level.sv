@@ -57,6 +57,8 @@ module top_level(
     // PIXEL VALUE WRITING
     logic [23:0] rgb_out; // from the frame buffer
 
+    logic video_gen_stop;
+
     frame_buffer frame_buffer_module(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
@@ -66,7 +68,8 @@ module top_level(
         .pixel_in(ray_pixel_out),
         .ray_last_pixel_in(ray_last_pixel_in),
         .video_last_pixel_in(last_screen_pixel),
-        .rgb_out(rgb_out)
+        .video_gen_stop_out(),
+        .rgb_out(rgb_out) // should I create a valid signal so that 
     )
 
     // PIXEL VALUE DISPLAY ON SCREEN
