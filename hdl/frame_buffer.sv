@@ -15,27 +15,68 @@ at some point, the video_sig_gen will stop generating because it's waiting for t
 can you tell video sig gen to stop generating the frame when 
 */
 
-module frame_buffer
+module frame_buffer #(
+                        parameter PIXEL_WIDTH = 16,
+                        parameter FULL_SCREEN_WIDTH = 1280,
+                        parameter FULL_SCREEN_HEIGHT = 720,
+                        parameter SCREEN_WIDTH = 320,
+                        parameter SCREEN_HEIGHT = 180
+                    )
                     (
                     input wire pixel_clk_in,
                     input wire rst_in,
                     input wire [10:0] hcount_in, // from video_sig_gen
                     input wire [9:0] vcount_in,
-                    // input wire valid_video_gen_in,
+                    // input ray_valid_in, // DO I NEED TO HAVE A RAY VALID IN SIGNAL?
                     input wire [15:0] address_in, // from transformating / flattening module (not in order and ranges from 0 to 320*180)
                     input wire [15:0] pixel_in,
                     input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
                     input wire video_last_pixel_in, // indicates the last 
-                    output wire video_gen_stop_out, // signals to video_sig_gen to stop generating
-                    output wire [23:0] rgb_out);
+                    output logic [23:0] rgb_out);
 
-    localparam PIXEL_WIDTH = 16;
+    // localparam PIXEL_WIDTH = 16;
+    // localparam FULL_SCREEN_WIDTH = 1280;
+    // localparam FULL_SCREEN_HEIGHT = 720;
+    // localparam SCREEN_WIDTH = 320;
+    // localparam SCREEN_HEIGHT = 180;
+
     logic state; // state = 0 (write to fb1, read from fb2), state = 1 (read from fb1, write to fb2)
-    logic [7:0] pixel_out;    // output 8-bit pixel representation from frame buffer
+    logic [15:0] pixel_out1, pixel_out2;    // output 16-bit pixel representation from frame buffer
+    logic [4:0] red1, red2, blue1, blue2; // (color)1 = pixel color from FB1, (color)2 = pixel color from FB2 (had to do separately so that there was no conflict in output wires)
+    logic [5:0] green1, green2;
 
-    assign address1 = (!state) ? address_in : ((hcount_in >> 2)+((vcount_in >> 2) * 320)); // if writing, address = address_in. if reading, video sig indexing
-    assign address2 = (state) ? address_in : ((hcount_in >> 2)+((vcount_in >> 2) * 320));
 
+    logic [15:0] test_pixel_out1, test_pixel_out2;
+
+    logic valid_output_pixel;
+
+    logic [15:0] address1, address2;
+
+    // state = 0: writing to FB1, reading from FB2 (pixel_out_2)
+    // state = 1: writing to FB2, reading from FB1 (pixel_out_1)
+    assign address1 = (!state) ? address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2)); // if writing, address = address_in. if reading, video sig indexing
+    assign address2 = (state) ? address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
+    assign valid_output_pixel = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
+
+    assign red1 = pixel_out1[15:11];
+    assign green1 = pixel_out1[10:5];
+    assign blue1 = pixel_out1[4:0];
+
+    assign red2 = pixel_out2[15:11];
+    assign green2 = pixel_out2[10:5];
+    assign blue2 = pixel_out2[4:0];
+
+    always_comb begin
+        if (rst_in) begin
+            rgb_out = 0;
+        end else if (state) begin // display from fb1
+            rgb_out = {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}};
+            test_pixel_out1 = {red1, green1, blue1};
+        end else if (!state) begin
+            rgb_out = {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}};
+            test_pixel_out2 = {red2, green2, blue2};
+        end
+    end
     // FRAME BUFFER 1
     xilinx_single_port_ram_read_first #( // could have width be equal to PIXEL_WIDTH * height
     .RAM_WIDTH(PIXEL_WIDTH),                          // 16 bits wide (16 bit pixel representation)
@@ -47,10 +88,10 @@ module frame_buffer
         .dina(pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
         .wea(!state),               // Write enabled when state == 0
-        .ena(1),                    // RAM Enable = always enabled
+        .ena(1),   // RAM Enable = only enabled when we have a valid address (cannot read from invalid address)
         .rsta(rst_in),              // Output reset (does not affect memory contents)
-        .regcea(state && !video_gen_stop_out),             // Output register enabled when state == 1
-        .douta(pixel_out)           // RAM output data, width determined from RAM_WIDTH
+        .regcea(1),             // Output register enabled when state == 1
+        .douta(pixel_out1)           // RAM output data, width determined from RAM_WIDTH
     );
 
     // FRAME BUFFER 2
@@ -64,28 +105,12 @@ module frame_buffer
         .dina(pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
         .wea(state),                // Write enabled when state == 1
-        .ena(1),                    // RAM Enable = always enabled
+        .ena(1),   // RAM Enable = only enabled when we have a valid address
         .rsta(rst_in),              // Output reset (does not affect memory contents)
-        .regcea(!state && !video_gen_stop_out),            // Output register enabled when state == 0
-        .douta(pixel_out)           // RAM output data, width determined from RAM_WIDTH
+        .regcea(1),            // Output register enabled when state == 0
+        .douta(pixel_out2)           // RAM output data, width determined from RAM_WIDTH
     );
 
-    // PIXEL PALETTE
-    xilinx_single_port_ram_read_first #(
-    .RAM_WIDTH(24),                             // 24 bits wide (565 rgb representation)
-    .RAM_DEPTH(256),                            // 2^8 = 256 different pixel represenations 
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"),       // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE(`FPATH(palette.mem))                                // name of RAM initialization file = palette.mem
-    ) palette (
-        .addra(pixel_out),          // address
-        .dina(),                    // RAM input data = none since using as ROM
-        .clka(pixel_clk_in),        // Clock
-        .wea(0),                    // never write to it
-        .ena(1),                    // RAM Enable = always enabled
-        .rsta(rst_in),              // Output reset (does not affect memory contents)
-        .regcea(1),                 // Output register always enabled
-        .douta(rgb_out)           // RAM output data, width determined from RAM_WIDTH
-    );
 
     logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
     logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
@@ -99,10 +124,8 @@ module frame_buffer
     always_comb begin
         if (rst_in || switched) begin
             ready_to_switch = 2'b0;
-            video_gen_stop_out = 0;
         end else if (ray_last_pixel_in || video_last_pixel_in) begin
             if (ray_last_pixel_in) begin
-                video_gen_stop_out = 0;
                 ready_to_switch[0] = 1;
                 if (video_last_pixel_in) begin // in case they are both true at the same time
                     ready_to_switch[1] = 1;
@@ -111,8 +134,6 @@ module frame_buffer
                 ready_to_switch[1] = 1;
                 if (ray_last_pixel_in) begin
                     ready_to_switch[0] = 1;
-                end else begin
-                    video_gen_stop_out = 1;
                 end
             end
         end
@@ -121,8 +142,10 @@ module frame_buffer
     // all state logic done here
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
-            rgb_out <= 0;
-            pixel_out <= 0;
+            // rgb_out <= 0;
+            // pixel_out1 <= 0;
+            // pixel_out2 <= 0;
+            state <= 0;
             switched <= 0;
         end else begin
             if (ready_to_switch == 2'b11) begin // if we are done displaying all of fb1 and writing to fb2
