@@ -34,6 +34,9 @@ module top_level(
     logic last_screen_pixel;
     logic [5:0] frame_count; //0 to 59 then rollover frame counter
 
+    // PIPELINING
+
+
     video_sig_gen mvg(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
@@ -66,7 +69,7 @@ module top_level(
         .pixel_in(ray_pixel_out),
         .ray_last_pixel_in(ray_last_pixel_in),
         .video_last_pixel_in(last_screen_pixel),
-        .rgb_out(rgb_out)
+        .rgb_out(rgb_out) // should I create a valid signal so that 
     )
 
     // PIXEL VALUE DISPLAY ON SCREEN
