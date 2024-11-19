@@ -1,0 +1,14 @@
+import random
+
+list_of_ray_addresses_left = [i for i in range(5*10)]
+
+while(list_of_ray_addresses_left):
+    random_address = random.choice(list_of_ray_addresses_left)
+    list_of_ray_addresses_left.remove(random_address)
+print("hi")
+
+# x = random.choice([i for i in range(1,10)])
+# for h in range(10):
+#     if (h%x == 0):
+#         random_address = random.choice(list_of_ray_addresses_left)
+#         list_of_ray_addresses_left.remove(random_address)
