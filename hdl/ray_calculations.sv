@@ -1,9 +1,9 @@
 module ray_calculations (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [13:0] pos, //TODO change this in controloler to be a 31:0 value
+  input wire [31:0] pos, //TODO change this in controloler to be a 31:0 value
   input wire [31:0] dir,
-  input wire [15:0] plane,
+  input wire [31:0] plane,
   input wire hcount_in[8:0], //which column I am calculating ray for on screen (0 to screenwidth-1), was thinking of incrementing in top_level and feedign that into dda
   output wire [15:0] rayDirX, //ray direction for the current column
   output wire [15:0] rayDirY,
@@ -25,12 +25,12 @@ module ray_calculations (
 
   logic moveFwd, moveBack;
   logic rotLeft, rotRight;
-  logic [6:0] posX, [6:0] posY;
-  logic [15:0] dirX, [15:0] dirY;
+  logic [15:0] posX, posY;
+  logic [15:0] dirX, dirY;
   logic [15:0] planeX, [15:0] planeY;
   logic [1:0] stepX, stepY;
-  logic signed [15:0] cameraX;
-  assign cameraX = ((2 * hcount_in) * SCREEN_WIDTH_RECIPRICAL) - 1;
+  logic signed [15:0] cameraX; //is Q8.8 fixed point
+  assign cameraX = (2 * hcount_in * SCREEN_WIDTH_RECIPRICAL) + 16'b1111_1111_0000_0000; // 2*x/w- 1
   always_ff @(posEdge pixel_clk_in) begin
     if (rst_in) begin
       rayDirX <= 0;

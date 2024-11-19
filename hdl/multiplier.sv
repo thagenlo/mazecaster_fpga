@@ -4,7 +4,6 @@ module fixed_point_multiplier (
     output signed [15:0] result
 );
 
-    // Intermediate 32-bit product to hold the result of multiplication
     wire signed [31:0] product;
 
     assign product = a * b; //need to doubke lenth for fractional part when multiplying 
