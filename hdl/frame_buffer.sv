@@ -44,9 +44,7 @@ module frame_buffer #(
     logic [15:0] pixel_out1, pixel_out2;    // output 16-bit pixel representation from frame buffer
     logic [4:0] red1, red2, blue1, blue2; // (color)1 = pixel color from FB1, (color)2 = pixel color from FB2 (had to do separately so that there was no conflict in output wires)
     logic [5:0] green1, green2;
-
-
-    logic [15:0] test_pixel_out1, test_pixel_out2;
+    // logic [15:0] test_pixel_out1, test_pixel_out2;
 
     logic valid_output_pixel;
 
@@ -71,10 +69,10 @@ module frame_buffer #(
             rgb_out = 0;
         end else if (state) begin // display from fb1
             rgb_out = {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}};
-            test_pixel_out1 = {red1, green1, blue1};
+            // test_pixel_out1 = {red1, green1, blue1};
         end else if (!state) begin
             rgb_out = {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}};
-            test_pixel_out2 = {red2, green2, blue2};
+            // test_pixel_out2 = {red2, green2, blue2};
         end
     end
     // FRAME BUFFER 1
