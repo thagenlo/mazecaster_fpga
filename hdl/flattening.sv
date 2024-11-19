@@ -17,7 +17,6 @@ module dda
   output logic [7:0] screenX_out; //pipelined x_coord
   output logic [7:0] screenY_out; //pipelined y_coord
   output logic [7:0] screenData_out; //pixel color
-
   );
 
 endmodule
