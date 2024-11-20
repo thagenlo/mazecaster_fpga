@@ -5,7 +5,7 @@
 /*
 QUESTIONS:
 - do I need valid signal for every hcount, vcount pair
-- do I need a valid signal for every address_in, pixel_in pair
+- do I need a valid signal for every ray_address_in, pixel_in pair
 to make sure I am not writing or reading invalid addresses
 - what happens if you index into an address that does not exist in a BRAM?
 
@@ -16,11 +16,11 @@ can you tell video sig gen to stop generating the frame when
 */
 
 module frame_buffer #(
-                        parameter PIXEL_WIDTH = 16,
-                        parameter FULL_SCREEN_WIDTH = 1280,
-                        parameter FULL_SCREEN_HEIGHT = 720,
-                        parameter SCREEN_WIDTH = 320,
-                        parameter SCREEN_HEIGHT = 180
+                        parameter [4:0] PIXEL_WIDTH = 16,
+                        parameter [10:0] FULL_SCREEN_WIDTH = 1280,
+                        parameter [9:0] FULL_SCREEN_HEIGHT = 720,
+                        parameter [8:0] SCREEN_WIDTH = 320,
+                        parameter [7:0] SCREEN_HEIGHT = 180
                     )
                     (
                     input wire pixel_clk_in,
@@ -28,8 +28,8 @@ module frame_buffer #(
                     input wire [10:0] hcount_in, // from video_sig_gen
                     input wire [9:0] vcount_in,
                     // input ray_valid_in, // DO I NEED TO HAVE A RAY VALID IN SIGNAL?
-                    input wire [15:0] address_in, // from transformating / flattening module (not in order and ranges from 0 to 320*180)
-                    input wire [15:0] pixel_in,
+                    input wire [15:0] ray_address_in, // from transformating / flattening module (not in order and ranges from 0 to 320*180)
+                    input wire [15:0] ray_pixel_in,
                     input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
                     input wire video_last_pixel_in, // indicates the last 
                     output logic [23:0] rgb_out);
@@ -52,8 +52,8 @@ module frame_buffer #(
 
     // state = 0: writing to FB1, reading from FB2 (pixel_out_2)
     // state = 1: writing to FB2, reading from FB1 (pixel_out_1)
-    assign address1 = (!state) ? address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2)); // if writing, address = address_in. if reading, video sig indexing
-    assign address2 = (state) ? address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
+    assign address1 = (!state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2)); // if writing, address = ray_address_in. if reading, video sig indexing
+    assign address2 = (state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
     assign valid_output_pixel = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
 
     assign red1 = pixel_out1[15:11];
@@ -83,7 +83,7 @@ module frame_buffer #(
     .INIT_FILE()                            // name of RAM initialization file = pop_cat.mem
     ) framebuffer_1 (
         .addra(address1),           // address
-        .dina(pixel_in),            // RAM input data = pixel_in from DDA_out buffer
+        .dina(ray_pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
         .wea(!state),               // Write enabled when state == 0
         .ena(1),   // RAM Enable = only enabled when we have a valid address (cannot read from invalid address)
@@ -100,7 +100,7 @@ module frame_buffer #(
     .INIT_FILE()                            // name of RAM initialization file = none
     ) framebuffer_2 (
         .addra(address2),           // address
-        .dina(pixel_in),            // RAM input data = pixel_in from DDA_out buffer
+        .dina(ray_pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
         .wea(state),                // Write enabled when state == 1
         .ena(1),   // RAM Enable = only enabled when we have a valid address

@@ -163,7 +163,7 @@ module dda
 
                 WALL_CALC: begin
 
-                    lineHeight_out <= SCREEN_HEIGHT / perpWallDist; //TODO THIS DIVISION POOPOO
+                    lineHeight_out <= SCREEN_HEIGHT / perpWallDist; //TODO THIS DIVISION POOPOO (note from Cathy: can you turn this into a non-decimal number since it doesn't need to be a decimal)
 
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
 
