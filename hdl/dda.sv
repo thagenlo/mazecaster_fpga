@@ -12,7 +12,7 @@ module dda
   input wire [] dda_data_in, // (hcount_ray, rayDir_in, sideDist_in, deltaDist_in, map_in) - (8 + (3*32) + 16) = 120
   input wire push_in,
   
-  output logic [10:0] hcount_ray_out, //pipelined x_coord
+  output logic [8:0] hcount_ray_out, //pipelined x_coord
   output logic [15:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist
   output logic wallType_out, // 0 = X wall hit, 1 = Y wall hit
   output logic [3:0] mapData_out;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
@@ -191,7 +191,7 @@ module dda
           last_granted_fsm <= 1'b0;
         end
 
-        ASSIGN: begin //cycle 2 (data ready) - onnect BRAM data to the appropriate submodule based on arbiter state
+        ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
           if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
             dda_fsm0_map_data_valid_in <= 1'b1;
             dda_fsm0_map_data_in <= map_data;
