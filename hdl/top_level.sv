@@ -34,9 +34,9 @@ module top_level(
     logic last_screen_pixel;
     logic [5:0] frame_count; //0 to 59 then rollover frame counter
 
-    // PIPELINING
+    //TODO: PIPELINING
 
-
+    // VIDEO SIGN GEN
     video_sig_gen mvg(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
@@ -49,13 +49,71 @@ module top_level(
         .very_last_pixel_out(last_screen_pixel),
         .fc_out(frame_count));
 
-    // RAY CASTING OUTPUTS
-    logic address_out;          // address from transformation module
-    logic [15:0] ray_pixel_out;     // calculated pixel value from transformation module in 565 format
-    logic ray_last_pixel_in;    // signal from transformation module indicating the last calculated pixel from the ray cast
-    logic valid_out;            // valid signal telling video sig gen that 
+    //TODO: INSERT CONTROLLER MODULE
 
-    //TODO: insert all ray modules + transformation module
+
+    //TODO: INSERT RAY CALCULATION MODULE
+
+
+    //TODO: INSERT DDA-in FIFO
+    ddr_fifo_wrap dda_fifo_in ( // read data output from traffic
+        .sender_rst(sys_rst),
+        .sender_clk(clk_pixel),
+        .sender_axis_tvalid(display_ui_axis_tvalid), // Heba input
+        .sender_axis_tready(display_ui_axis_tready), // FIFO
+        .sender_axis_tdata(display_ui_axis_tdata), // Heba input
+        .sender_axis_tlast(),
+        .sender_axis_prog_full(),
+        .receiver_clk(clk_pixel),
+        .receiver_axis_tvalid(display_axis_tvalid), // FIFO
+        .receiver_axis_tready(display_axis_tready), // Tori input
+        .receiver_axis_tdata(display_axis_tdata), // FIFO
+        .receiver_axis_tlast(), // FIFO
+        .receiver_axis_prog_empty());
+
+    //TODO: INSERT DDA MODULES
+
+
+    //TODO: INSERT DDA-out FIFO
+    // fifo-out signal to transformer
+    logic fifo_tvalid_out;
+    logic [38:0] fifo_tdata_out;
+    logic fifo_tlast_out;
+    logic fifo_prog_empty;
+    // transformer signal to fifo-out
+    logic transformer_tready;
+
+    ddr_fifo_wrap dda_fifo_out ( // read data output from traffic
+        .sender_rst(sys_rst),
+        .sender_clk(clk_pixel),
+        .sender_axis_tvalid(display_ui_axis_tvalid), //TODO: Replace names starting from here
+        .sender_axis_tready(display_ui_axis_tready),
+        .sender_axis_tdata(display_ui_axis_tdata),
+        .sender_axis_tlast(display_ui_axis_tlast),
+        .sender_axis_prog_full(display_ui_axis_prog_full), //TODO: to here
+        .receiver_clk(clk_pixel),
+        .receiver_axis_tvalid(fifo_tvalid_out),
+        .receiver_axis_tready(transformer_tready),
+        .receiver_axis_tdata(fifo_tdata_out),
+        .receiver_axis_tlast(fifo_tlast_out),
+        .receiver_axis_prog_empty(fifo_prog_empty)); // unused
+
+    //TODO: INSERT TRANSFORMATION MODULE
+    logic [15:0] ray_address_out;
+    logic [15:0] ray_pixel_out;
+    logic ray_last_pixel_out;
+
+    transformation flattening_module (
+        .pixel_clk_in(pixel_clk_in),
+        .rst_in(sys_rst),
+        .dda_fifo_tvalid_in(fifo_tvalid_out),
+        .dda_fifo_tdata_in(fifo_tdata_out),
+        .dda_fifo_tlast_in(fifo_tlast_out),
+        .transformer_tready_out(transformer_tready),
+        .ray_address_out(ray_address_out).
+        .ray_pixel_out(ray_pixel_out),
+        .ray_last_pixel_out(ray_last_pixel_out)
+    )
 
     // PIXEL VALUE WRITING
     logic [23:0] rgb_out; // from the frame buffer
@@ -65,9 +123,9 @@ module top_level(
         .rst_in(sys_rst),
         .hcount_in(hcount_video),
         .vcount_in(vcount_video),
-        .address_in(address_out),
+        .address_in(ray_address_out),
         .pixel_in(ray_pixel_out),
-        .ray_last_pixel_in(ray_last_pixel_in),
+        .ray_last_pixel_in(ray_last_pixel_out),
         .video_last_pixel_in(last_screen_pixel),
         .rgb_out(rgb_out) // should I create a valid signal so that 
     )

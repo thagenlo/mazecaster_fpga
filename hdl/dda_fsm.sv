@@ -242,7 +242,8 @@ module dda
 
                 WALL_CALC: begin
 
-                    // 1 cycle
+                    lineHeight_out <= SCREEN_HEIGHT / perpWallDist; //TODO THIS DIVISION POOPOO
+
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
                     mapData_out <= mapData_store; // value from 0->7 at map[mapX][mapY] from BRAM
 

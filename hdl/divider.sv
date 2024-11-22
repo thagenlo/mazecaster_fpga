@@ -120,4 +120,5 @@ module divider #(
             val <= 0;
         end
     end
+
 endmodule
