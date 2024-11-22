@@ -13,12 +13,13 @@ module dda
   input wire push_in,
   
   output logic [8:0] hcount_ray_out, //pipelined x_coord
-  output logic [15:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist
+  output logic [7:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist
   output logic wallType_out, // 0 = X wall hit, 1 = Y wall hit
-  output logic [3:0] mapData_out;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
-  output logic [15:0] wallX_out; //where on wall the ray hits
+  output logic [3:0] mapData_out,  // value 0 -> 2^4 at map[mapX][mapY] from BROM
+  output logic [15:0] wallX_out, //where on wall the ray hits
 
-  output logic valid_out, // indicates when to store (x, lineHeight, wallType, mapData) in DDA_fifo_out
+  output logic valid_out, // indicates when to store (x, lineHeight, wallType, mapData, tLast_out) in DDA_fifo_out
+  output logic tLast_out, //TODO single-cycle indicator for the 320th ray
   
   );
 
@@ -131,8 +132,53 @@ module dda
     .dda_valid_out(dda_fsm0_valid_out)
   );
 
-  // DDA FSM module 1 HERE (duplicate when ready)
+  // DDA FSM module 1 HERE
+  dda_fsm #(
+    .SCREEN_WIDTH(SCREEN_WIDTH),
+    .SCREEN_HEIGHT(SCREEN_HEIGHT),
+    .N(N)
+  ) dda_fsm0 (
+    .pixel_clk_in(pixel_clk_in),
+    .rst_in(rst_in),
+    .dda_data_in(dda_fsm1_in),
+    .valid_in(dda_fsm1_valid_in),
 
+    .map_data_in(dda_fsm1_map_data_in),
+    .map_data_valid_in(dda_fsm1_map_data_valid_in),
+    .map_addra_out(dda_fsm1_map_addra_out),
+    .map_request_out(dda_fsm1_map_request_out),
+
+    .hcount_ray_out(dda_fsm1_hcount_ray_out),
+    .lineHeight_out(dda_fsm1_lineHeight_out),
+    .wallType_out(dda_fsm1_wallType_out),
+    .mapData_out(dda_fsm1_mapData_out),
+    .wallX_out(dda_fsm1_wallX_out),
+    
+    .dda_busy_out(dda_fsm1_busy),
+    .dda_valid_out(dda_fsm1_valid_out)
+  );
+
+  ////############ TLAST COUNTER ###############
+
+  //internal registers
+  logic [8:0] ray_counter;    // 9-bit counter to count up to 320 (0 to 319)
+  logic [1:0] increment;      // tracks how much to increment (0, 1, or 2)
+  //logic tLast_out;  
+  assign increment = dda_fsm0_valid_out + dda_fsm1_valid_out;
+  assign tLast_out = (ray_counter == SCREEN_WIDTH-1) || 
+                (ray_counter + increment > (SCREEN_WIDTH-1) && ray_counter <= (SCREEN_WIDTH-1));   // assert tLast_out for one cycle
+
+  always_ff @(posedge pixel_clk_in) begin
+      if (rst_in) begin
+          ray_counter <= 9'd0;
+      end else if (increment > 0) begin
+          if (ray_counter + increment >= SCREEN_WIDTH) begin//9'd319) begin
+              ray_counter <= (ray_counter + increment) - SCREEN_WIDTH; //reset counter after 320th ray
+          end else begin
+              ray_counter <= ray_counter + increment;
+          end
+      end
+  end
 
 
   ////############ MAP DATA BRAM REQUESTS ###############

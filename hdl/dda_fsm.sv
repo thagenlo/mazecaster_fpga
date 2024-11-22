@@ -7,7 +7,7 @@ module dda
 (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [] dda_data_in; //TODO (hcount_ray[10:0], stepX/stepY[3:0], rayDirX/rayDirY[31:0], deltaDistX/deltaDistY[31:0], posX/posY[31:0] , sideDistX/sideDistY[31:0], mapX/mapY[13:0])
+  input wire [] dda_data_in; //TODO (hcount_ray[8:0], stepX/stepY[1:0], rayDirX/rayDirY[31:0], deltaDistX/deltaDistY[31:0], posX/posY[31:0], sideDistX/sideDistY[31:0])
   input wire valid_in; //single cycle high for new dda_data_in
 
   //handling map data requests
@@ -18,10 +18,9 @@ module dda
 
   output logic [8:0] hcount_ray_out, // current ray/sreen x-coordinate - (11-bit uint) (0 -> screenWidth)
   output logic [7:0] lineHeight_out, //log_2(240) - 8-bit uint
-  //output logic [15:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist - (8.8 fixed point) TODO
   output logic wallType_out, // 0 -> X wall hit, 1 -> Y wall hit (1-bit uint)
   output logic [3:0] mapData_out;  // value 0 -> 16 at map[mapX][mapY] from BROM
-  output logic [7:0] wallX_out; //where on wall the ray hits - 8-bit uint (fractional part of 8.8 fixed point value)
+  output logic [15:0] wallX_out; //where on wall the ray hits - 16 bit fixed point (fractional part of 8.8 fixed point value)
 
     // handshakes
   output logic dda_busy_out, // high when DDA FSM in use
@@ -31,18 +30,29 @@ module dda
 
     // ---- INPUT CONSTANTS ----
         //TODO split up dda_data_in variables
-    logic [8:0] hcount_ray; // current ray/screen x-coordinate
-    assign hcount_ray = dda_data_in[]; // 11-bit uint (0 -> screenWidth)
+    // logic [8:0] hcount_ray; // current ray/screen x-coordinate
+    // assign hcount_ray = dda_data_in[]; // 9-bit uint (0 -> screenWidth)
+    assign hcount_ray_out = dda_data_in[]
 
-    logic [1:0] stepX, stepY; //which dir to take step
-    //assign stepX = dda_data_in[]; // 0 => -1 (left), 1 => 1 (right) - ( 1-bit uint )
-    //assign stepY = dda_data_in[]; // 0 => -1 (back), 1 => 1 (forward) - ( 1-bit uint )
-    assign stepX = $signed(dda_data_in[]); // 2'b10 = -1, 2'b01 = 1 - (2-bit two's complement)
-    assign stepY = $signed(dda_data_in[]); // 2'b10 = -1, 2'b01 = 1 - (2-bit two's complement)
+    logic stepX, stepY; //which dir to take step
+    assign stepX = dda_data_in[]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
+    assign stepY = dda_data_in[]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
 
     logic [15:0] rayDirX, rayDirY; // x & y componentions of ray vector (used to calculate wallX_out)
-    assign rayDirX = $signed(dda_data_in[]); // 8.8 signed fixed point 
-    assign rayDirY = $signed(dda_data_in[]); // 8.8 signed fixed point 
+    always_comb begin
+        if (dda_data_in[]) begin // negative
+            rayDirX = ~dda_data_in[] + 16'd1; // Two's complement
+        end else begin
+            rayDirX = dda_data_in[]; // if positive, retain original value
+        end
+        if (dda_data_in[]) begin // negative
+            rayDirY = ~dda_data_in[] + 16'd1; // Two's complement
+        end else begin
+            rayDirY = dda_data_in[]; // if positive, retain original value
+        end
+    end
+    // assign rayDirX = $signed(dda_data_in[]); // 8.8 signed fixed point 
+    // assign rayDirY = $signed(dda_data_in[]); // 8.8 signed fixed point 
 
     logic [15:0] deltaDistX, deltaDistY; // distance ray travels to go from 1 x/y-side to the next x/y-side
     assign deltaDistX = dda_data_in[]; // 8.8 fixed point 
@@ -56,7 +66,7 @@ module dda
 
     // init w/ input
     logic [15:0] sideDistX, sideDistY; //distance ray travels to first x-side/y-side ( 8.8 fixed point )
-    logic [6:0] mapX, mapY; // current x, y box of player position (7-bit uint) - log_2(90) = 7
+    logic [7:0] mapX, mapY; // current x, y box of player position (8-bit uint)
     // no iniit
     logic wallType; // 0 -> X wall hit, 1 -> Y wall hit (1-bit uint)
 
@@ -78,8 +88,33 @@ module dda
     //WALL_CALC
     localparam logic [15:0] SCREEN_HEIGHT_FIXED_POINT = SCREEN_HEIGHT << 8;
 
-    logic [3:0] wall_calc_counter; // Counter for division latency 0 -> 10 (4-bit uint)
-    logic signed [31:0] wallX_out_intermediate;
+    //logic [3:0] wall_calc_counter; // Counter for division latency 0 -> 10 (4-bit uint)
+    logic [31:0] wallX_out_intermediate;
+
+
+    logic div_start_in; // start division
+    logic div_busy_out, div_done_out, div_valid_out, div_dbz_out, div_ovf_out;
+    logic [15:0] div_numerator_in, div_denominator_in; // 8.8 fixed-point
+    logic [15:0] div_quotient_out; // 8.8 fixed-point
+
+    divu #(
+        .WIDTH(16),
+        .FBITS(8)
+    ) divu_inst (
+        .clk(pixel_clk_in),
+        .rst(rst_in),
+        .start(div_start_in),
+        .busy(div_busy_out),
+        .done(div_done_out),
+        .valid(div_valid_out),
+        .dbz(div_dbz_out),
+        .ovf(div_ovf_out),
+        .a(div_numerator_in),
+        .b(div_denominator_in),
+        .val(div_quotient_out)
+    );
+
+
   
     ////############ STEP FSM ###############
 
@@ -126,8 +161,8 @@ module dda
 
                     sideDistX <= dda_data_in[]; //TODO
                     sideDistY <= dda_data_in[]; //TODO
-                    mapX <= dda_data_in[]; //TODO
-                    mapY <= dda_data_in[]; //TODO
+                    mapX <= posX[15:8];
+                    mapY <= posY[15:8];
 
                     DDA_FSM_STATE <= (dda_data_in[] < dda_data_in[])?  X_STEP : // if sideDistX < sideDistY
                                                                        Y_STEP;  // if sideDistX >= sideDistY
@@ -189,7 +224,13 @@ module dda
                                                                 sideDistY - deltaDistY; // 1 => y-wall
                             // set as X or Y for wall_calc
                             pos_X_or_Y <= (wallType == 1'b0)? posX : posY;
-                            rayDir_X_or_Y <= (wallType == 1'b0)? $signed(rayDirX) : $signed(rayDirY);
+                            rayDir_X_or_Y <= (wallType == 1'b0)? rayDirX : rayDirY; 
+
+                            //start division (SCREEN_HEIGHT_FIXED_POINT / perpWallDist)
+                            div_start_in <= 1'b1;
+                            div_denominator_in <= (wallType == 1'b0)? sideDistX - deltaDistX: 
+                                                                      sideDistY - deltaDistY;
+                            div_numerator_in <= 16'b0000_0000_1111_0000; //screen_height = 240
 
                         end else if (sideDistX < sideDistY) begin
                             DDA_FSM_STATE <= X_STEP;  // Continue stepping in X
@@ -205,21 +246,27 @@ module dda
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
                     mapData_out <= mapData_store; // value from 0->7 at map[mapX][mapY] from BRAM
 
-                    wall_calc_counter <= wall_calc_counter + 1'b1;
+                    //wall_calc_counter <= wall_calc_counter + 1'b1;
 
-                    // ~10 cycles
-                    // TODO check if line height will take up entire screen? - have some sort of range - 
-                    // perpWallDist 0 -> N * sqrt(2)
-                    lineHeight_out <= SCREEN_HEIGHT_FIXED_POINT / perpWallDist; //TODO THIS DIVISION POOPOO
+                    // ~16 cycles?
+                    // possible efficiency considerations?
+                    // perpWallDist 0 -> N * sqrt(2), lineHeight_out 0 -> SCREEN_HEIGHT
+                            // full screen -> if perpWallDist[15:8] == 0, lineHeight_out <= SCREEN_HEIGHT
+                            // 1 pixel -> if perpWallDist[15:8] > SCREEN_HEIGHT, lineHeight_out <= 1; (will never be 0 pixels b/c 240*sqrt(2) = 339)
+                    //lineHeight_out <= SCREEN_HEIGHT_FIXED_POINT / perpWallDist;
+                    div_start_in <= 1'b0;
 
                     // ~6 cycles?
-                    //where exactly the wall was hit ( fractional part [7:0] -> wallX -= floor((wallX)) ) //TODO pipeline?
+                    //where exactly the wall was hit ( fractional part [7:0] -> wallX -= floor((wallX)) ) 
                     // wallX_out <= (wallType == 1'b0)? (posX + (perpWallDist * rayDirX))[7:0]: // 0 => x-wall
                     //                                  (posY + (perpWallDist * rayDirY))[7:0]; // 1 => y-wall
-                    wallX_out_intermediate <= $signed(perpWallDist) * $signed(rayDir_X_or_Y);
+                    wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
 
-                    if (wall_calc_counter == 15) begin //account for 15 cycles of latency
-                        wallX_out <= (pos_X_or_Y + (wallX_out_intermediate >>> 8))[7:0];
+
+                    if (div_done_out) begin
+                        wallX_out <= (pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
+
+                        lineHeight_out <= div_quotient_out[15:8];
 
                         DDA_FSM_STATE <= VALID_OUT;
                     end
