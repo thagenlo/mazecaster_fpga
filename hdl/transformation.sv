@@ -26,7 +26,7 @@ Inputs into frame_buffer module:
 
 /*
 data from DDA-out FIFO
-- 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) + 1 (tlast) = 39 bits = [38:0]
+- 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
 
 Version 1:
 - no textures, no shading, just black and white
@@ -47,41 +47,42 @@ module transformation  #(
                         input wire rst_in,
 
                         input wire dda_fifo_tvalid_in,
-                        input wire [38:0] dda_fifo_tdata_in,
+                        input wire [37:0] dda_fifo_tdata_in,
+                        input wire dda_fifo_tlast_in,
 
-                        output logic transformer_tready,         // tells FIFO that we're ready to receive next data (need a vcount counter)
+                        output logic transformer_tready_out,         // tells FIFO that we're ready to receive next data (need a vcount counter)
 
                         output logic [15:0] ray_address_out,    // where to store the pixel value in frame buffer
                         output logic [15:0] ray_pixel_out,      // the calculated pixel value of the ray
-                        output logic ray_last_pixel_out,        // tells frame buffer whether we are on the last pixel or not
+                        output logic ray_last_pixel_out        // tells frame buffer whether we are on the last pixel or not
                         );
 // STATE MACHINE
 typedef enum {
 	    FIFO_DATA_WAIT,     // wait for valid vertical line data from the FIFO
         FLATTENING          // iterating through all vcounts for hcount, and transmitting corresponding (v,h) pixel value
 	} t_state;
-  t_state state;
+
+t_state state;
 
 // PARAMETERS
 localparam [15:0] BACKGROUND_COLOR = 65535;
 localparam [15:0] WALL_COLOR = 0;
-localparam [7:0] HALF_SCREEN_HEIGHT = SCREEN_HEIGHT >> 1;
+localparam [7:0] HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 
 // FROM DDA FIFO
-logic [10:0] hcount_ray_in, //pipelined x_coord
-logic [9:0] lineHeight_in, // = SCREEN_HEIGHT/perpWallDist
-logic wallType_in, // 0 = X wall hit, 1 = Y wall hit
+logic [10:0] hcount_ray_in; //pipelined x_coord
+logic [9:0] half_line_height; // = SCREEN_HEIGHT/perpWallDist
+logic wallType_in; // 0 = X wall hit, 1 = Y wall hit
 logic [3:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
 logic [15:0] wallX_in; //where on wall the ray hits
 
-logic [38:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) + 1 (tlast) = 39 bits = [38:0]
+logic [38:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
 
-assign hcount_ray_in = fifo_data_store[38:30];
-assign half_line_height = fifo_data_store[29:22] >> 1;
-assign wallType_in = fifo_data_store[21];
-assign mapData_in = fifo_data_store[20:17];
-assign wallX_in = fifo_data_store[16:1];
-assign tlast = fifo_data_store[0]
+assign hcount_ray_in = fifo_data_store[37:29];
+assign half_line_height = (fifo_data_store[28:21] >> 1);
+assign wallType_in = fifo_data_store[20];
+assign mapData_in = fifo_data_store[19:16];
+assign wallX_in = fifo_data_store[15:0];
 
 // TO USE IN MODULE
 logic [9:0] vcount_ray;
@@ -91,11 +92,11 @@ logic [9:0] draw_end;
 always_comb begin
     case (state)
         FIFO_DATA_WAIT: begin
-            transformer_tready = 1; // ready to receive new data
+            transformer_tready_out = 1; // ready to receive new data
         end
 
         FLATTENING: begin
-            transformer_tready = 0; // not ready to receive new data
+            transformer_tready_out = 0; // not ready to receive new data
 
             // ray pixel calculation
             draw_start = HALF_SCREEN_HEIGHT - half_line_height;
@@ -119,10 +120,10 @@ always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
         vcount_ray <= 0;
         state <= FIFO_DATA_WAIT;
-    end else if (ray_valid_in) begin
+    end else begin
         case (state)
             FIFO_DATA_WAIT: begin
-                ray_last_pixel_out <= 0
+                ray_last_pixel_out <= 0;
                 if (dda_fifo_tvalid_in) begin // handshake for fifo data
                     state <= FLATTENING;
                     fifo_data_store <= dda_fifo_tdata_in; // store fifo data in a register
@@ -134,14 +135,16 @@ always_ff @(posedge pixel_clk_in) begin
             FLATTENING: begin
                 if (vcount_ray < SCREEN_HEIGHT) begin
                     vcount_ray <= vcount_ray + 1;
-                    ray_last_pixel_out <= 0
+                    ray_last_pixel_out <= 0;
                     state <= FLATTENING;
                 end else begin
-                    ray_last_pixel_out <= (tlast);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
+                    ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
                     vcount_ray <= 0;
                     state <= FIFO_DATA_WAIT;
                 end
             end
+
+            default : vcount_ray <= 0;
         endcase
     end
 end
