@@ -83,7 +83,7 @@ module controller (parameter N = 24,
       end
 
       else if (moveBack && ((posY < 90) && (posY > 0))) begin
-        if (worldMap[posY*24+posX-1]==0) begin
+        if (worldMap[posY*N+posX-1]==0) begin
           newPosX <= posX + (dirX * NEG_MOVE_SPEED);
           newPosY <= posY + (dirY * NEG_MOVE_SPEED);
         end
