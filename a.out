@@ -1,0 +1,203 @@
+#! /opt/homebrew/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2009.vpi";
+S_0x137609d40 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_0x137607900 .scope module, "testing_u_divider" "testing_u_divider" 3 1;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "pixel_clk_in";
+    .port_info 1 /INPUT 1 "rst_in";
+    .port_info 2 /INPUT 16 "posX";
+    .port_info 3 /INPUT 16 "dirX";
+    .port_info 4 /INPUT 32 "planeX";
+    .port_info 5 /INPUT 9 "hcount_in";
+    .port_info 6 /OUTPUT 16 "rayDirX";
+    .port_info 7 /OUTPUT 1 "stepX";
+    .port_info 8 /OUTPUT 16 "sideDistX";
+    .port_info 9 /OUTPUT 16 "deltaDistX";
+P_0x137609c50 .param/l "SCREEN_WIDTH" 1 3 13, +C4<00000000000000000000000101000000>;
+P_0x137609c90 .param/l "SCREEN_WIDTH_RECIPRICAL" 1 3 14, C4<0000000000000001>;
+enum0x137611760 .enum2/s (32)
+   "RESTING" 0,
+   "DIVIDING" 1
+ ;
+v0x1376157f0_0 .net *"_ivl_0", 15 0, L_0x1376292b0;  1 drivers
+v0x137627fd0_0 .net *"_ivl_11", 15 0, L_0x1376294b0;  1 drivers
+L_0x1380880e8 .functor BUFT 1, C4<1111111100000000>, C4<0>, C4<0>, C4<0>;
+v0x137628070_0 .net/2u *"_ivl_12", 15 0, L_0x1380880e8;  1 drivers
+L_0x138088010 .functor BUFT 1, C4<0000000>, C4<0>, C4<0>, C4<0>;
+v0x137628120_0 .net *"_ivl_3", 6 0, L_0x138088010;  1 drivers
+L_0x138088058 .functor BUFT 1, C4<0000000000000010>, C4<0>, C4<0>, C4<0>;
+v0x1376281d0_0 .net/2u *"_ivl_4", 15 0, L_0x138088058;  1 drivers
+v0x1376282c0_0 .net *"_ivl_7", 15 0, L_0x137629370;  1 drivers
+L_0x1380880a0 .functor BUFT 1, C4<0000000000000001>, C4<0>, C4<0>, C4<0>;
+v0x137628370_0 .net/2u *"_ivl_8", 15 0, L_0x1380880a0;  1 drivers
+v0x137628420_0 .net "cameraX", 15 0, L_0x1376295f0;  1 drivers
+v0x1376284d0_0 .var "deltaDistX", 15 0;
+o0x1380501c0 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
+v0x1376285e0_0 .net "dirX", 15 0, o0x1380501c0;  0 drivers
+v0x137628690_0 .var "div_busy", 0 0;
+v0x137628730_0 .var "done_rayDirX", 0 0;
+o0x138050250 .functor BUFZ 9, C4<zzzzzzzzz>; HiZ drive
+v0x1376287d0_0 .net "hcount_in", 8 0, o0x138050250;  0 drivers
+o0x138050280 .functor BUFZ 1, C4<z>; HiZ drive
+v0x137628880_0 .net "pixel_clk_in", 0 0, o0x138050280;  0 drivers
+o0x1380502b0 .functor BUFZ 32, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x137628920_0 .net "planeX", 31 0, o0x1380502b0;  0 drivers
+o0x1380502e0 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
+v0x1376289d0_0 .net "posX", 15 0, o0x1380502e0;  0 drivers
+v0x137628a80_0 .var "rayDirX", 15 0;
+v0x137628c10_0 .var "rayX_recip_out", 15 0;
+v0x137628ca0_0 .var "ready_rayDirX", 0 0;
+o0x1380503a0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x137628d40_0 .net "rst_in", 0 0, o0x1380503a0;  0 drivers
+v0x137628de0_0 .var "sideDistX", 15 0;
+v0x137628e90_0 .var "start_rayDirX", 0 0;
+v0x137628f30_0 .var/2s "state", 31 0;
+v0x137628fe0_0 .var "stepX", 0 0;
+v0x137629080_0 .var "tabulate_in", 0 0;
+v0x137629120_0 .var "valid_ray_calculated", 0 0;
+E_0x137613de0 .event posedge, v0x137628880_0;
+L_0x1376292b0 .concat [ 9 7 0 0], o0x138050250, L_0x138088010;
+L_0x137629370 .arith/mult 16, L_0x1376292b0, L_0x138088058;
+L_0x1376294b0 .arith/mult 16, L_0x137629370, L_0x1380880a0;
+L_0x1376295f0 .arith/sum 16, L_0x1376294b0, L_0x1380880e8;
+    .scope S_0x137607900;
+T_0 ;
+    %wait E_0x137613de0;
+    %load/vec4 v0x137628d40_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x137628a80_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628fe0_0, 0;
+    %pushi/vec4 1, 0, 16;
+    %assign/vec4 v0x137628de0_0, 0;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x1376284d0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628690_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137629080_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628e90_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628ca0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x137628f30_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0x1376285e0_0;
+    %pad/s 32;
+    %load/vec4 v0x137628920_0;
+    %load/vec4 v0x137628420_0;
+    %pad/s 32;
+    %mul;
+    %add;
+    %pad/s 16;
+    %assign/vec4 v0x137628a80_0, 0;
+    %load/vec4 v0x137628f30_0;
+    %dup/vec4;
+    %pushi/vec4 0, 0, 32;
+    %cmp/u;
+    %jmp/1 T_0.2, 6;
+    %dup/vec4;
+    %pushi/vec4 1, 0, 32;
+    %cmp/u;
+    %jmp/1 T_0.3, 6;
+    %jmp T_0.4;
+T_0.2 ;
+    %load/vec4 v0x137628690_0;
+    %inv;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.5, 8;
+    %load/vec4 v0x137629120_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.7, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137629120_0, 0;
+    %load/vec4 v0x137628a80_0;
+    %parti/s 1, 15, 5;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.9, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628fe0_0, 0;
+    %pushi/vec4 0, 0, 8;
+    %load/vec4 v0x1376289d0_0;
+    %parti/s 8, 0, 2;
+    %concat/vec4; draw_concat_vec4
+    %load/vec4 v0x1376284d0_0;
+    %mul;
+    %assign/vec4 v0x137628de0_0, 0;
+    %jmp T_0.10;
+T_0.9 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x137628fe0_0, 0;
+    %pushi/vec4 0, 0, 8;
+    %load/vec4 v0x1376289d0_0;
+    %parti/s 8, 0, 2;
+    %concat/vec4; draw_concat_vec4
+    %addi 256, 0, 16;
+    %inv;
+    %load/vec4 v0x1376284d0_0;
+    %mul;
+    %assign/vec4 v0x137628de0_0, 0;
+T_0.10 ;
+    %jmp T_0.8;
+T_0.7 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x137628e90_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x137628690_0, 0;
+    %pushi/vec4 1, 0, 32;
+    %assign/vec4 v0x137628f30_0, 0;
+T_0.8 ;
+T_0.5 ;
+    %jmp T_0.4;
+T_0.3 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628e90_0, 0;
+    %load/vec4 v0x137628ca0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.11, 8;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x137629120_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628ca0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x137628690_0, 0;
+    %load/vec4 v0x137628c10_0;
+    %assign/vec4 v0x1376284d0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x137628f30_0, 0;
+T_0.11 ;
+    %load/vec4 v0x137628730_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.13, 8;
+    %load/vec4 v0x137628c10_0;
+    %assign/vec4 v0x1376284d0_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x137628ca0_0, 0;
+    %pushi/vec4 1, 0, 32;
+    %assign/vec4 v0x137628f30_0, 0;
+T_0.13 ;
+    %jmp T_0.4;
+T_0.4 ;
+    %pop/vec4 1;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "-";
+    "hdl/testing_u_divider.sv";
