@@ -50,9 +50,21 @@ module top_level(
         .fc_out(frame_count));
 
     //TODO: INSERT CONTROLLER MODULE
-
+    controller controller_in (
+        .pixel_clk_in(),
+        .rst_in(),
+        .moveDir(),
+        .rotDir(),
+        .pos(),
+        .dir(),
+        .plane()
+    );
 
     //TODO: INSERT RAY CALCULATION MODULE
+
+    ray_calculations calculating_ray (
+        
+    )
 
 
     //TODO: INSERT DDA-in FIFO
