@@ -1,13 +1,13 @@
 `default_nettype none // prevents system from inferring an undeclared logic (good practice)
  
 module top_level(
-    input wire clk_100mhz, //crystal reference clock
-    input wire [3:0] btn,         // buttons for move control and rotation
-    input wire [15:0] sw,
-    output logic [15:0] led, //16 green output LEDs (located right above switches)
-    output logic [2:0] hdmi_tx_p, //hdmi output signals (positives) (blue, green, red)
-    output logic [2:0] hdmi_tx_n, //hdmi output signals (negatives) (blue, green, red)
-    output logic hdmi_clk_p, hdmi_clk_n //differential hdmi clock
+    input wire clk_100mhz,                  //crystal reference clock
+    input wire [3:0] btn,                   // buttons for move control and rotation
+    input wire [15:0] sw,                   // switches
+    output logic [15:0] led,                //16 green output LEDs (located right above switches)
+    output logic [2:0] hdmi_tx_p,           //hdmi output signals (positives) (blue, green, red)
+    output logic [2:0] hdmi_tx_n,           //hdmi output signals (negatives) (blue, green, red)
+    output logic hdmi_clk_p, hdmi_clk_n     //differential hdmi clock
     );
 
     // RESET SIGNAL
