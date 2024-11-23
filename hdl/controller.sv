@@ -51,6 +51,7 @@ module controller (parameter N = 24,
     posY = pos[15:0];
     mapX = (posX + (1 << 7)) >> 8; //rounded out to nearest int
     mapY = (posY + (1 << 7)) >> 8;
+    map_addra = posY*N+posX-1;
 
     dirX = newDirX[23:8]; //middle of dirX and dirY vectors
     dirY = newDirY[23:8];
@@ -71,11 +72,13 @@ module controller (parameter N = 24,
       dirY <= 1;
       planeX <= 16'b0; //.66 -> 0.66015625
       planeY <= 16'b0000000010101001; //.66 -> 0.66015625
+      newPosX <= 0;
+      newPosY <= 0;
 
     end else begin
       if (moveFwd && ((posY < 89) && (posY >= 0))) begin
         //TODO: for accuracy may want to keep track of position update offset, so not just rounding to a whole number each movement
-        if (worldMap[posY*N+posX-1]==0) begin
+        if (worldMap[map_addra]==0) begin
           newPosX <= posX + (dirX * MOVE_SPEED);
           newPosY <= posY + (dirY * MOVE_SPEED);
           //rounding properly could reduce error: ((dirY * MOVE_SPEED + (1 << 7)) >> 8)
