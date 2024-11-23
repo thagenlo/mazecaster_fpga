@@ -1,14 +1,20 @@
 module ray_calculations (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [31:0] pos, //TODO change this in controloler to be a 31:0 value
-  input wire [31:0] dir,
-  input wire [31:0] plane,
+  input wire [15:0] posX, //TODO change this in controloler to be a 31:0 value
+  input wire [15:0] posY,
+  input wire [31:0] dirX,
+  input wire [31:0] dirY,
+  input wire [31:0] planeX,
+  input wire [31:0] planeY,
   input wire [8:0] hcount_in, //which column I am calculating ray for on screen (0 to screenwidth-1), was thinking of incrementing in top_level and feedign that into dda
   output logic signed [31:0] rayDir, //ray direction for the current column
-  output logic [1:0] step,      //direction in which the ray moves through the grid, for X and Y (-1 or 1)
-  output logic [31:0] sideDistY,
-  output logic [31:0] deltaDistY //distance to travel to reach the next x- or y-boundary
+  output logic stepX,      //direction in which the ray moves through the grid, for X and Y (-1 or 1)
+  output logic stepY,
+  output logic [15:0] sideDistX,
+  output logic [15:0] sideDistY,
+  output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
+  output logic [15:0] deltaDistY
   );
   localparam SCREEN_WIDTH = 320;
   localparam SCREEN_WIDTH_RECIPRICAL = 24'b0000_0000_0000_0000_0000_1101; //fixed point representation: 0.003173828125
@@ -41,7 +47,10 @@ module ray_calculations (
   logic tabulate_in;
   logic valid_ray_calculated;
 
-  
+  logic [6:0] mapX, mapY;
+  logic [15:0] posX, posY;
+  logic [15:0] dirX, dirY;
+  logic [32:0] planeX, planeY;
 
   logic start_rayDirX;
   logic busy_rayDirX;
@@ -133,14 +142,16 @@ module ray_calculations (
                     end
                     if (rayDirY[15]) begin
                         stepY <= 0;
-                        sideDistY <= tempSideDistY[23:8]; //mapX is the floor of posX
+                        sideDistY <= tempSideDistY[23:8];
                     end else begin
                         stepX <= 1;
                         sideDistY <= (~tempSideDistY[23:8]) + 16'b1111111100000000;
                     end 
                 end else begin
                     start_rayDirX <= 1;
+                    start_rayDirY <= 1;
                     div_busy <= 1;
+                    currentRayDirY <= rayDirY;
                     currentRayDirX <= rayDirX;
                     state <= DIVIDING;
                   end 
@@ -152,9 +163,9 @@ module ray_calculations (
                   valid_ray_calculated <= 1;
                   div_busy <= 0;
                   ready_rayDirX <= 0;
-                  tempSideDistX <= (({8'b0, posX[7:0]})) * $signed(deltaDistX);
                   ready_rayDirY <= 0;
-                  tempSideDistY <= (({8'b0, posX[7:0]})) * $signed(deltaDistY);
+                  tempSideDistX <= (({8'b0, posX[7:0]})) * $signed(deltaDistX);
+                  tempSideDistY <= (({8'b0, posY[7:0]})) * $signed(deltaDistY);
                 //   deltaDistX <= ~(rayX_recip_out) + 16'b0000_0001_0000_0000; //taking absolute value
                   state <= RESTING;
               end if (done_rayDirX) begin

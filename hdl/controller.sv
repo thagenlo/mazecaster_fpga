@@ -72,6 +72,8 @@ module controller (parameter N = 24,
       dirY <= 1;
       planeX <= 16'b0; //.66 -> 0.66015625
       planeY <= 16'b0000000010101001; //.66 -> 0.66015625
+      newPosX <= 0;
+      newPosY <= 0;
 
     end else begin
       if (moveFwd && ((posY < 89) && (posY >= 0))) begin

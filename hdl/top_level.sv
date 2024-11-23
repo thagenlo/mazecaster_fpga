@@ -2,7 +2,9 @@
  
 module top_level(
     input wire clk_100mhz, //crystal reference clock
-    input wire btn,         // reset button
+    input wire [3:0] btn,         // buttons for move control and rotation
+    input wire [0] sw,
+      output logic [15:0] led, //16 green output LEDs (located right above switches)
     output logic [2:0] hdmi_tx_p, //hdmi output signals (positives) (blue, green, red)
     output logic [2:0] hdmi_tx_n, //hdmi output signals (negatives) (blue, green, red)
     output logic hdmi_clk_p, hdmi_clk_n //differential hdmi clock
@@ -10,7 +12,7 @@ module top_level(
 
     // RESET SIGNAL
     logic sys_rst;
-    assign sys_rst = btn;
+    assign sys_rst = sw;
 
     // CLOCK
     logic clk_pixel, clk_5x; //clock lines
@@ -34,6 +36,8 @@ module top_level(
     logic last_screen_pixel;
     logic [5:0] frame_count; //0 to 59 then rollover frame counter
 
+    //CONTROL BUTTONS
+
     //TODO: PIPELINING
 
     // VIDEO SIGN GEN
@@ -50,11 +54,12 @@ module top_level(
         .fc_out(frame_count));
 
     //TODO: INSERT CONTROLLER MODULE
+
     controller controller_in (
-        .pixel_clk_in(),
-        .rst_in(),
-        .moveDir(),
-        .rotDir(),
+        .pixel_clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .moveDir(btn[3:2]),
+        .rotDir(btn[1:0]),
         .pos(),
         .dir(),
         .plane()
