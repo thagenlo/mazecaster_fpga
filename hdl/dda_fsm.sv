@@ -7,60 +7,62 @@ module dda
 (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [] dda_data_in; //TODO (hcount_ray[8:0], stepX/stepY[1:0], rayDirX/rayDirY[31:0], deltaDistX/deltaDistY[31:0], posX/posY[31:0], sideDistX/sideDistY[31:0])
-  input wire valid_in; //single cycle high for new dda_data_in
+  input wire [138:0] dda_data_in, //(hcount_ray[8:0], stepX/stepY[1:0], rayDirX/rayDirY[31:0], deltaDistX/deltaDistY[31:0], posX/posY[31:0], sideDistX/sideDistY[31:0])
+  input wire valid_in, //single cycle high for new dda_data_in
+
+  input wire dda_fsm_out_tready, // FIFO has valid data available for the receiver
 
   //handling map data requests
-  input wire [3:0] map_data_in; // value 0 -> 16 output from BROM at map_addra_out
-  input wire map_data_valid_in; //single cycle high for new map data from BRAM is ready
-  output logic [$clog2(N*N)-1:0] map_addra_out; //map_addra = mapX + (mapY × N) (e.g. 24*24, [9:0])
-  output logic map_request_out; // high when new map_addra is requested, low after map_data_valid_in
+  input wire [3:0] map_data_in, // value 0 -> 16 output from BROM at map_addra_out
+  input wire map_data_valid_in, //single cycle high for new map data from BRAM is ready
+  output logic [$clog2(N*N)-1:0] map_addra_out, //map_addra = mapX + (mapY × N) (e.g. 24*24, [9:0])
+  output logic map_request_out, // high when new map_addra is requested, low after map_data_valid_in
 
-  output logic [8:0] hcount_ray_out, // current ray/sreen x-coordinate - (11-bit uint) (0 -> screenWidth)
+  output logic [8:0] hcount_ray_out, // current ray/screen x-coordinate - (11-bit uint) (0 -> screenWidth)
   output logic [7:0] lineHeight_out, //log_2(240) - 8-bit uint
   output logic wallType_out, // 0 -> X wall hit, 1 -> Y wall hit (1-bit uint)
-  output logic [3:0] mapData_out;  // value 0 -> 16 at map[mapX][mapY] from BROM
-  output logic [15:0] wallX_out; //where on wall the ray hits - 16 bit fixed point (fractional part of 8.8 fixed point value)
+  output logic [3:0] mapData_out,  // value 0 -> 16 at map[mapX][mapY] from BROM
+  output logic [15:0] wallX_out, //where on wall the ray hits - 16 bit fixed point (fractional part of 8.8 fixed point value)
 
     // handshakes
   output logic dda_busy_out, // high when DDA FSM in use
-  output logic dda_valid_out, // single cycle - indicates DDA_hit a wall & has found line height (informs articulator)
-  
+  output logic dda_valid_out // single cycle - indicates DDA_hit a wall & has found line height (informs articulator)
   );
 
     // ---- INPUT CONSTANTS ----
-        //TODO split up dda_data_in variables
+
     // logic [8:0] hcount_ray; // current ray/screen x-coordinate
     // assign hcount_ray = dda_data_in[]; // 9-bit uint (0 -> screenWidth)
-    assign hcount_ray_out = dda_data_in[]
+    assign hcount_ray_out = dda_data_in[138:130];
 
     logic stepX, stepY; //which dir to take step
-    assign stepX = dda_data_in[]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
-    assign stepY = dda_data_in[]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
+    assign stepX = dda_data_in[129]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
+    assign stepY = dda_data_in[128]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
 
     logic [15:0] rayDirX, rayDirY; // x & y componentions of ray vector (used to calculate wallX_out)
-    always_comb begin
-        if (dda_data_in[]) begin // negative
-            rayDirX = ~dda_data_in[] + 16'd1; // Two's complement
-        end else begin
-            rayDirX = dda_data_in[]; // if positive, retain original value
-        end
-        if (dda_data_in[]) begin // negative
-            rayDirY = ~dda_data_in[] + 16'd1; // Two's complement
-        end else begin
-            rayDirY = dda_data_in[]; // if positive, retain original value
-        end
-    end
-    // assign rayDirX = $signed(dda_data_in[]); // 8.8 signed fixed point 
-    // assign rayDirY = $signed(dda_data_in[]); // 8.8 signed fixed point 
+    assign rayDirX = dda_data_in[127:112]; //TODO TEMP VAL (UNTIL TEXTURES NEEDED)
+    assign rayDirY = dda_data_in[111:96]; //TODO TEMP VAL (UNTIL TEXTURES NEEDED)
+    // always_comb begin
+    //     if (dda_data_in[127:112]) begin // negative
+    //         rayDirX = ~dda_data_in[127:112] + 16'd1; // Two's complement
+    //     end else begin
+    //         rayDirX = dda_data_in[127:112]; // if positive, retain original value
+    //     end
+    //     if (dda_data_in[111:96]) begin // negative
+    //         rayDirY = ~dda_data_in[111:96] + 16'd1; // Two's complement
+    //     end else begin
+    //         rayDirY = dda_data_in[111:96]; // if positive, retain original value
+    //     end
+    // end
 
     logic [15:0] deltaDistX, deltaDistY; // distance ray travels to go from 1 x/y-side to the next x/y-side
-    assign deltaDistX = dda_data_in[]; // 8.8 fixed point 
-    assign deltaDistY = dda_data_in[]; // 8.8 fixed point 
+    assign deltaDistX = dda_data_in[95:80]; // 8.8 fixed point 
+    assign deltaDistY = dda_data_in[79:64]; // 8.8 fixed point 
 
     logic [15:0] posX, posY; // position of camera/player
-    assign posX = dda_data_in[]; // 8.8 fixed point 
-    assign posY = dda_data_in[]; // 8.8 fixed point 
+    assign posX = dda_data_in[63:48]; // 8.8 fixed point 
+    assign posY = dda_data_in[47:32]; // 8.8 fixed point 
+
 
     // ---- UPDATE W/ STEP ----
 
@@ -77,20 +79,12 @@ module dda
 
     // ---- PIPELINES ----
 
-    // X_STEP
-    // logic [$clog2(N*N)-1:0] map_addra_out_pipe_x [2:0]; //3 stage pipeline
-    // logic [$clog2(N*N)-1:0] map_addra_out_pipe_y [2:0]; //3 stage pipeline
-
     //CHECK_WALL
-    logic [15:0] rayDir_X_or_Y //signed 8.8 signed fixed point 
-    logic [15:0] pos_X_or_Y // 8.8 fixed point 
+    logic [15:0] rayDir_X_or_Y; //signed 8.8 signed fixed point 
+    logic [15:0] pos_X_or_Y; // 8.8 fixed point 
 
     //WALL_CALC
-    localparam logic [15:0] SCREEN_HEIGHT_FIXED_POINT = SCREEN_HEIGHT << 8;
-
-    //logic [3:0] wall_calc_counter; // Counter for division latency 0 -> 10 (4-bit uint)
     logic [31:0] wallX_out_intermediate;
-
 
     logic div_start_in; // start division
     logic div_busy_out, div_done_out, div_valid_out, div_dbz_out, div_ovf_out;
@@ -130,15 +124,11 @@ module dda
 
             map_addra_out <= 0;
             map_request_out <= 1'b0;
-            busy_out <= 0;
 
-            hcount_ray_out <= 0;
             lineHeight_out <= 0;
             wallType_out <= 0;
             mapData_out <= 0;
             wallX_out <= 0;
-
-            wall_calc_counter <= 4'b0;
 
             DDA_FSM_STATE <= IDLE;
             
@@ -157,14 +147,12 @@ module dda
                 READY: begin
                     dda_busy_out <= 1'b1;
 
-                    wall_calc_counter <= 4'b0;
-
-                    sideDistX <= dda_data_in[]; //TODO
-                    sideDistY <= dda_data_in[]; //TODO
+                    sideDistX <= dda_data_in[31:16];
+                    sideDistY <= dda_data_in[15:0];
                     mapX <= posX[15:8];
                     mapY <= posY[15:8];
 
-                    DDA_FSM_STATE <= (dda_data_in[] < dda_data_in[])?  X_STEP : // if sideDistX < sideDistY
+                    DDA_FSM_STATE <= (dda_data_in[31:16] < dda_data_in[15:0])?  X_STEP : // if sideDistX < sideDistY
                                                                        Y_STEP;  // if sideDistX >= sideDistY
 
                 end
@@ -180,14 +168,6 @@ module dda
                     //map_addr = mapX + (mapY × N) - single cycle (check?)
                     map_addra_out <= (stepX == 1'b0)? (mapX - 1'b1) + (N * (mapY)): 
                                                       (mapX + 1'b1) + (N * (mapY));
-
-                    // map_request_out_pipe_x[0] <= 1'b1;
-                    // for (int i=1; i<3; i = i+1)begin //3 stage pipeline
-                    //     map_request_out_pipe_x[i] <= map_request_out_pipe_x[i-1];
-                    //     if (map_request_out_pipe_x[2] == 1'b1) begin
-                    //         DDA_FSM_STATE <= CHECK_WALL;
-                    //     end
-                    // end
                     
                     //send request to BRAM for map data
                     map_request_out <= 1'b1;
@@ -226,7 +206,7 @@ module dda
                             pos_X_or_Y <= (wallType == 1'b0)? posX : posY;
                             rayDir_X_or_Y <= (wallType == 1'b0)? rayDirX : rayDirY; 
 
-                            //start division (SCREEN_HEIGHT_FIXED_POINT / perpWallDist)
+                            //start division (screenHeight / perpWallDist)
                             div_start_in <= 1'b1;
                             div_denominator_in <= (wallType == 1'b0)? sideDistX - deltaDistX: 
                                                                       sideDistY - deltaDistY;
@@ -242,19 +222,15 @@ module dda
 
                 WALL_CALC: begin
 
-                    lineHeight_out <= SCREEN_HEIGHT / perpWallDist; //TODO THIS DIVISION POOPOO
-
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
                     mapData_out <= mapData_store; // value from 0->7 at map[mapX][mapY] from BRAM
-
-                    //wall_calc_counter <= wall_calc_counter + 1'b1;
 
                     // ~16 cycles?
                     // possible efficiency considerations?
                     // perpWallDist 0 -> N * sqrt(2), lineHeight_out 0 -> SCREEN_HEIGHT
                             // full screen -> if perpWallDist[15:8] == 0, lineHeight_out <= SCREEN_HEIGHT
                             // 1 pixel -> if perpWallDist[15:8] > SCREEN_HEIGHT, lineHeight_out <= 1; (will never be 0 pixels b/c 240*sqrt(2) = 339)
-                    //lineHeight_out <= SCREEN_HEIGHT_FIXED_POINT / perpWallDist;
+                    //lineHeight_out <= screenHeight / perpWallDist;
                     div_start_in <= 1'b0;
 
                     // ~6 cycles?
@@ -263,9 +239,8 @@ module dda
                     //                                  (posY + (perpWallDist * rayDirY))[7:0]; // 1 => y-wall
                     wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
 
-
                     if (div_done_out) begin
-                        wallX_out <= (pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
+                        wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
 
                         lineHeight_out <= div_quotient_out[15:8];
 
@@ -275,9 +250,11 @@ module dda
                 end
 
                 VALID_OUT: begin
-                    dda_valid_out <= 1'b1;
-                    dda_busy_out <= 1'b0;
-                    DDA_FSM_STATE <= IDLE;
+                    if (dda_fsm_out_tready) begin// data is not sent to the FIFO unless dda_fsm_out_tready is high
+                        dda_valid_out <= 1'b1;
+                        dda_busy_out <= 1'b0;
+                        DDA_FSM_STATE <= IDLE;
+                    end
                 end
 
                 default: DDA_FSM_STATE <= IDLE;  

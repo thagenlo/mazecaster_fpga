@@ -1,104 +1,104 @@
+//`timescale 1ns / 1ps
+`default_nettype none
+
+`ifdef SYNTHESIS
+`define FPATH(X) `"X`"
+`else /* ! SYNTHESIS */
+`define FPATH(X) `"../../data/X`"
+`endif  /* ! SYNTHESIS */
+
 module dda
 #(
   parameter SCREEN_WIDTH = 320,
   parameter SCREEN_HEIGHT = 240,
-  parameter N = 24,
-  parameter STACK_DEPTH = 16
-  // parameter NUM_DDA_FSMS = 2
+  parameter N = 24
 )
 (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [] dda_data_in, // (hcount_ray, rayDir_in, sideDist_in, deltaDist_in, map_in) - (8 + (3*32) + 16) = 120
-  input wire push_in,
-  
-  output logic [8:0] hcount_ray_out, //pipelined x_coord
-  output logic [7:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist
-  output logic wallType_out, // 0 = X wall hit, 1 = Y wall hit
-  output logic [3:0] mapData_out,  // value 0 -> 2^4 at map[mapX][mapY] from BROM
-  output logic [15:0] wallX_out, //where on wall the ray hits
 
-  output logic valid_out, // indicates when to store (x, lineHeight, wallType, mapData, tLast_out) in DDA_fifo_out
-  output logic tLast_out, //TODO single-cycle indicator for the 320th ray
+  // dda_in FIFO receiver
+  input wire dda_fsm_in_tvalid,
+  input wire [138:0] dda_fsm_in_tdata, // (hcount_ray, rayDir_in, sideDist_in, deltaDist_in, map_in) - (8 + (3*32) + 16) = 120
+  output logic dda_fsm_in_tready,
+
+
+  // dda_out FIFO sender
+  input wire dda_fsm_out_tready,
+  output logic [37:0] dda_fsm_out_tdata,
+        // [8:0] hcount_ray_out
+        // [7:0] lineHeight_out (240/perpWallDist)
+        // wallType_out (0 = X wall hit, 1 = Y wall hit)
+        // [3:0] mapData_out (value 0 -> 2^4 at map[mapX][mapY] from BROM)
+        // [15:0] wallX_out (where on wall the ray hits)
+  output logic dda_fsm_out_tvalid, // indicates when to store (x, lineHeight, wallType, mapData) in DDA_fifo_out
+  output logic dda_fsm_out_tlast //TODO indicator for the 320th ray
   
   );
 
+  logic dda_fsm0_busy, dda_fsm1_busy, dda_fsm0_valid_out, dda_fsm1_valid_out,
+        dda_fsm0_valid_in, dda_fsm1_valid_in;
+  logic [138:0] dda_fsm0_in, dda_fsm1_in;
+  logic [8:0] dda_fsm0_hcount_ray_out, dda_fsm1_hcount_ray_out;
+  logic [7:0] dda_fsm0_lineHeight_out, dda_fsm1_lineHeight_out;
+  logic dda_fsm0_wallType_out, dda_fsm1_wallType_out;
+  logic [3:0] dda_fsm0_mapData_out, dda_fsm1_mapData_out;
+  logic [15:0] dda_fsm0_wallX_out, dda_fsm1_wallX_out;
+  logic tLast_out;
+
 
   ////############ DDA FIFO ###############
-
-  localparam FIFO_DEPTH = 128 // TODO
-
-  // FIFO queue (array) and pointers
-  logic [119:0] dda_fifo [FIFO_DEPTH-1:0];  // FIFO storage
-  logic [$clog2(FIFO_DEPTH)-1:0] write_ptr; // write pointer
-  logic [$clog2(FIFO_DEPTH)-1:0] read_ptr;  // read pointer
-  logic [$clog2(FIFO_DEPTH+1)-1:0] fifo_count; // count num items in FIFO
-  
-  // handshaking & control signals
-  logic dda_fsm0_busy, dda_fsm1_busy;
-  logic dda_fsm0_valid_in, dda_fsm1_valid_in;
-  logic [119:0] dda_fsm0_in, dda_fsm1_in;
-  logic dda_fsm0_valid_out, dda_fsm1_valid_out;
-
-  // PUSH logic (adding to fifo) 
+  assign dda_fsm_in_tready = !dda_fsm0_busy || !dda_fsm1_busy; // ready only if both FSMs are free
   always_ff @(posedge pixel_clk_in) begin
-    if (rst_in) begin
-      write_ptr <= 0;
-      fifo_count <= 0;
-    end else if (push_in && fifo_count < FIFO_DEPTH) begin
-      dda_fifo[write_ptr] <= dda_data_in;     // stores the incoming data
-      write_ptr <= (write_ptr + 1 == FIFO_DEPTH) ? 0 : write_ptr + 1; // increments & wrap write pointer
-      fifo_count <= fifo_count + 1;           // updates item count
-    end
-  end
-
-  // POP logic (removing from fifo) - (only when FSM is ready and not busy)
-  always_ff @(posedge pixel_clk_in) begin
-    if (rst_in) begin
-      read_ptr <= 0;
-      dda_fsm0_valid_in <= 1'b0;
-      dda_fsm1_valid_in <= 1'b0;
-      dda_fsm0_in <= 0;
-      dda_fsm1_in <= 0;
-    end else begin
-      if (!dda_fsm0_busy && fifo_count > 0) begin
-        dda_fsm0_in <= dda_fifo[read_ptr];     // provide data to FSM0
-        dda_fsm0_valid_in <= 1'b1;             // signal new data is valid for FSM0
-        read_ptr <= (read_ptr + 1 == FIFO_DEPTH) ? 0 : read_ptr + 1; // increment and wrap read pointer
-        fifo_count <= fifo_count - 1;          // decrement count
-      end else if (!dda_fsm1_busy && fifo_count > 0) begin
-        dda_fsm1_in <= dda_fifo[read_ptr];     // provide data to FSM1
-        dda_fsm1_valid_in <= 1'b1;             // signal new data is valid for FSM1
-        read_ptr <= (read_ptr + 1 == FIFO_DEPTH) ? 0 : read_ptr + 1; // increment and wrap read pointer
-        fifo_count <= fifo_count - 1;          // decrement count
+      if (rst_in) begin
+          dda_fsm0_valid_in <= 1'b0;
+          dda_fsm1_valid_in <= 1'b0;
+          dda_fsm0_in <= 0;
+          dda_fsm1_in <= 0;
       end else begin
-        dda_fsm0_valid_in <= 1'b0;
-        dda_fsm1_valid_in <= 1'b0;
+          // provide data to FSM0 when valid and FSM0 is ready
+          if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
+              dda_fsm0_in <= dda_fsm_in_tdata;
+              dda_fsm0_valid_in <= 1'b1;
+          end else begin
+              dda_fsm0_valid_in <= 1'b0;
+          end
+
+          // provide data to FSM1 when valid and FSM1 is ready
+          if (dda_fsm_in_tvalid && !dda_fsm1_busy && dda_fsm0_busy) begin
+              dda_fsm1_in <= dda_fsm_in_tdata;
+              dda_fsm1_valid_in <= 1'b1;
+          end else begin
+              dda_fsm1_valid_in <= 1'b0;
+          end
       end
-    end
   end
 
   // output multiplexing based on valid_out signals from DDA FSMs
   always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
-      valid_out <= 0;
+      dda_fsm_out_tvalid <= 0;
+      dda_fsm_out_tlast <= 0;
     end else begin
       if (dda_fsm0_valid_out) begin //single cycle valid out
-        hcount_ray_out <= dda_fsm0_hcount_ray_out;
-        lineHeight_out <= dda_fsm0_lineHeight_out;
-        wallType_out <= dda_fsm0_wallType_out;
-        mapData_out <= dda_fsm0_mapData_out;
-        wallX_out <= dda_fsm0_wallX_out;
-        valid_out <= 1'b1;
+        dda_fsm_out_tdata <= {dda_fsm0_hcount_ray_out, 
+                              dda_fsm0_lineHeight_out, 
+                              dda_fsm0_wallType_out, 
+                              dda_fsm0_mapData_out, 
+                              dda_fsm0_wallX_out};
+        dda_fsm_out_tlast <= tLast_out;
+        dda_fsm_out_tvalid <= 1'b1;
       end else if (dda_fsm1_valid_out) begin //single cycle valid out
-        hcount_ray_out <= dda_fsm1_hcount_ray_out;
-        lineHeight_out <= dda_fsm1_lineHeight_out;
-        wallType_out <= dda_fsm1_wallType_out;
-        mapData_out <= dda_fsm1_mapData_out;
-        wallX_out <= dda_fsm1_wallX_out;
-        valid_out <= 1'b1;
+        dda_fsm_out_tdata <= {dda_fsm1_hcount_ray_out, 
+                             dda_fsm1_lineHeight_out, 
+                             dda_fsm1_wallType_out, 
+                             dda_fsm1_mapData_out, 
+                             dda_fsm1_wallX_out};
+        dda_fsm_out_tlast <= tLast_out;
+        dda_fsm_out_tvalid <= 1'b1;
       end else begin
-        valid_out <= 1'b0;
+        dda_fsm_out_tlast <= 1'b0;
+        dda_fsm_out_tvalid <= 1'b0;
       end
     end
   end
@@ -116,6 +116,8 @@ module dda
     .rst_in(rst_in),
     .dda_data_in(dda_fsm0_in),
     .valid_in(dda_fsm0_valid_in),
+
+    .dda_fsm_out_tready(dda_fsm_out_tready),
 
     .map_data_in(dda_fsm0_map_data_in),
     .map_data_valid_in(dda_fsm0_map_data_valid_in),
@@ -137,11 +139,13 @@ module dda
     .SCREEN_WIDTH(SCREEN_WIDTH),
     .SCREEN_HEIGHT(SCREEN_HEIGHT),
     .N(N)
-  ) dda_fsm0 (
+  ) dda_fsm1 (
     .pixel_clk_in(pixel_clk_in),
     .rst_in(rst_in),
     .dda_data_in(dda_fsm1_in),
     .valid_in(dda_fsm1_valid_in),
+
+    .dda_fsm_out_tready(dda_fsm_out_tready),
 
     .map_data_in(dda_fsm1_map_data_in),
     .map_data_valid_in(dda_fsm1_map_data_valid_in),
@@ -160,25 +164,42 @@ module dda
 
   ////############ TLAST COUNTER ###############
 
-  //internal registers
-  logic [8:0] ray_counter;    // 9-bit counter to count up to 320 (0 to 319)
-  logic [1:0] increment;      // tracks how much to increment (0, 1, or 2)
-  //logic tLast_out;  
-  assign increment = dda_fsm0_valid_out + dda_fsm1_valid_out;
-  assign tLast_out = (ray_counter == SCREEN_WIDTH-1) || 
-                (ray_counter + increment > (SCREEN_WIDTH-1) && ray_counter <= (SCREEN_WIDTH-1));   // assert tLast_out for one cycle
+  // internal signals to detect rising edges
+  logic dda_fsm0_valid_out_d; // delayed version of dda_fsm0_valid_out
+  logic dda_fsm1_valid_out_d; // delayed version of dda_fsm1_valid_out
+  logic dda_fsm0_rising_edge; // rising edge detection for dda_fsm0_valid_out
+  logic dda_fsm1_rising_edge; // rising edge detection for dda_fsm1_valid_out
 
+  // detect rising edges
   always_ff @(posedge pixel_clk_in) begin
       if (rst_in) begin
-          ray_counter <= 9'd0;
-      end else if (increment > 0) begin
-          if (ray_counter + increment >= SCREEN_WIDTH) begin//9'd319) begin
-              ray_counter <= (ray_counter + increment) - SCREEN_WIDTH; //reset counter after 320th ray
-          end else begin
-              ray_counter <= ray_counter + increment;
-          end
+          dda_fsm0_valid_out_d <= 1'b0;
+          dda_fsm1_valid_out_d <= 1'b0;
+      end else begin
+          dda_fsm0_valid_out_d <= dda_fsm0_valid_out;
+          dda_fsm1_valid_out_d <= dda_fsm1_valid_out;
       end
   end
+
+  assign dda_fsm0_rising_edge = dda_fsm0_valid_out && !dda_fsm0_valid_out_d; // high only on rising edge
+  assign dda_fsm1_rising_edge = dda_fsm1_valid_out && !dda_fsm1_valid_out_d; // high only on rising edge
+
+  // calculate increment (0, 1, or 2)
+  logic [1:0] increment;
+  assign increment = dda_fsm0_rising_edge + dda_fsm1_rising_edge;
+
+  logic [8:0] ray_counter_out; 
+  evt_counter #(
+      .MAX_COUNT(SCREEN_WIDTH)
+  ) ray_counter (
+      .clk_in(pixel_clk_in),
+      .rst_in(rst_in),
+      .evt_in(increment),
+      .count_out(ray_counter_out)
+  );
+
+  assign tLast_out = (ray_counter_out == SCREEN_WIDTH-1) || 
+                     (ray_counter_out + increment > SCREEN_WIDTH-1 && ray_counter_out <= SCREEN_WIDTH-1);
 
 
   ////############ MAP DATA BRAM REQUESTS ###############
@@ -221,8 +242,8 @@ module dda
           end else if (dda_fsm0_map_request_out) begin
             map_addra <= dda_fsm0_map_addra_out;
             MAP_ARBITER_STATE <= GRANT_FSM0;
-          end else if (dda_fsm1_map_request) begin
-            map_addra <= dda_fsm1_map_addra;
+          end else if (dda_fsm1_map_request_out) begin
+            map_addra <= dda_fsm1_map_addra_out;
             MAP_ARBITER_STATE <= GRANT_FSM1;
           end
         end
@@ -253,12 +274,12 @@ module dda
   end
 
 
-  //  2D MAP - Xilinx Single Port Read Firdst RAM
+  //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
   xilinx_single_port_ram_read_first #(
     .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE(`FPATH(map.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    .INIT_FILE(`FPATH(grid.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
   ) worldMap (
     .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
     .dina(0),       // RAM input data, width determined from RAM_WIDTH

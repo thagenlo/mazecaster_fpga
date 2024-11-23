@@ -57,17 +57,20 @@ module top_level(
 
     //TODO: INSERT DDA-in FIFO
     ddr_fifo_wrap dda_fifo_in ( // read data output from traffic
+        // reset and clock signals
         .sender_rst(sys_rst),
         .sender_clk(clk_pixel),
-        .sender_axis_tvalid(display_ui_axis_tvalid), // Heba input
-        .sender_axis_tready(display_ui_axis_tready), // FIFO
-        .sender_axis_tdata(display_ui_axis_tdata), // Heba input
+        .receiver_clk(clk_pixel),
+        // sender interface (input to FIFO)
+        .sender_axis_tvalid(dda_data_valid_in), // Heba input
+        .sender_axis_tready(dda_data_ready_out), // FIFO
+        .sender_axis_tdata(dda_data_in), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
-        .receiver_clk(clk_pixel),
-        .receiver_axis_tvalid(display_axis_tvalid), // FIFO
-        .receiver_axis_tready(display_axis_tready), // Tori input
-        .receiver_axis_tdata(display_axis_tdata), // FIFO
+        // receiver interface (output from FIFO)
+        .receiver_axis_tvalid(dda_fsm_in_tvalid), // indicates the FIFO has valid data for the receiver to consume
+        .receiver_axis_tready(dda_fsm_in_tready), // indicates the receiver is ready to consume data
+        .receiver_axis_tdata(dda_fsm_in_tdata), //  the actual data being received from the FIFO
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
@@ -86,12 +89,12 @@ module top_level(
     ddr_fifo_wrap dda_fifo_out ( // read data output from traffic
         .sender_rst(sys_rst),
         .sender_clk(clk_pixel),
-        .sender_axis_tvalid(display_ui_axis_tvalid), //TODO: Replace names starting from here
-        .sender_axis_tready(display_ui_axis_tready),
-        .sender_axis_tdata(display_ui_axis_tdata),
-        .sender_axis_tlast(display_ui_axis_tlast),
-        .sender_axis_prog_full(display_ui_axis_prog_full), //TODO: to here
-        .receiver_clk(clk_pixel),
+        .sender_axis_tvalid(dda_fsm_out_tvalid), // in - data on the sender_axis_tdata signal is valid and can be written into the FIFO
+        .sender_axis_tready(dda_fsm_out_tready), // out - FIFO is ready to accept data from the sender
+        .sender_axis_tdata(dda_fsm_out_tdata), // in - actual data being written into the FIFO
+        .sender_axis_tlast(dda_fsm_out_tlast), // in - last piece of data in a frame or packet being sent to the FIFO
+        .sender_axis_prog_full(), //TODO: to here ???
+        .receiver_clk(clk_pixel), //TODO: Replace names starting from here
         .receiver_axis_tvalid(fifo_tvalid_out),
         .receiver_axis_tready(transformer_tready),
         .receiver_axis_tdata(fifo_tdata_out),
