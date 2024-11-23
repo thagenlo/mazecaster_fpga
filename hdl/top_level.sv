@@ -99,7 +99,7 @@ module top_level(
         .receiver_axis_tready(transformer_tready),
         .receiver_axis_tdata(fifo_tdata_out),
         .receiver_axis_tlast(fifo_tlast_out),
-        .receiver_axis_prog_empty(fifo_prog_empty)); // unused
+        .receiver_axis_prog_empty()); // unused
 
     //TODO: INSERT TRANSFORMATION MODULE
     logic [15:0] ray_address_out;
