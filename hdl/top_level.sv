@@ -3,8 +3,8 @@
 module top_level(
     input wire clk_100mhz, //crystal reference clock
     input wire [3:0] btn,         // buttons for move control and rotation
-    input wire [0] sw,
-      output logic [15:0] led, //16 green output LEDs (located right above switches)
+    input wire [15:0] sw,
+    output logic [15:0] led, //16 green output LEDs (located right above switches)
     output logic [2:0] hdmi_tx_p, //hdmi output signals (positives) (blue, green, red)
     output logic [2:0] hdmi_tx_n, //hdmi output signals (negatives) (blue, green, red)
     output logic hdmi_clk_p, hdmi_clk_n //differential hdmi clock
@@ -12,7 +12,7 @@ module top_level(
 
     // RESET SIGNAL
     logic sys_rst;
-    assign sys_rst = sw;
+    assign sys_rst = sw[0];
 
     // CLOCK
     logic clk_pixel, clk_5x; //clock lines
@@ -38,6 +38,15 @@ module top_level(
 
     //CONTROL BUTTONS
 
+    //debouncing buttons
+
+    logic deb_out;
+ 
+    debouncer btn1_db(.clk_in(clk_100mhz),
+                    .rst_in(sys_rst),
+                    .dirty_in(btn[1]),
+                    .clean_out(deb_out));
+
     //TODO: PIPELINING
 
     // VIDEO SIGN GEN
@@ -60,9 +69,12 @@ module top_level(
         .rst_in(sys_rst),
         .moveDir(btn[3:2]),
         .rotDir(btn[1:0]),
-        .pos(),
-        .dir(),
-        .plane()
+        .posX(),
+        .posY(),
+        .dirX(),
+        .dirY(),
+        .planeX(), 
+        .planeY(),
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
