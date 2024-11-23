@@ -6,17 +6,20 @@
 `define FPATH(X) `"../../data/X`"
 `endif  /* ! SYNTHESIS */
 
-module controller (parameter N = 24,
+module controller #(parameter N = 24,
   parameter SCREEN_WIDTH = 320,
-  parameter SCREEN_WIDTH = 240)
+  parameter SCREEN_HEIGHT = 240)
 (
   input wire pixel_clk_in,
   input wire rst_in,
-  input wire [1:0] moveDir, //fwd, back
-  input wire [1:0] rotDir, //left, right
-  output logic [31:0] pos, //exact location on map
-  output logic [31:0] dir,
-  output logic [31:0] plane
+  input wire moveFwd,
+  input wire moveBack,
+  input wire rotLeft,
+  input wire rotRight,
+  output logic [15:0] posX, //exact location on map
+  output logic [15:0] posY,
+  output logic [15:0] dirX,
+  output logic [15:0] dirY
   );
   //localparam SCREEN_WIDTH = 320;
   localparam FOV = 66; // 66 degrees
@@ -29,26 +32,26 @@ module controller (parameter N = 24,
   localparam MOVE_SPEED = 16'b0000_0001_0000_0000;//TODO figure out what a reasonable move speed is
   localparam NEG_MOVE_SPEED = 16'b1111_1111_0000_0000;
 
-  logic moveFwd, moveBack;
+  // logic moveFwd, moveBack;
   // logic rotLeft, rotRight;
-  logic [6:0] rotLeft, rotRight;
+  // logic [6:0] rotLeft, rotRight;
   logic [6:0] mapX, mapY;
-  logic [15:0] posX, posY;
-  logic [15:0] dirX, dirY;
-  logic [32:0] planeX, planeY;
+  // logic [15:0] posX, posY;
+  // logic [15:0] dirX, dirY;
+  // logic [32:0] planeX, planeY;
   logic [32:0] newDirX, newDirY;
   logic [32:0] newPosX, newPosY;
   logic [32:0] newPlaneX, newPlaneY;
 
   always_comb begin
     // rotAngle = 10;
-    moveFwd = moveDir[1];
-    moveBack = moveDir[0];
-    rotLeft = rotDir[1];
-    rotRight = rotDir[0];
+    // moveFwd = moveDir[1];
+    // moveBack = moveDir[0];
+    // rotLeft = rotDir[1];
+    // rotRight = rotDir[0];
 
-    posX = pos[31:16];
-    posY = pos[15:0];
+    // posX = pos[31:16];
+    // posY = pos[15:0];
     mapX = (posX + (1 << 7)) >> 8; //rounded out to nearest int
     mapY = (posY + (1 << 7)) >> 8;
     map_addra = posY*N+posX-1;
@@ -114,7 +117,7 @@ module controller (parameter N = 24,
     .RAM_WIDTH(8),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^8)
     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE(`FPATH(map.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
   ) worldMap (
     .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
     .dina(0),       // RAM input data, width determined from RAM_WIDTH

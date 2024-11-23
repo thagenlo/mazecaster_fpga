@@ -138,7 +138,7 @@ module ray_calculations (
                         sideDistX <= tempSideDistX[23:8]; //mapX is the floor of posX
                     end else begin
                         stepX <= 1;
-                        sideDistX <= (~tempSideDistY[23:8]) + 16'b1111111100000000;
+                        sideDistX <= (~tempSideDistY[23:8]) + 16'b1111111100000000; //TODO change the to ternary statement to only be when 
                     end
                     if (rayDirY[15]) begin
                         stepY <= 0;
