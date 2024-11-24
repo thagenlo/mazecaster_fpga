@@ -1,4 +1,15 @@
-module dda
+// `ifdef SIMULATION
+//     always @(posedge pixel_clk_in) begin
+//         $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d", 
+//                 $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY);
+        
+//         // $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", 
+//         //         $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
+
+//     end
+// `endif
+
+module dda_fsm
 #(
   parameter SCREEN_WIDTH = 320,
   parameter SCREEN_HEIGHT = 240,
@@ -87,7 +98,8 @@ module dda
     logic [31:0] wallX_out_intermediate;
 
     logic div_start_in; // start division
-    logic div_busy_out, div_done_out, div_valid_out, div_dbz_out, div_ovf_out;
+    logic div_done_out;
+    //logic div_busy_out, div_valid_out;
     logic [15:0] div_numerator_in, div_denominator_in; // 8.8 fixed-point
     logic [15:0] div_quotient_out; // 8.8 fixed-point
 
@@ -98,16 +110,15 @@ module dda
         .clk(pixel_clk_in),
         .rst(rst_in),
         .start(div_start_in),
-        .busy(div_busy_out),
+        .busy(),
         .done(div_done_out),
-        .valid(div_valid_out),
-        .dbz(div_dbz_out),
-        .ovf(div_ovf_out),
-        .a(div_numerator_in),
+        .valid(),
+        .dbz(),
+        .ovf(),
+        .a(div_numerator_in), //screen_height 8.8 unsigned fixed point
         .b(div_denominator_in),
         .val(div_quotient_out)
     );
-
 
   
     ////############ STEP FSM ###############
@@ -119,6 +130,7 @@ module dda
 
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
+            $display("Time: %0t | Resetting DDA FSM", $time);
             dda_busy_out <= 1'b0;
             dda_valid_out <= 1'b0;
 
@@ -133,9 +145,14 @@ module dda
             DDA_FSM_STATE <= IDLE;
             
         end else begin
+            $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d", 
+                 $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY);
+
             case (DDA_FSM_STATE)
 
                 IDLE: begin
+                    //$display("valid_out: %0d", dda_valid_out);
+                    $display("Time: %0t | IDLE State", $time);
                     dda_busy_out <= 1'b0;
                     dda_valid_out <= 1'b0;
 
@@ -145,6 +162,9 @@ module dda
                 end
 
                 READY: begin
+                    $display("Time: %0t | READY State | posX: %0d | posY: %0d | sideDistX: %0d | sideDistY: %0d",
+                         $time, posX, posY, sideDistX, sideDistY);
+
                     dda_busy_out <= 1'b1;
 
                     sideDistX <= dda_data_in[31:16];
@@ -158,6 +178,8 @@ module dda
                 end
 
                 X_STEP: begin
+                    $display("Time: %0t | X_STEP State | mapX: %0d | sideDistX: %0d", $time, mapX, sideDistX);
+
                     sideDistX <= sideDistX + deltaDistX;
 
                     mapX <= (stepX == 1'b0)? mapX - 1'b1: // 1'b0 => -1
@@ -176,6 +198,8 @@ module dda
                 end
 
                 Y_STEP: begin
+                    $display("Time: %0t | Y_STEP State | mapY: %0d | sideDistY: %0d", $time, mapY, sideDistY);
+
                     sideDistY <= sideDistY + deltaDistY;
 
                     mapY <= (stepY == 1'b0)? mapY - 1'b1: // 1'b0 => -1 
@@ -194,23 +218,29 @@ module dda
                 end
 
                 CHECK_WALL: begin
+                    $display("Time: %0t | CHECK_WALL State | map_data_in: %0d", $time, map_data_in);
 
                     if (map_data_valid_in) begin
                         map_request_out <= 1'b0;  // clear the request signal
                         mapData_store <= map_data_in; //store map data locally
                         if (map_data_in != 0) begin
-                            DDA_FSM_STATE <= WALL_CALC; // wall detected
-                            perpWallDist <= (wallType == 1'b0)? sideDistX - deltaDistX: // 0 => x-wall
-                                                                sideDistY - deltaDistY; // 1 => y-wall
+                            $display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
+                            
+                            //TODO WHEN TEXTURES NEEDED
+                            // perpWallDist <= (wallType == 1'b0)? sideDistX - deltaDistX: // 0 => x-wall
+                            //                                     sideDistY - deltaDistY; // 1 => y-wall
+
                             // set as X or Y for wall_calc
                             pos_X_or_Y <= (wallType == 1'b0)? posX : posY;
                             rayDir_X_or_Y <= (wallType == 1'b0)? rayDirX : rayDirY; 
 
                             //start division (screenHeight / perpWallDist)
                             div_start_in <= 1'b1;
-                            div_denominator_in <= (wallType == 1'b0)? sideDistX - deltaDistX: 
-                                                                      sideDistY - deltaDistY;
-                            div_numerator_in <= 16'b0000_0000_1111_0000; //screen_height = 240
+                            div_denominator_in <= (wallType == 1'b0)? (sideDistX - deltaDistX): 
+                                                                       (sideDistY - deltaDistY);
+                            div_numerator_in <= 16'b1111_0000_0000_0000; //screen_height = 240
+
+                            DDA_FSM_STATE <= WALL_CALC; // wall detected
 
                         end else if (sideDistX < sideDistY) begin
                             DDA_FSM_STATE <= X_STEP;  // Continue stepping in X
@@ -221,9 +251,13 @@ module dda
                 end
 
                 WALL_CALC: begin
+                    $display("Time: %0t | WALL_CALC State | perpWallDist: %0d", $time, perpWallDist);
 
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
                     mapData_out <= mapData_store; // value from 0->7 at map[mapX][mapY] from BRAM
+
+
+                    $display("Time: %0t | Divider Started: numerator=%0d, denominator=%0d", $time, div_numerator_in, div_denominator_in);
 
                     // ~16 cycles?
                     // possible efficiency considerations?
@@ -237,12 +271,16 @@ module dda
                     //where exactly the wall was hit ( fractional part [7:0] -> wallX -= floor((wallX)) ) 
                     // wallX_out <= (wallType == 1'b0)? (posX + (perpWallDist * rayDirX))[7:0]: // 0 => x-wall
                     //                                  (posY + (perpWallDist * rayDirY))[7:0]; // 1 => y-wall
-                    wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
+                    
+                    //wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
 
                     if (div_done_out) begin
+                        $display("Time: %0t | Divider Done: quotient=%0d", $time, div_quotient_out);
+
                         wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
 
-                        lineHeight_out <= div_quotient_out[15:8];
+                        //TODO div_quotient_out is zero when player is super close to wall
+                        lineHeight_out <= (div_quotient_out == 0)? SCREEN_HEIGHT : div_quotient_out[15:8];
 
                         DDA_FSM_STATE <= VALID_OUT;
                     end
@@ -250,14 +288,21 @@ module dda
                 end
 
                 VALID_OUT: begin
+                    $display("Time: %0t | VALID_OUT State | lineHeight_out: %0d | wallType_out: %0d", 
+                         $time, lineHeight_out, wallType_out);
+
                     if (dda_fsm_out_tready) begin// data is not sent to the FIFO unless dda_fsm_out_tready is high
+                        $display("valid_out: %0d", dda_valid_out);
                         dda_valid_out <= 1'b1;
                         dda_busy_out <= 1'b0;
                         DDA_FSM_STATE <= IDLE;
                     end
                 end
 
-                default: DDA_FSM_STATE <= IDLE;  
+                default: begin
+                    $display("Time: %0t | Invalid State", $time);
+                    DDA_FSM_STATE <= IDLE;  
+                end
             endcase
         end
     end

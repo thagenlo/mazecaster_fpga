@@ -1,13 +1,13 @@
 `default_nettype none // prevents system from inferring an undeclared logic (good practice)
  
 module top_level(
-    input wire clk_100mhz, //crystal reference clock
-    input wire [3:0] btn,         // buttons for move control and rotation
-    input wire [15:0] sw,
-    output logic [15:0] led, //16 green output LEDs (located right above switches)
-    output logic [2:0] hdmi_tx_p, //hdmi output signals (positives) (blue, green, red)
-    output logic [2:0] hdmi_tx_n, //hdmi output signals (negatives) (blue, green, red)
-    output logic hdmi_clk_p, hdmi_clk_n //differential hdmi clock
+    input wire clk_100mhz,                  //crystal reference clock
+    input wire [3:0] btn,                   // buttons for move control and rotation
+    input wire [15:0] sw,                   // switches
+    output logic [15:0] led,                //16 green output LEDs (located right above switches)
+    output logic [2:0] hdmi_tx_p,           //hdmi output signals (positives) (blue, green, red)
+    output logic [2:0] hdmi_tx_n,           //hdmi output signals (negatives) (blue, green, red)
+    output logic hdmi_clk_p, hdmi_clk_n     //differential hdmi clock
     );
 
     // RESET SIGNAL
@@ -170,7 +170,26 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
-    //TODO: INSERT DDA MODULES
+    // DDA MODULE
+    dda #(
+        .SCREEN_WIDTH(320),
+        .SCREEN_HEIGHT(240), 
+        .N(24)
+    ) dda_module (
+        .pixel_clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        
+        // DDA-in FIFO receiver
+        .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
+        .dda_fsm_in_tdata(dda_fsm_in_tdata),
+        .dda_fsm_in_tready(dda_fsm_in_tready),
+        
+        // DDA-out FIFO sender
+        .dda_fsm_out_tready(dda_fsm_out_tready),
+        .dda_fsm_out_tdata(dda_fsm_out_tdata),
+        .dda_fsm_out_tvalid(dda_fsm_out_tvalid),
+        .dda_fsm_out_tlast(dda_fsm_out_tlast)
+    );
 
 
     //TODO: INSERT DDA-out FIFO
