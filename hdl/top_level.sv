@@ -137,7 +137,7 @@ module top_level(
     end
 
 
-    logic dda_data_valid_in;
+    logic dda_data_valid_in, dda_data_ready_out;
 
     ray_calculations calculating_ray (
         .pixel_clk_in(clk_pixel),
@@ -240,7 +240,7 @@ module top_level(
     logic ray_last_pixel_out;
 
     transformation flattening_module (
-        .pixel_clk_in(pixel_clk_in),
+        .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
         .dda_fifo_tdata_in(fifo_tdata_out),
