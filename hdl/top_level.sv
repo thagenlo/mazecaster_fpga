@@ -112,17 +112,43 @@ module top_level(
 
     //TODO: INSERT RAY CALCULATION MODULE
 
+    //TODO: sending in 320 hcounts
+
+    logic [8:0] hcount_in_ray;
+    logic [8:0] hcount_ray;
+    logic stepX;
+    logic stepY;
+    logic signed [15:0] rayDirX;
+    logic signed [15:0] rayDirY;
+    logic [15:0] sideDistX;
+    logic [15:0] sideDistY;
+    logic [15:0] deltaDistX;
+    logic [15:0] deltaDistY;
+
+
     ray_calculations calculating_ray (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
+        .hcount_in(hcount_in_ray),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
         .planeY(planeY),
-        
-    )
+        .stepX(stepX),
+        .stepY(stepY),
+        .rayDirX(rayDirX),
+        .rayDirY(rayDirY),
+        .sideDistX(sideDistX),
+        .sideDistY(sideDistY),
+        .deltaDistX(deltaDistX),
+        .deltaDistY(deltaDistY),
+        .hcount_out(hcount_ray),
+        .valid_out(dda_data_valid_in)
+    );
+
+    logic [] dda_data_in
 
 
     //TODO: INSERT DDA-in FIFO

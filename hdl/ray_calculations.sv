@@ -1,20 +1,22 @@
 module ray_calculations (
   input wire pixel_clk_in,
   input wire rst_in,
+  input wire [8:0] hcount_in, //which column I am calculating ray for on screen (0 to screenwidth-1), was thinking of incrementing in top_level and feedign that into dda
   input wire [15:0] posX, //TODO change this in controloler to be a 31:0 value
   input wire [15:0] posY,
-  input wire [31:0] dirX,
-  input wire [31:0] dirY,
-  input wire [31:0] planeX,
-  input wire [31:0] planeY,
-  input wire [8:0] hcount_in, //which column I am calculating ray for on screen (0 to screenwidth-1), was thinking of incrementing in top_level and feedign that into dda
-  output logic signed [31:0] rayDir, //ray direction for the current column
+  input wire [15:0] dirX,
+  input wire [15:0] dirY,
+  input wire [15:0] planeX,
+  input wire [15:0] planeY,
   output logic stepX,      //direction in which the ray moves through the grid, for X and Y (-1 or 1)
   output logic stepY,
+  output logic signed [15:0] rayDirX, //ray direction for the current column
+  output logic signed [15:0] rayDirY,
   output logic [15:0] sideDistX,
   output logic [15:0] sideDistY,
   output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
-  output logic [15:0] deltaDistY
+  output logic [15:0] deltaDistY,
+  output logic [8:0] hcount_out
   );
   localparam SCREEN_WIDTH = 320;
   localparam SCREEN_WIDTH_RECIPRICAL = 24'b0000_0000_0000_0000_0000_1101; //fixed point representation: 0.003173828125
