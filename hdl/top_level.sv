@@ -45,10 +45,10 @@ module top_level(
     logic fwd_btn;
     logic bwd_btn;
 
-    assign leftRot_btn = btn[1];
-    assign rightRot_btn = btn[0];
-    assign fwd_btn = btn[3];
-    assign bwd_btn = btn[2];
+    // assign leftRot_btn = btn[1];
+    // assign rightRot_btn = btn[0];
+    // assign fwd_btn = btn[3];
+    // assign bwd_btn = btn[2];
  
     debouncer deb_leftRot_btn (
         .clk_in(clk_pixel),
