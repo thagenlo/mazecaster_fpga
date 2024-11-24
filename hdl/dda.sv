@@ -48,7 +48,7 @@ module dda
 
 
   ////############ DDA FIFO ###############
-  assign dda_fsm_in_tready = !dda_fsm0_busy || !dda_fsm1_busy; // ready only if both FSMs are free
+  assign dda_fsm_in_tready = !dda_fsm0_busy || !dda_fsm1_busy; // ready if either FSMs are free
   always_ff @(posedge pixel_clk_in) begin
       if (rst_in) begin
           dda_fsm0_valid_in <= 1'b0;

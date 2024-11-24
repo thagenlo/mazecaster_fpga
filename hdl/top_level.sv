@@ -97,9 +97,9 @@ module top_level(
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)
-        .receiver_axis_tvalid(dda_fsm_in_tvalid), // indicates the FIFO has valid data for the receiver to consume
-        .receiver_axis_tready(dda_fsm_in_tready), // indicates the receiver is ready to consume data
-        .receiver_axis_tdata(dda_fsm_in_tdata), //  the actual data being received from the FIFO
+        .receiver_axis_tvalid(dda_fsm_in_tvalid), // in - indicates the FIFO has valid data for the receiver to consume
+        .receiver_axis_tready(dda_fsm_in_tready), // out - indicates the receiver is ready to consume data
+        .receiver_axis_tdata(dda_fsm_in_tdata), //  in - the actual data being received from the FIFO
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
