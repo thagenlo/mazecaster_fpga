@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1732395747" />
-    <testcase name="test_a" classname="test_dda_fsm" file="/Users/victoriahagenlocker/Documents/Documents - Victoria’s MacBook Air/GitHub/mazecaster_fpga/sim/test_dda_fsm.py" lineno="22" time="0.0052127838134765625" sim_time_ns="25.001" ratio_time="4796.093775338456" />
+    <property name="random_seed" value="1732399637" />
+    <testcase name="test_a" classname="test_dda" file="/Users/victoriahagenlocker/Documents/Documents - Victoria’s MacBook Air/GitHub/mazecaster_fpga/sim/test_dda.py" lineno="57" time="7.177900075912476" sim_time_ns="14435.001" ratio_time="2011.0339858924522" />
   </testsuite>
 </testsuites>

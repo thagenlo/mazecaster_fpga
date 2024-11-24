@@ -27,6 +27,7 @@ dirY = 1.0
 planeX = 0.0
 planeY = 0.66
 
+
 def to_fixed(value, fraction_bits=8, total_bits=16):
     """Convert a floating-point value to fixed-point representation."""
     scaling_factor = 1 << fraction_bits
@@ -35,23 +36,35 @@ def to_fixed(value, fraction_bits=8, total_bits=16):
     fixed_val = int(round(value * scaling_factor))
     return max(min(fixed_val, max_val), min_val) & ((1 << total_bits) - 1)
 
-def pack_data(i, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY):
+
+def pack_data(
+    i,
+    stepX,
+    stepY,
+    rayDirX,
+    rayDirY,
+    deltaDistX,
+    deltaDistY,
+    posX,
+    posY,
+    sideDistX,
+    sideDistY,
+):
     """Pack the data fields into a single value for `dda_fsm_in_tdata`."""
     packed_data = (
-        (i & 0x1FF) << 130 |  # 9-bit i
-        (stepX & 0x1) << 129 |  # 1-bit stepX
-        (stepY & 0x1) << 128 |  # 1-bit stepY
-        (rayDirX & 0xFFFF) << 112 |  # 16-bit rayDirX
-        (rayDirY & 0xFFFF) << 96 |  # 16-bit rayDirY
-        (deltaDistX & 0xFFFF) << 80 |  # 16-bit deltaDistX
-        (deltaDistY & 0xFFFF) << 64 |  # 16-bit deltaDistY
-        (posX & 0xFFFF) << 48 |  # 16-bit posX
-        (posY & 0xFFFF) << 32 |  # 16-bit posY
-        (sideDistX & 0xFFFF) << 16 |  # 16-bit sideDistX
-        (sideDistY & 0xFFFF)  # 16-bit sideDistY
+        (i & 0x1FF) << 130  # 9-bit i
+        | (stepX & 0x1) << 129  # 1-bit stepX
+        | (stepY & 0x1) << 128  # 1-bit stepY
+        | (rayDirX & 0xFFFF) << 112  # 16-bit rayDirX
+        | (rayDirY & 0xFFFF) << 96  # 16-bit rayDirY
+        | (deltaDistX & 0xFFFF) << 80  # 16-bit deltaDistX
+        | (deltaDistY & 0xFFFF) << 64  # 16-bit deltaDistY
+        | (posX & 0xFFFF) << 48  # 16-bit posX
+        | (posY & 0xFFFF) << 32  # 16-bit posY
+        | (sideDistX & 0xFFFF) << 16  # 16-bit sideDistX
+        | (sideDistY & 0xFFFF)  # 16-bit sideDistY
     )
     return packed_data
-
 
 
 @cocotb.test()
@@ -61,17 +74,16 @@ async def test_a(dut):
     cocotb.start_soon(Clock(dut.pixel_clk_in, 1, units="ns").start())
 
     dut.rst_in.value = 1
-    dut.dda_fsm_in_tvalid.value = 1 #FIFO has valid data for the receiver to consume
-    dut.dda_fsm_out_tready.value = 1 #FIFO is ready to accept data from the sender
+    dut.dda_fsm_in_tvalid.value = 1  # FIFO has valid data for the receiver to consume
+    dut.dda_fsm_out_tready.value = 1  # FIFO is ready to accept data from the sender
     await ClockCycles(dut.pixel_clk_in, 5)
     dut.rst_in.value = 0
-
 
     # Apply test inputs
     for i in range(screen_width):
         # Calculate cameraX for the current pixel
         cameraX = 2 * i / screen_width - 1
-        
+
         # Calculate ray direction
         rayDirX = dirX + planeX * cameraX
         rayDirY = dirY + planeY * cameraX
@@ -111,9 +123,17 @@ async def test_a(dut):
 
         # Pack data
         dda_input_data = pack_data(
-            i, stepX, stepY, rayDirX_fixed, rayDirY_fixed,
-            deltaDistX_fixed, deltaDistY_fixed, posX_fixed, posY_fixed,
-            sideDistX_fixed, sideDistY_fixed
+            i,
+            stepX,
+            stepY,
+            rayDirX_fixed,
+            rayDirY_fixed,
+            deltaDistX_fixed,
+            deltaDistY_fixed,
+            posX_fixed,
+            posY_fixed,
+            sideDistX_fixed,
+            sideDistY_fixed,
         )
 
         # Apply data to DUT
@@ -136,7 +156,6 @@ async def test_a(dut):
         dut.dda_fsm_in_tvalid.value = 0
 
 
-
 def is_runner():
     """DDA FSM Tester."""
     hdl_toplevel_lang = os.getenv("HDL_TOPLEVEL_LANG", "verilog")
@@ -147,6 +166,7 @@ def is_runner():
         proj_path / "hdl" / "dda.sv",
         proj_path / "hdl" / "dda_fsm.sv",
         proj_path / "hdl" / "evt_counter.sv",
+        proj_path / "hdl" / "divu.sv",
     ]
     sources += [proj_path / "hdl" / "xilinx_single_port_ram_read_first.v"]
     build_test_args = ["-Wall"]

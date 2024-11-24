@@ -1,20 +1,13 @@
-`ifdef SIMULATION
-    always @(posedge pixel_clk_in) begin
-        $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d", 
-                $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY);
+// `ifdef SIMULATION
+//     always @(posedge pixel_clk_in) begin
+//         $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d", 
+//                 $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY);
         
-        // $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", 
-        //         $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
+//         // $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", 
+//         //         $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
 
-        if (div_start_in) begin
-            $display("Time: %0t | Divider Started: numerator=%0d, denominator=%0d", 
-                    $time, div_numerator_in, div_denominator_in);
-        end else if (div_done_out) begin
-            $display("Time: %0t | Divider Done: quotient=%0d", $time, div_quotient_out);
-        end
-
-    end
-`endif
+//     end
+// `endif
 
 module dda_fsm
 #(
@@ -158,7 +151,7 @@ module dda_fsm
             case (DDA_FSM_STATE)
 
                 IDLE: begin
-                    $display("valid_out: %0d", dda_valid_out);
+                    //$display("valid_out: %0d", dda_valid_out);
                     $display("Time: %0t | IDLE State", $time);
                     dda_busy_out <= 1'b0;
                     dda_valid_out <= 1'b0;
