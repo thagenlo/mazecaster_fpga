@@ -3,23 +3,23 @@
 # SW Build 5076996 on Wed May 22 18:36:09 MDT 2024
 # IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
 # SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
-# Start of session at: Sun Nov 24 16:55:30 2024
-# Process ID: 3211
-# Current directory: /home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4
+# Start of session at: Sun Nov 24 17:21:13 2024
+# Process ID: 3400
+# Current directory: /home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68
 # Command line: vivado -mode batch -source build.tcl
-# Log file: /home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/vivado.log
-# Journal file: /home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/vivado.jou
-# Running On        :eecs-digital-09
+# Log file: /home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/vivado.log
+# Journal file: /home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/vivado.jou
+# Running On        :eecs-digital-37
 # Platform          :Ubuntu
 # Operating System  :Ubuntu 24.04.1 LTS
-# Processor Detail  :13th Gen Intel(R) Core(TM) i7-13700
-# CPU Frequency     :1198.501 MHz
-# CPU Physical cores:16
-# CPU Logical cores :24
-# Host memory       :33325 MB
-# Swap memory       :8589 MB
-# Total Virtual     :41915 MB
-# Available Virtual :40808 MB
+# Processor Detail  :AMD Ryzen 7 2700X Eight-Core Processor
+# CPU Frequency     :4141.960 MHz
+# CPU Physical cores:8
+# CPU Logical cores :16
+# Host memory       :16686 MB
+# Swap memory       :4294 MB
+# Total Virtual     :20981 MB
+# Available Virtual :19966 MB
 #-----------------------------------------------------------
 source build.tcl
 # set_param general.maxThreads 2
@@ -37,6 +37,7 @@ source build.tcl
 obj is empty
 # set sources_sv [ glob ./hdl/*.sv ]
 # read_verilog -sv $sources_sv
+read_verilog: Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 1410.922 ; gain = 0.027 ; free physical = 13077 ; free virtual = 18664
 # set sources_v [ glob -nocomplain ./hdl/*.v ]
 # if {[llength $sources_v] > 0 } {
 #     read_verilog $sources_v
@@ -70,18 +71,20 @@ INFO: [Device 21-403] Loading part xc7s50csga324-1
 INFO: [Device 21-9227] Part: xc7s50csga324-1 does not have CEAM library.
 INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
 INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
-INFO: [Synth 8-7075] Helper process launched with PID 3237
+INFO: [Synth 8-7075] Helper process launched with PID 3425
 ---------------------------------------------------------------------------------
-Starting RTL Elaboration : Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 2166.531 ; gain = 404.711 ; free physical = 27748 ; free virtual = 37506
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 2166.617 ; gain = 405.711 ; free physical = 12009 ; free virtual = 17597
 ---------------------------------------------------------------------------------
-WARNING: [Synth 8-6901] identifier 'TOTAL_PIXELS' is used before its declaration [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/video_sig_gen.sv:21]
-WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/video_sig_gen.sv:22]
-WARNING: [Synth 8-6901] identifier 'LINE_LENGTH' is used before its declaration [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/video_sig_gen.sv:30]
-WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/video_sig_gen.sv:30]
-WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/video_sig_gen.sv:33]
-INFO: [Synth 8-11241] undeclared symbol 'rayDirY_recip_out', assumed default net type 'wire' [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/ray_calculations.sv:103]
-INFO: [Synth 8-6157] synthesizing module 'top_level' [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/top_level.sv:3]
-INFO: [Synth 8-6157] synthesizing module 'hdmi_clk_wiz_720p' [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/hdmi_clk_wiz.sv:69]
+WARNING: [Synth 8-6901] identifier 'TOTAL_PIXELS' is used before its declaration [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:21]
+WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:22]
+WARNING: [Synth 8-6901] identifier 'LINE_LENGTH' is used before its declaration [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:30]
+WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:30]
+WARNING: [Synth 8-6901] identifier 'TOTAL_LINES' is used before its declaration [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:33]
+INFO: [Synth 8-11241] undeclared symbol 'rayDirY_recip_out', assumed default net type 'wire' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/ray_calculations.sv:103]
+WARNING: [Synth 8-11065] parameter 'COUNTER_MAX' becomes localparam in 'debouncer' with formal parameter declaration list [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/debouncer.sv:13]
+WARNING: [Synth 8-11065] parameter 'COUNTER_SIZE' becomes localparam in 'debouncer' with formal parameter declaration list [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/debouncer.sv:14]
+INFO: [Synth 8-6157] synthesizing module 'top_level' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:3]
+INFO: [Synth 8-6157] synthesizing module 'hdmi_clk_wiz_720p' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/hdmi_clk_wiz.sv:69]
 INFO: [Synth 8-6157] synthesizing module 'IBUF' [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:73643]
 INFO: [Synth 8-6155] done synthesizing module 'IBUF' (0#1) [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:73643]
 INFO: [Synth 8-6157] synthesizing module 'MMCME2_ADV' [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:82388]
@@ -105,15 +108,66 @@ INFO: [Synth 8-6157] synthesizing module 'MMCME2_ADV' [/tools/Xilinx/Vivado/2024
 INFO: [Synth 8-6155] done synthesizing module 'MMCME2_ADV' (0#1) [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:82388]
 INFO: [Synth 8-6157] synthesizing module 'BUFG' [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:1951]
 INFO: [Synth 8-6155] done synthesizing module 'BUFG' (0#1) [/tools/Xilinx/Vivado/2024.1/scripts/rt/data/unisim_comp.v:1951]
-INFO: [Synth 8-6155] done synthesizing module 'hdmi_clk_wiz_720p' (0#1) [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/hdmi_clk_wiz.sv:69]
-ERROR: [Synth 8-439] module 'debouncer' not found [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/top_level.sv:53]
-ERROR: [Synth 8-6156] failed synthesizing module 'top_level' [/home/fpga/worker_place/temp/temp/3bab07b83f494907914632194c1241d4/hdl/top_level.sv:3]
+INFO: [Synth 8-6155] done synthesizing module 'hdmi_clk_wiz_720p' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/hdmi_clk_wiz.sv:69]
+INFO: [Synth 8-6157] synthesizing module 'debouncer' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/debouncer.sv:6]
+INFO: [Synth 8-6155] done synthesizing module 'debouncer' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/debouncer.sv:6]
+INFO: [Synth 8-6157] synthesizing module 'video_sig_gen' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:7]
+INFO: [Synth 8-6155] done synthesizing module 'video_sig_gen' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/video_sig_gen.sv:7]
+WARNING: [Synth 8-689] width (11) of port connection 'hcount_out' does not match port width (21) of module 'video_sig_gen' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:83]
+INFO: [Synth 8-6157] synthesizing module 'controller' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/controller.sv:9]
+INFO: [Synth 8-6157] synthesizing module 'xilinx_single_port_ram_read_first' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/xilinx_single_port_ram_read_first.v:10]
+	Parameter RAM_WIDTH bound to: 4 - type: integer 
+	Parameter RAM_DEPTH bound to: 576 - type: integer 
+	Parameter RAM_PERFORMANCE bound to: HIGH_PERFORMANCE - type: string 
+	Parameter INIT_FILE bound to: grid_24x24_onlywall.mem - type: string 
+INFO: [Synth 8-3876] $readmem data file 'grid_24x24_onlywall.mem' is read successfully [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/xilinx_single_port_ram_read_first.v:33]
+INFO: [Synth 8-6155] done synthesizing module 'xilinx_single_port_ram_read_first' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/xilinx_single_port_ram_read_first.v:10]
+WARNING: [Synth 8-689] width (3) of port connection 'douta' does not match port width (4) of module 'xilinx_single_port_ram_read_first' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/controller.sv:182]
+INFO: [Synth 8-6155] done synthesizing module 'controller' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/controller.sv:9]
+WARNING: [Synth 8-689] width (32) of port connection 'valid_out' does not match port width (1) of module 'controller' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:112]
+WARNING: [Synth 8-2900] ignoring illegal expression in output port connection [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:112]
+INFO: [Synth 8-6157] synthesizing module 'ray_calculations' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/ray_calculations.sv:1]
+INFO: [Synth 8-6157] synthesizing module 'divider' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/divider.sv:3]
+	Parameter WIDTH bound to: 16 - type: integer 
+	Parameter FBITS bound to: 8 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'divider' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/divider.sv:3]
+WARNING: [Synth 8-689] width (1) of port connection 'val' does not match port width (16) of module 'divider' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/ray_calculations.sv:103]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/ray_calculations.sv:137]
+INFO: [Synth 8-6155] done synthesizing module 'ray_calculations' (0#1) [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/ray_calculations.sv:1]
+WARNING: [Synth 8-7071] port 'tabulate_in' of module 'ray_calculations' is unconnected for instance 'calculating_ray' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:142]
+WARNING: [Synth 8-7023] instance 'calculating_ray' of module 'ray_calculations' has 21 connections declared, but only 20 given [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:142]
+INFO: [Synth 8-6157] synthesizing module 'dda_fifo_wrap' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/dda_fifo_wrap.sv:11]
+	Parameter DEPTH bound to: 320 - type: integer 
+	Parameter DATA_WIDTH bound to: 144 - type: integer 
+	Parameter PROGFULL_DEPTH bound to: 12 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'xpm_fifo_axis' [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv:2373]
+	Parameter CLOCKING_MODE bound to: independent_clock - type: string 
+	Parameter FIFO_MEMORY_TYPE bound to: auto - type: string 
+	Parameter PACKET_FIFO bound to: false - type: string 
+	Parameter FIFO_DEPTH bound to: 320 - type: integer 
+	Parameter TDATA_WIDTH bound to: 144 - type: integer 
+	Parameter SIM_ASSERT_CHK bound to: 0 - type: integer 
+	Parameter CASCADE_HEIGHT bound to: 0 - type: integer 
+	Parameter ECC_MODE bound to: no_ecc - type: string 
+	Parameter RELATED_CLOCKS bound to: 0 - type: integer 
+	Parameter USE_ADV_FEATURES bound to: 0202 - type: string 
+	Parameter PROG_FULL_THRESH bound to: 308 - type: integer 
+	Parameter PROG_EMPTY_THRESH bound to: 10 - type: integer 
+	Parameter CDC_SYNC_STAGES bound to: 3 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'xpm_cdc_sync_rst' [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_cdc/hdl/xpm_cdc.sv:1059]
+INFO: [Synth 8-6155] done synthesizing module 'xpm_cdc_sync_rst' (0#1) [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_cdc/hdl/xpm_cdc.sv:1059]
+INFO: [Synth 8-6157] synthesizing module 'xpm_fifo_base' [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv:53]
+ERROR: [Synth 8-6058] Synth Error: [XPM_FIFO 1-4] FIFO_WRITE_DEPTH (320) value specified is non-power of 2, but this release of XPM_FIFO supports configurations having the fifo write depth set to power of 2.   [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv:337]
+ERROR: [Synth 8-6156] failed synthesizing module 'xpm_fifo_base' [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv:53]
+ERROR: [Synth 8-6156] failed synthesizing module 'xpm_fifo_axis' [/tools/Xilinx/Vivado/2024.1/data/ip/xpm/xpm_fifo/hdl/xpm_fifo.sv:2373]
+ERROR: [Synth 8-6156] failed synthesizing module 'dda_fifo_wrap' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/dda_fifo_wrap.sv:11]
+ERROR: [Synth 8-6156] failed synthesizing module 'top_level' [/home/fpga/worker_place/temp/c610b538283b4c4ab1025f4d34c9ce68/hdl/top_level.sv:3]
 ---------------------------------------------------------------------------------
-Finished RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 2248.469 ; gain = 486.648 ; free physical = 27654 ; free virtual = 37412
+Finished RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 2249.555 ; gain = 488.648 ; free physical = 11908 ; free virtual = 17496
 ---------------------------------------------------------------------------------
 RTL Elaboration failed
 INFO: [Common 17-83] Releasing license: Synthesis
-17 Infos, 5 Warnings, 0 Critical Warnings and 3 Errors encountered.
+36 Infos, 14 Warnings, 0 Critical Warnings and 6 Errors encountered.
 synth_design failed
 ERROR: [Common 17-69] Command failed: Synthesis failed - please see the console or run log file for details
-INFO: [Common 17-206] Exiting Vivado at Sun Nov 24 16:55:41 2024...
+INFO: [Common 17-206] Exiting Vivado at Sun Nov 24 17:21:33 2024...

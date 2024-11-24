@@ -10,7 +10,7 @@
 
 module dda_fifo_wrap
   #(parameter DEPTH=128,
-    parameter DATA_WIDTH=38, // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+    parameter DATA_WIDTH=64, // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
     parameter PROGFULL_DEPTH=12)
   (
    input wire 		sender_rst,

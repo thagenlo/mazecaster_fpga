@@ -165,9 +165,13 @@ module top_level(
 
     //TODO: INSERT DDA-in FIFO
     logic dda_fsm_in_tvalid, dda_fsm_in_tready;
-    logic [138:0] dda_fsm_in_tdata;
+    logic [143:0] dda_fsm_in_tdata;//[138:0] dda_fsm_in_tdata;
 
-    ddr_fifo_wrap dda_fifo_in ( // read data output from traffic
+    dda_fifo_wrap #(
+        .DEPTH(320),
+        .DATA_WIDTH(144), // 139 bits (8*18 = 144)
+        .PROGFULL_DEPTH(12)
+    )dda_fifo_in ( // read data output from traffic
         // reset and clock signals
         .sender_rst(sys_rst),
         .sender_clk(clk_pixel),
@@ -175,13 +179,13 @@ module top_level(
         // sender interface (input to FIFO)
         .sender_axis_tvalid(dda_data_valid_in), // Heba input
         .sender_axis_tready(dda_data_ready_out), // FIFO
-        .sender_axis_tdata({hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
+        .sender_axis_tdata({5'b0_0000, hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)
-        .receiver_axis_tvalid(dda_fsm_in_tvalid), // in - indicates the FIFO has valid data for the receiver to consume
-        .receiver_axis_tready(dda_fsm_in_tready), // out - indicates the receiver is ready to consume data
-        .receiver_axis_tdata(dda_fsm_in_tdata), //  in - the actual data being received from the FIFO
+        .receiver_axis_tvalid(dda_fsm_in_tvalid), // out - indicates the FIFO has valid data for the receiver to consume
+        .receiver_axis_tready(dda_fsm_in_tready), // in - indicates the receiver is ready to consume data
+        .receiver_axis_tdata(dda_fsm_in_tdata), //  out - the actual data being received from the FIFO
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
@@ -196,7 +200,7 @@ module top_level(
         
         // DDA-in FIFO receiver
         .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
-        .dda_fsm_in_tdata(dda_fsm_in_tdata),
+        .dda_fsm_in_tdata(dda_fsm_in_tdata[138:0]),
         .dda_fsm_in_tready(dda_fsm_in_tready),
         
         // DDA-out FIFO sender
@@ -213,18 +217,22 @@ module top_level(
     logic [37:0] dda_fsm_out_tdata;
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
-    logic [38:0] fifo_tdata_out;
+    logic [39:0] fifo_tdata_out; //TODO CHANGED
     logic fifo_tlast_out;
     logic fifo_prog_empty;
     // transformer signal to fifo-out
     logic transformer_tready;
 
-    ddr_fifo_wrap dda_fifo_out ( // read data output from traffic
+    ddr_fifo_wrap #(
+        .DEPTH(320),
+        .DATA_WIDTH(40), // *multiple of 8 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+        .PROGFULL_DEPTH(12)
+    ) dda_fifo_out ( // read data output from traffic
         .sender_rst(sys_rst),
         .sender_clk(clk_pixel),
         .sender_axis_tvalid(dda_fsm_out_tvalid), // in - data on the sender_axis_tdata signal is valid and can be written into the FIFO
         .sender_axis_tready(dda_fsm_out_tready), // out - FIFO is ready to accept data from the sender
-        .sender_axis_tdata(dda_fsm_out_tdata), // in - actual data being written into the FIFO
+        .sender_axis_tdata({2'b00, dda_fsm_out_tdata}), // in - actual data being written into the FIFO
         .sender_axis_tlast(dda_fsm_out_tlast), // in - last piece of data in a frame or packet being sent to the FIFO
         .sender_axis_prog_full(), //TODO: to here ???
         .receiver_clk(clk_pixel), //TODO: Replace names starting from here
@@ -243,7 +251,7 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
-        .dda_fifo_tdata_in(fifo_tdata_out),
+        .dda_fifo_tdata_in(fifo_tdata_out[38:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
         .transformer_tready_out(transformer_tready),
         .ray_address_out(ray_address_out),

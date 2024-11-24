@@ -19,7 +19,7 @@ module dda
 
   // dda_in FIFO receiver
   input wire dda_fsm_in_tvalid,
-  input wire [138:0] dda_fsm_in_tdata, // (hcount_ray, rayDir_in, sideDist_in, deltaDist_in, map_in) - (8 + (3*32) + 16) = 120
+  input wire [138:0] dda_fsm_in_tdata, // (hcount_ray, rayDir_in, sideDist_in, deltaDist_in, map_in) - (9 + (4*32)) = 139
   output logic dda_fsm_in_tready,
 
 
