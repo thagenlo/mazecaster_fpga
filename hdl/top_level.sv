@@ -40,12 +40,39 @@ module top_level(
 
     //debouncing buttons
 
-    logic deb_out;
+    logic leftRot_btn;
+    logic rightRot_btn;
+    logic fwd_btn;
+    logic bwd_btn;
+
+    assign leftRot_btn = btn[1];
+    assign rightRot_btn = btn[0];
+    assign fwd_btn = btn[3];
+    assign bwd_btn = btn[2];
  
-    debouncer btn1_db(.clk_in(clk_100mhz),
-                    .rst_in(sys_rst),
-                    .dirty_in(btn[1]),
-                    .clean_out(deb_out));
+    debouncer deb_leftRot_btn (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .dirty_in(btn[1]),
+        .clean_out(leftRot_btn));
+
+    debouncer deb_rightRot_btn (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .dirty_in(btn[0]),
+        .clean_out(rightRot_btn));
+    
+    debouncer deb_fwd_btn (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .dirty_in(btn[3]),
+        .clean_out(fwd_btn));
+
+    debouncer deb_bwd_btn (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .dirty_in(btn[2]),
+        .clean_out(bwd_btn));
 
     //TODO: PIPELINING
 
@@ -64,24 +91,79 @@ module top_level(
 
     //TODO: INSERT CONTROLLER MODULE
 
+    logic [15:0] posX, posY;
+    logic [15:0] dirX, dirY;
+    logic [15:0] planeX, planeY;
+
     controller controller_in (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
-        .moveDir(btn[3:2]),
-        .rotDir(btn[1:0]),
-        .posX(),
-        .posY(),
-        .dirX(),
-        .dirY(),
-        .planeX(), 
-        .planeY(),
+        .moveFwd(fwd_btn),
+        .moveBack(bwd_btn),
+        .rotLeft(leftRot_btn),
+        .rotRight(rightRot_btn),
+        .valid_in(1),
+        .posX(posX),
+        .posY(posY),
+        .dirX(dirX),
+        .dirY(dirY),
+        .planeX(planeX), 
+        .planeY(planeY),
+        .valid_out(1),
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
 
+    //TODO: sending in 320 hcounts
+
+    logic [8:0] hcount_in_ray;
+    logic [8:0] hcount_ray;
+    logic stepX;
+    logic stepY;
+    logic signed [15:0] rayDirX;
+    logic signed [15:0] rayDirY;
+    logic [15:0] sideDistX;
+    logic [15:0] sideDistY;
+    logic [15:0] deltaDistX;
+    logic [15:0] deltaDistY;
+
+    //generate all hcounts
+    always_ff @(posedge clk_pixel) begin
+        if (sys_rst) begin
+        hcount_in_ray <= 0;
+        end else begin
+            hcount_in_ray <= hcount_in_ray + 1;
+        end
+    end
+
+
+    logic dda_data_valid_in;
+    logic dda_data_valid_in;
+
+
     ray_calculations calculating_ray (
-        
-    )
+        .pixel_clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .hcount_in(hcount_in_ray),
+        .posX(posX),
+        .posY(posY),
+        .dirX(dirX),
+        .dirY(dirY),
+        .planeX(planeX), 
+        .planeY(planeY),
+        .stepX(stepX),
+        .stepY(stepY),
+        .rayDirX(rayDirX),
+        .rayDirY(rayDirY),
+        .sideDistX(sideDistX),
+        .sideDistY(sideDistY),
+        .deltaDistX(deltaDistX),
+        .deltaDistY(deltaDistY),
+        .hcount_out(hcount_ray),
+        .valid_out(dda_data_valid_in),
+        .dda_data_ready_out(dda_data_ready_out)
+    );
+
 
 
     //TODO: INSERT DDA-in FIFO
@@ -93,7 +175,7 @@ module top_level(
         // sender interface (input to FIFO)
         .sender_axis_tvalid(dda_data_valid_in), // Heba input
         .sender_axis_tready(dda_data_ready_out), // FIFO
-        .sender_axis_tdata(dda_data_in), // Heba input
+        .sender_axis_tdata({hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)
