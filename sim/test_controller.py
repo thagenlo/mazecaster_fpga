@@ -23,38 +23,59 @@ async def test_a(dut):
     dut._log.info("Holding reset...")
     # reseting
     dut.rst_in.value = 1
-    dut.moveDir.value = 0
-    dut.rotDir.value = 0
+    # dut.moveDir.value = 0
+    # dut.rotDir.value = 0
     await RisingEdge(dut.pixel_clk_in)
     dut.rst_in.value = 0
 
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+
+    await RisingEdge(dut.pixel_clk_in)
+
     # testing forward movement
-    dut.moveDir.value = MOVE_FWD
+    # dut.moveDir.value = MOVE_FWD
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    dut.moveFwd.value = 1
+    dut.moveBack.value = 0
     await RisingEdge(dut.pixel_clk_in)
-    await RisingEdge(dut.pixel_clk_in)
-    dut.moveDir.value = 0
-    await RisingEdge(dut.pixel_clk_in)
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+    
+    await ClockCycles(dut.pixel_clk_in, 100)
 
-    # testing bwd movement
-    dut.moveDir.value = MOVE_BACK
-    await RisingEdge(dut.pixel_clk_in)
-    await RisingEdge(dut.pixel_clk_in)
-    dut.moveDir.value = 0 
-    await RisingEdge(dut.pixel_clk_in)
 
-    # left rotation
-    dut.rotDir.value = ROT_LEFT
-    await RisingEdge(dut.pixel_clk_in)
-    await RisingEdge(dut.pixel_clk_in)
-    dut.rotDir.value = 0
-    await RisingEdge(dut.pixel_clk_in)
+    # await RisingEdge(dut.pixel_clk_in)
+    # await RisingEdge(dut.pixel_clk_in)
+    # # dut.moveDir.value = 0
+    # await RisingEdge(dut.pixel_clk_in)
 
-    # right rotation
-    dut.rotDir.value = ROT_RIGHT
-    await RisingEdge(dut.pixel_clk_in)
-    await RisingEdge(dut.pixel_clk_in)
-    dut.rotDir.value = 0
-    await RisingEdge(dut.pixel_clk_in)
+    # # testing bwd movement
+    # # dut.moveDir.value = MOVE_BACK
+    # await RisingEdge(dut.pixel_clk_in)
+    # await RisingEdge(dut.pixel_clk_in)
+    # dut.moveDir.value = 0 
+    # await RisingEdge(dut.pixel_clk_in)
+
+    # # left rotation
+    # dut.rotDir.value = ROT_LEFT
+    # await RisingEdge(dut.pixel_clk_in)
+    # await RisingEdge(dut.pixel_clk_in)
+    # dut.rotDir.value = 0
+    # await RisingEdge(dut.pixel_clk_in)
+
+    # # right rotation
+    # dut.rotDir.value = ROT_RIGHT
+    # await RisingEdge(dut.pixel_clk_in)
+    # await RisingEdge(dut.pixel_clk_in)
+    # dut.rotDir.value = 0
+    # await RisingEdge(dut.pixel_clk_in)
+    # await ClockCycles(dut.pixel_clk_in, 100)
 
 
 
@@ -65,7 +86,7 @@ def controller_runner():
     sim = os.getenv("SIM", "icarus")
     proj_path = Path(__file__).resolve().parent.parent
     sys.path.append(str(proj_path / "sim" / "model"))
-    sources = [proj_path / "hdl" / "controller.sv"]
+    sources = [proj_path / "hdl" / "controller.sv", proj_path / "hdl" / "xilinx_single_port_ram_read_first.v"]
     build_test_args = ["-Wall"]
     parameters = {}
     sys.path.append(str(proj_path / "sim"))

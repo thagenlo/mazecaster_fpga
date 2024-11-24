@@ -102,12 +102,14 @@ module top_level(
         .moveBack(bwd_btn),
         .rotLeft(leftRot_btn),
         .rotRight(rightRot_btn),
+        .valid_in(1),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
         .planeY(planeY),
+        .valid_out(1),
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
@@ -124,6 +126,19 @@ module top_level(
     logic [15:0] sideDistY;
     logic [15:0] deltaDistX;
     logic [15:0] deltaDistY;
+
+    //generate all hcounts
+    always_ff @(posedge clk_pixel) begin
+        if (sys_rst) begin
+        hcount_in_ray <= 0;
+        end else begin
+            hcount_in_ray <= hcount_in_ray + 1;
+        end
+    end
+
+
+    logic dda_data_valid_in;
+    logic dda_data_valid_in;
 
 
     ray_calculations calculating_ray (
@@ -145,10 +160,10 @@ module top_level(
         .deltaDistX(deltaDistX),
         .deltaDistY(deltaDistY),
         .hcount_out(hcount_ray),
-        .valid_out(dda_data_valid_in)
+        .valid_out(dda_data_valid_in),
+        .dda_data_ready_out(dda_data_ready_out)
     );
 
-    logic [] dda_data_in
 
 
     //TODO: INSERT DDA-in FIFO
@@ -160,7 +175,7 @@ module top_level(
         // sender interface (input to FIFO)
         .sender_axis_tvalid(dda_data_valid_in), // Heba input
         .sender_axis_tready(dda_data_ready_out), // FIFO
-        .sender_axis_tdata(dda_data_in), // Heba input
+        .sender_axis_tdata({hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)

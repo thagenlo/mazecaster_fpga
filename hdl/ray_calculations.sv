@@ -8,6 +8,8 @@ module ray_calculations (
   input wire [15:0] dirY,
   input wire [15:0] planeX,
   input wire [15:0] planeY,
+  input wire dda_data_ready_out,
+  input wire tabulate_in,
   output logic stepX,      //direction in which the ray moves through the grid, for X and Y (-1 or 1)
   output logic stepY,
   output logic signed [15:0] rayDirX, //ray direction for the current column
@@ -16,7 +18,8 @@ module ray_calculations (
   output logic [15:0] sideDistY,
   output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
   output logic [15:0] deltaDistY,
-  output logic [8:0] hcount_out
+  output logic [8:0] hcount_out,
+  output logic valid_out,
   );
   localparam SCREEN_WIDTH = 320;
   localparam SCREEN_WIDTH_RECIPRICAL = 24'b0000_0000_0000_0000_0000_1101; //fixed point representation: 0.003173828125
@@ -30,7 +33,7 @@ module ray_calculations (
   //TODO can I change the position for me to be posX and posY in fixed point for accuracy
   //and change mapX and mapY where player is integer wise in map
 
-  typedef enum {RESTING, DIVIDING} divider_state;
+  typedef enum {RESTING, DIVIDING, VALID_OUT} divider_state;
   divider_state state;
 
   logic [23:0] fixed_pt_hcount; //Q12.12 representation of hcount
@@ -46,7 +49,7 @@ module ray_calculations (
   //might need to pipeline this multiplication once or twice
 
   logic div_busy;
-  logic tabulate_in;
+  // logic tabulate_in;
   logic valid_ray_calculated;
 
   logic [6:0] mapX, mapY;
@@ -123,10 +126,11 @@ module ray_calculations (
       ready_rayDirY <= 0;
 
       div_busy <= 0;
-      tabulate_in <= 0; //triggering the divide
+      // tabulate_in <= 0; //triggering the divide
       
       valid_ray_calculated <= 0;
       state <= RESTING;
+      valid_out <= 0;
 
 
     end else begin
@@ -149,21 +153,25 @@ module ray_calculations (
                         stepX <= 1;
                         sideDistY <= (~tempSideDistY[23:8]) + 16'b1111111100000000;
                     end 
-                end else begin
+                    state <= VALID_OUT;
+                end else if (tabulate_in) begin
                     start_rayDirX <= 1;
                     start_rayDirY <= 1;
                     div_busy <= 1;
                     currentRayDirY <= rayDirY;
                     currentRayDirX <= rayDirX;
                     state <= DIVIDING;
-                  end 
+                    valid_out <= 0;
+                end else begin
+                  valid_out <= 0;
               end
+            end
             end
             DIVIDING: begin
               start_rayDirX <= 0;
               if (ready_rayDirX & ready_rayDirY) begin
                   valid_ray_calculated <= 1;
-                  div_busy <= 0;
+                  // div_busy <= 0;
                   ready_rayDirX <= 0;
                   ready_rayDirY <= 0;
                   tempSideDistX <= (({8'b0, posX[7:0]})) * $signed(deltaDistX);
@@ -182,6 +190,14 @@ module ray_calculations (
                   state <= DIVIDING;
               end
             end
+            VALID_OUT: begin
+                valid_out <= 1;
+                  if (dda_data_ready_out) begin// data is not sent to the FIFO unless dda_data_ready_out is high
+                      valid_out <= 1'b1;
+                      div_busy <= 1'b0;
+                      state <= RESTING;
+                  end
+                end
 
           endcase
     end
