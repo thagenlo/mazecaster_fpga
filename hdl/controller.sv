@@ -65,12 +65,12 @@ module controller #(parameter SCREEN_WIDTH = 320,
 
     // dirX = newDirX[23:8]; //middle of dirX and dirY vectors
     // dirY = newDirY[23:8];
-    posX <= newPosX[23:8];
-    posY <= newPosY[23:8];
+    posX = newPosX[23:8];
+    posY = newPosY[23:8];
     dirX = newDirX[23:8]; //middle of dirX and dirY vectors
     dirY = newDirY[23:8];
-    planeX <= newPlaneX[23:8]; //.66 -> 0.66015625
-    planeY <= newPlaneY[23:8]; //.66 -> 0.66015625
+    planeX = newPlaneX[23:8]; //.66 -> 0.66015625
+    planeY = newPlaneY[23:8]; //.66 -> 0.66015625
   end
   //dirX and dirY indicate the direction the player is facing, a line extending out from the player's position into the screen
   //it guides center of camera view

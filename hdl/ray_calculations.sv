@@ -19,7 +19,7 @@ module ray_calculations (
   output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
   output logic [15:0] deltaDistY,
   output logic [8:0] hcount_out,
-  output logic valid_out,
+  output logic valid_out
   );
   localparam SCREEN_WIDTH = 320;
   localparam SCREEN_WIDTH_RECIPRICAL = 24'b0000_0000_0000_0000_0000_1101; //fixed point representation: 0.003173828125
@@ -53,9 +53,9 @@ module ray_calculations (
   logic valid_ray_calculated;
 
   logic [6:0] mapX, mapY;
-  logic [15:0] posX, posY;
-  logic [15:0] dirX, dirY;
-  logic [32:0] planeX, planeY;
+  // logic [15:0] posX, posY;
+  // logic [15:0] dirX, dirY;
+  // logic [32:0] planeX, planeY;
 
   logic start_rayDirX;
   logic busy_rayDirX;
