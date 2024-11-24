@@ -8,68 +8,239 @@
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2009.vpi";
-S_0x12640a280 .scope package, "$unit" "$unit" 2 1;
+S_0x15400e450 .scope package, "$unit" "$unit" 2 1;
  .timescale 0 0;
-S_0x126009af0 .scope module, "top_level" "top_level" 3 3;
+S_0x15400e5c0 .scope module, "controller" "controller" 3 9;
  .timescale 0 0;
-    .port_info 0 /INPUT 1 "clk_100mhz";
-    .port_info 1 /INPUT 4 "btn";
-    .port_info 2 /INPUT 16 "sw";
-    .port_info 3 /OUTPUT 16 "led";
-    .port_info 4 /OUTPUT 3 "hdmi_tx_p";
-    .port_info 5 /OUTPUT 3 "hdmi_tx_n";
-    .port_info 6 /OUTPUT 1 "hdmi_clk_p";
-    .port_info 7 /OUTPUT 1 "hdmi_clk_n";
-v0x126008b60_0 .net "blue_screen", 7 0, L_0x126507220;  1 drivers
-o0x108008040 .functor BUFZ 4, C4<zzzz>; HiZ drive
-v0x12640b6c0_0 .net "btn", 3 0, o0x108008040;  0 drivers
-v0x12640b780_0 .net "bwd_btn", 0 0, L_0x126507040;  1 drivers
-o0x1080080a0 .functor BUFZ 1, C4<z>; HiZ drive
-v0x12640b810_0 .net "clk_100mhz", 0 0, o0x1080080a0;  0 drivers
-v0x12640b8b0_0 .var "clk_pixel", 0 0;
-v0x12640b990_0 .net "fwd_btn", 0 0, L_0x126506fa0;  1 drivers
-v0x12640ba30_0 .net "green_screen", 7 0, L_0x126507180;  1 drivers
-v0x12640bae0_0 .var "hcount_in_ray", 8 0;
-v0x12640bb90_0 .var "hdmi_clk_n", 0 0;
-v0x12640bca0_0 .var "hdmi_clk_p", 0 0;
-v0x12640bd30_0 .var "hdmi_tx_n", 2 0;
-v0x126506840_0 .var "hdmi_tx_p", 2 0;
-v0x1265068d0_0 .var "led", 15 0;
-v0x126506960_0 .net "leftRot_btn", 0 0, L_0x126506e60;  1 drivers
-v0x1265069f0_0 .net "red_screen", 7 0, L_0x1265070e0;  1 drivers
-v0x126506a80_0 .var "rgb_out", 23 0;
-v0x126506b10_0 .net "rightRot_btn", 0 0, L_0x126506f00;  1 drivers
-o0x108008340 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
-v0x126506ca0_0 .net "sw", 15 0, o0x108008340;  0 drivers
-v0x126506d30_0 .net "sys_rst", 0 0, L_0x126506dc0;  1 drivers
-E_0x126009220 .event posedge, v0x12640b8b0_0;
-L_0x126506dc0 .part o0x108008340, 0, 1;
-L_0x126506e60 .part o0x108008040, 1, 1;
-L_0x126506f00 .part o0x108008040, 0, 1;
-L_0x126506fa0 .part o0x108008040, 3, 1;
-L_0x126507040 .part o0x108008040, 2, 1;
-L_0x1265070e0 .part v0x126506a80_0, 16, 8;
-L_0x126507180 .part v0x126506a80_0, 8, 8;
-L_0x126507220 .part v0x126506a80_0, 0, 8;
-    .scope S_0x126009af0;
+    .port_info 0 /INPUT 1 "pixel_clk_in";
+    .port_info 1 /INPUT 1 "rst_in";
+    .port_info 2 /INPUT 1 "moveFwd";
+    .port_info 3 /INPUT 1 "moveBack";
+    .port_info 4 /INPUT 1 "rotLeft";
+    .port_info 5 /INPUT 1 "rotRight";
+    .port_info 6 /INPUT 1 "valid_in";
+    .port_info 7 /OUTPUT 16 "posX";
+    .port_info 8 /OUTPUT 16 "posY";
+    .port_info 9 /OUTPUT 16 "dirX";
+    .port_info 10 /OUTPUT 16 "dirY";
+    .port_info 11 /OUTPUT 16 "planeX";
+    .port_info 12 /OUTPUT 16 "planeY";
+    .port_info 13 /OUTPUT 1 "valid_out";
+P_0x15400e730 .param/l "COS_ROT" 1 3 30, C4<0000000011111100>;
+P_0x15400e770 .param/l "FOV" 1 3 29, +C4<00000000000000000000000001000010>;
+P_0x15400e7b0 .param/l "MOVE_SPEED" 1 3 36, C4<0000000100000000>;
+P_0x15400e7f0 .param/l "N" 0 3 11, +C4<00000000000000000000000000011000>;
+P_0x15400e830 .param/l "NEG_MOVE_SPEED" 1 3 37, C4<1111111100000000>;
+P_0x15400e870 .param/l "NEG_SIN_ROT" 1 3 32, C4<1111111111010100>;
+P_0x15400e8b0 .param/l "SCREEN_HEIGHT" 0 3 10, +C4<00000000000000000000000011110000>;
+P_0x15400e8f0 .param/l "SCREEN_WIDTH" 0 3 9, +C4<00000000000000000000000101000000>;
+P_0x15400e930 .param/l "SIN_ROT" 1 3 31, C4<0000000000101100>;
+v0x15400ee00_0 .var "dirX", 15 0;
+v0x15401ee90_0 .var "dirY", 15 0;
+v0x15401ef30_0 .var "mapX", 7 0;
+v0x15401efe0_0 .var "mapY", 7 0;
+v0x15401f090_0 .var "map_addra", 9 0;
+o0x148030100 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401f180_0 .net "moveBack", 0 0, o0x148030100;  0 drivers
+o0x148030130 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401f220_0 .net "moveFwd", 0 0, o0x148030130;  0 drivers
+v0x15401f2c0_0 .var "newDirX", 31 0;
+v0x15401f370_0 .var "newDirY", 31 0;
+v0x15401f480_0 .var "newPlaneX", 31 0;
+v0x15401f530_0 .var "newPlaneY", 31 0;
+v0x15401f5e0_0 .var "newPosX", 31 0;
+v0x15401f690_0 .var "newPosY", 31 0;
+o0x148030280 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401f740_0 .net "pixel_clk_in", 0 0, o0x148030280;  0 drivers
+v0x15401f7e0_0 .var "planeX", 15 0;
+v0x15401f890_0 .var "planeY", 15 0;
+v0x15401f940_0 .var "posX", 15 0;
+v0x15401fad0_0 .var "posY", 15 0;
+o0x148030370 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401fb60_0 .net "rotLeft", 0 0, o0x148030370;  0 drivers
+o0x1480303a0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401fc00_0 .net "rotRight", 0 0, o0x1480303a0;  0 drivers
+o0x1480303d0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401fca0_0 .net "rst_in", 0 0, o0x1480303d0;  0 drivers
+o0x148030400 .functor BUFZ 1, C4<z>; HiZ drive
+v0x15401fd40_0 .net "valid_in", 0 0, o0x148030400;  0 drivers
+v0x15401fde0_0 .var "valid_out", 0 0;
+E_0x15400ebf0 .event posedge, v0x15401f740_0;
+E_0x15400ed80/0 .event anyedge, v0x15401f940_0, v0x15401fad0_0, v0x15401f5e0_0, v0x15401f690_0;
+E_0x15400ed80/1 .event anyedge, v0x15401f2c0_0, v0x15401f370_0, v0x15401f480_0, v0x15401f530_0;
+E_0x15400ed80 .event/or E_0x15400ed80/0, E_0x15400ed80/1;
+    .scope S_0x15400e5c0;
 T_0 ;
-    %wait E_0x126009220;
-    %load/vec4 v0x126506d30_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.0, 8;
-    %pushi/vec4 0, 0, 9;
-    %assign/vec4 v0x12640bae0_0, 0;
-    %jmp T_0.1;
-T_0.0 ;
-    %load/vec4 v0x12640bae0_0;
-    %addi 1, 0, 9;
-    %assign/vec4 v0x12640bae0_0, 0;
-T_0.1 ;
+Ewait_0 .event/or E_0x15400ed80, E_0x0;
+    %wait Ewait_0;
+    %load/vec4 v0x15401f940_0;
+    %parti/s 8, 8, 5;
+    %store/vec4 v0x15401ef30_0, 0, 8;
+    %load/vec4 v0x15401fad0_0;
+    %parti/s 8, 8, 5;
+    %store/vec4 v0x15401efe0_0, 0, 8;
+    %load/vec4 v0x15401ef30_0;
+    %pad/u 32;
+    %load/vec4 v0x15401efe0_0;
+    %pad/u 32;
+    %muli 24, 0, 32;
+    %add;
+    %pad/u 10;
+    %store/vec4 v0x15401f090_0, 0, 10;
+    %load/vec4 v0x15401f5e0_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15401f940_0, 0, 16;
+    %load/vec4 v0x15401f690_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15401fad0_0, 0, 16;
+    %load/vec4 v0x15401f2c0_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15400ee00_0, 0, 16;
+    %load/vec4 v0x15401f370_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15401ee90_0, 0, 16;
+    %load/vec4 v0x15401f480_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15401f7e0_0, 0, 16;
+    %load/vec4 v0x15401f530_0;
+    %parti/s 16, 8, 5;
+    %store/vec4 v0x15401f890_0, 0, 16;
     %jmp T_0;
-    .thread T_0;
+    .thread T_0, $push;
+    .scope S_0x15400e5c0;
+T_1 ;
+    %wait E_0x15400ebf0;
+    %load/vec4 v0x15401fca0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 3072, 0, 32;
+    %assign/vec4 v0x15401f5e0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x15401f690_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x15401f2c0_0, 0;
+    %pushi/vec4 256, 0, 32;
+    %assign/vec4 v0x15401f370_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x15401f480_0, 0;
+    %pushi/vec4 169, 0, 32;
+    %assign/vec4 v0x15401f530_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x15401fd40_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x15401f220_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.4, 8;
+    %load/vec4 v0x15401f690_0;
+    %load/vec4 v0x15401f370_0;
+    %muli 256, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f690_0, 0;
+    %jmp T_1.5;
+T_1.4 ;
+    %load/vec4 v0x15401f180_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.6, 8;
+    %load/vec4 v0x15401fad0_0;
+    %pad/u 32;
+    %load/vec4 v0x15401ee90_0;
+    %pad/u 32;
+    %muli 65280, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f690_0, 0;
+    %jmp T_1.7;
+T_1.6 ;
+    %load/vec4 v0x15401fb60_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.8, 8;
+    %load/vec4 v0x15400ee00_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %load/vec4 v0x15401ee90_0;
+    %pad/u 32;
+    %muli 44, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f2c0_0, 0;
+    %load/vec4 v0x15400ee00_0;
+    %pad/u 32;
+    %muli 65492, 0, 32;
+    %load/vec4 v0x15401ee90_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f370_0, 0;
+    %load/vec4 v0x15401f7e0_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %load/vec4 v0x15401f890_0;
+    %pad/u 32;
+    %muli 44, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f480_0, 0;
+    %load/vec4 v0x15401f7e0_0;
+    %pad/u 32;
+    %muli 65492, 0, 32;
+    %load/vec4 v0x15401f890_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f530_0, 0;
+    %jmp T_1.9;
+T_1.8 ;
+    %load/vec4 v0x15401fc00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.10, 8;
+    %load/vec4 v0x15400ee00_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %load/vec4 v0x15401ee90_0;
+    %pad/u 32;
+    %muli 65492, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f2c0_0, 0;
+    %load/vec4 v0x15400ee00_0;
+    %pad/u 32;
+    %muli 44, 0, 32;
+    %load/vec4 v0x15401ee90_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f370_0, 0;
+    %load/vec4 v0x15401f7e0_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %load/vec4 v0x15401f890_0;
+    %pad/u 32;
+    %muli 65492, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f480_0, 0;
+    %load/vec4 v0x15401f7e0_0;
+    %pad/u 32;
+    %muli 44, 0, 32;
+    %load/vec4 v0x15401f890_0;
+    %pad/u 32;
+    %muli 252, 0, 32;
+    %add;
+    %assign/vec4 v0x15401f530_0, 0;
+T_1.10 ;
+T_1.9 ;
+T_1.7 ;
+T_1.5 ;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x15401fde0_0, 0;
+    %jmp T_1.3;
+T_1.2 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x15401fde0_0, 0;
+T_1.3 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
 # The file index is used to find the file name in the following table.
 :file_names 4;
     "N/A";
     "<interactive>";
     "-";
-    "top_level.sv";
+    "controller.sv";

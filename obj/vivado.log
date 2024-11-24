@@ -1,0 +1,88 @@
+#-----------------------------------------------------------
+# Vivado v2024.1 (64-bit)
+# SW Build 5076996 on Wed May 22 18:36:09 MDT 2024
+# IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
+# SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
+# Start of session at: Sun Nov 24 16:45:02 2024
+# Process ID: 8290
+# Current directory: /home/fpga/worker_place/temp/2f33e67ba1964a569ecb76cc04760fbd
+# Command line: vivado -mode batch -source build.tcl
+# Log file: /home/fpga/worker_place/temp/2f33e67ba1964a569ecb76cc04760fbd/vivado.log
+# Journal file: /home/fpga/worker_place/temp/2f33e67ba1964a569ecb76cc04760fbd/vivado.jou
+# Running On        :eecs-digital-25
+# Platform          :Ubuntu
+# Operating System  :Ubuntu 24.04.1 LTS
+# Processor Detail  :13th Gen Intel(R) Core(TM) i7-13700
+# CPU Frequency     :3225.333 MHz
+# CPU Physical cores:16
+# CPU Logical cores :24
+# Host memory       :33325 MB
+# Swap memory       :8589 MB
+# Total Virtual     :41915 MB
+# Available Virtual :40834 MB
+#-----------------------------------------------------------
+source build.tcl
+# set_param general.maxThreads 2
+# set partNum xc7s50csga324-1
+# set outputDir obj
+# file mkdir $outputDir
+# set files [glob -nocomplain "$outputDir/*"]
+# if {[llength $files] != 0} {
+#     # clear folder contents
+#     puts "deleting contents of $outputDir"
+#     file delete -force {*}[glob -directory $outputDir *];
+# } else {
+#     puts "$outputDir is empty"
+# }
+obj is empty
+# set sources_sv [ glob ./hdl/*.sv ]
+# read_verilog -sv $sources_sv
+# set sources_v [ glob -nocomplain ./hdl/*.v ]
+# if {[llength $sources_v] > 0 } {
+#     read_verilog $sources_v
+# }
+# read_xdc [ glob ./xdc/*.xdc ]
+# set sources_mem [ glob -nocomplain ./data/*.mem ]
+# if {[llength $sources_mem] > 0} {
+#     read_mem $sources_mem
+# }
+# set_part $partNum
+INFO: [Coretcl 2-1500] The part has been set to 'xc7s50csga324-1' for the current project only. Run set_part -help for more details. To evaluate different speed grades in the current design, use the set_speed_grade command, or use the open_checkpoint -part command to change the part used by an existing checkpoint design.
+# set sources_ip [ glob -nocomplain -directory ./ip -tails * ]
+# puts $sources_ip
+
+# foreach ip_source $sources_ip {
+#     if {[file isdirectory ./ip/$ip_source]} {
+# 	read_ip ./ip/$ip_source/$ip_source.xci
+#     }
+# }
+WARNING: [Coretcl 2-176] No IPs found
+# generate_target all [get_ips]
+WARNING: [Coretcl 2-176] No IPs found
+# synth_ip [get_ips]
+INFO: [Vivado 12-3441] generate_netlist_ip - operation complete
+# synth_design -top top_level -part $partNum -verbose
+Command: synth_design -top top_level -part xc7s50csga324-1 -verbose
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7s50'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7s50'
+INFO: [Device 21-403] Loading part xc7s50csga324-1
+INFO: [Device 21-9227] Part: xc7s50csga324-1 does not have CEAM library.
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 8315
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 2169.723 ; gain = 404.742 ; free physical = 27245 ; free virtual = 37472
+---------------------------------------------------------------------------------
+ERROR: [Synth 8-2716] syntax error near ';' [/home/fpga/worker_place/temp/2f33e67ba1964a569ecb76cc04760fbd/hdl/flattening.sv:14]
+INFO: [Synth 8-9084] Verilog file '/home/fpga/worker_place/temp/2f33e67ba1964a569ecb76cc04760fbd/hdl/flattening.sv' ignored due to errors
+ERROR: [Synth 8-439] module 'top_level' not found
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 2249.660 ; gain = 484.680 ; free physical = 27143 ; free virtual = 37369
+---------------------------------------------------------------------------------
+RTL Elaboration failed
+INFO: [Common 17-83] Releasing license: Synthesis
+8 Infos, 0 Warnings, 0 Critical Warnings and 3 Errors encountered.
+synth_design failed
+ERROR: [Common 17-69] Command failed: Synthesis failed - please see the console or run log file for details
+INFO: [Common 17-206] Exiting Vivado at Sun Nov 24 16:45:12 2024...
