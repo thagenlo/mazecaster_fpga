@@ -168,7 +168,7 @@ module top_level(
     logic [143:0] dda_fsm_in_tdata;//[138:0] dda_fsm_in_tdata;
 
     dda_fifo_wrap #(
-        .DEPTH(320),
+        .DEPTH(256), //2^8 = 256 - ~320
         .DATA_WIDTH(144), // 139 bits (8*18 = 144)
         .PROGFULL_DEPTH(12)
     )dda_fifo_in ( // read data output from traffic
@@ -223,8 +223,8 @@ module top_level(
     // transformer signal to fifo-out
     logic transformer_tready;
 
-    ddr_fifo_wrap #(
-        .DEPTH(320),
+    dda_fifo_wrap #(
+        .DEPTH(256), //2^8 = 256 - ~320
         .DATA_WIDTH(40), // *multiple of 8 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
         .PROGFULL_DEPTH(12)
     ) dda_fifo_out ( // read data output from traffic
@@ -267,8 +267,8 @@ module top_level(
         .rst_in(sys_rst),
         .hcount_in(hcount_video),
         .vcount_in(vcount_video),
-        .address_in(ray_address_out),
-        .pixel_in(ray_pixel_out),
+        .ray_address_in(ray_address_out),
+        .ray_pixel_in(ray_pixel_out),
         .ray_last_pixel_in(ray_last_pixel_out),
         .video_last_pixel_in(last_screen_pixel),
         .rgb_out(rgb_out) // should I create a valid signal so that 
