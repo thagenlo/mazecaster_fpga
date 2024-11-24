@@ -217,7 +217,7 @@ module top_level(
     logic [37:0] dda_fsm_out_tdata;
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
-    logic [39:0] fifo_tdata_out; //TODO CHANGED
+    logic [39:0] fifo_tdata_out;
     logic fifo_tlast_out;
     logic fifo_prog_empty;
     // transformer signal to fifo-out
@@ -251,7 +251,7 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
-        .dda_fifo_tdata_in(fifo_tdata_out[38:0]),
+        .dda_fifo_tdata_in(fifo_tdata_out[37:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
         .transformer_tready_out(transformer_tready),
         .ray_address_out(ray_address_out),
