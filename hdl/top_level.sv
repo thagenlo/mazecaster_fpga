@@ -103,7 +103,26 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
-    //TODO: INSERT DDA MODULES
+    // DDA MODULE
+    dda #(
+        .SCREEN_WIDTH(320),
+        .SCREEN_HEIGHT(240), 
+        .N(24)
+    ) dda_module (
+        .pixel_clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        
+        // DDA-in FIFO receiver
+        .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
+        .dda_fsm_in_tdata(dda_fsm_in_tdata),
+        .dda_fsm_in_tready(dda_fsm_in_tready),
+        
+        // DDA-out FIFO sender
+        .dda_fsm_out_tready(dda_fsm_out_tready),
+        .dda_fsm_out_tdata(dda_fsm_out_tdata),
+        .dda_fsm_out_tvalid(dda_fsm_out_tvalid),
+        .dda_fsm_out_tlast(dda_fsm_out_tlast)
+    );
 
 
     //TODO: INSERT DDA-out FIFO
