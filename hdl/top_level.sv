@@ -109,7 +109,7 @@ module top_level(
         .dirY(dirY),
         .planeX(planeX), 
         .planeY(planeY),
-        .valid_out(1),
+        .valid_out(1)
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
@@ -138,8 +138,6 @@ module top_level(
 
 
     logic dda_data_valid_in;
-    logic dda_data_valid_in;
-
 
     ray_calculations calculating_ray (
         .pixel_clk_in(clk_pixel),
@@ -165,8 +163,10 @@ module top_level(
     );
 
 
-
     //TODO: INSERT DDA-in FIFO
+    logic dda_fsm_in_tvalid, dda_fsm_in_tready;
+    logic [138:0] dda_fsm_in_tdata;
+
     ddr_fifo_wrap dda_fifo_in ( // read data output from traffic
         // reset and clock signals
         .sender_rst(sys_rst),
@@ -208,6 +208,9 @@ module top_level(
 
 
     //TODO: INSERT DDA-out FIFO
+    //receiver
+    logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
+    logic [37:0] dda_fsm_out_tdata;
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
     logic [38:0] fifo_tdata_out;
@@ -243,10 +246,10 @@ module top_level(
         .dda_fifo_tdata_in(fifo_tdata_out),
         .dda_fifo_tlast_in(fifo_tlast_out),
         .transformer_tready_out(transformer_tready),
-        .ray_address_out(ray_address_out).
+        .ray_address_out(ray_address_out),
         .ray_pixel_out(ray_pixel_out),
         .ray_last_pixel_out(ray_last_pixel_out)
-    )
+    );
 
     // PIXEL VALUE WRITING
     logic [23:0] rgb_out; // from the frame buffer
@@ -261,7 +264,7 @@ module top_level(
         .ray_last_pixel_in(ray_last_pixel_out),
         .video_last_pixel_in(last_screen_pixel),
         .rgb_out(rgb_out) // should I create a valid signal so that 
-    )
+    );
 
     // PIXEL VALUE DISPLAY ON SCREEN
     logic [7:0] red_screen, green_screen, blue_screen; //red green and blue pixel values for output
