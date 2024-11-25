@@ -46,7 +46,7 @@ module frame_buffer #(
     logic [5:0] green1, green2;
     // logic [15:0] test_pixel_out1, test_pixel_out2;
 
-    logic valid_output_pixel;
+    logic good_address;
 
     logic [15:0] address1, address2;
 
@@ -54,7 +54,7 @@ module frame_buffer #(
     // state = 1: writing to FB2, reading from FB1 (pixel_out_1)
     assign address1 = (!state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2)); // if writing, address = ray_address_in. if reading, video sig indexing
     assign address2 = (state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
-    assign valid_output_pixel = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
+    assign good_address = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
 
     assign red1 = pixel_out1[15:11];
     assign green1 = pixel_out1[10:5];
@@ -68,10 +68,10 @@ module frame_buffer #(
         if (rst_in) begin
             rgb_out = 0;
         end else if (state) begin // display from fb1
-            rgb_out = {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}};
+            rgb_out = (good_address) ? {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}};
             // test_pixel_out1 = {red1, green1, blue1};
         end else if (!state) begin
-            rgb_out = {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}};
+            rgb_out = (good_address) ? {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}};
             // test_pixel_out2 = {red2, green2, blue2};
         end
     end
@@ -112,48 +112,32 @@ module frame_buffer #(
 
     logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
     logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
-    /*
-    ready_to_switch
-    - collects ray_last_pixel_in and video_last_pixel_in signals
-    - after ready_to_switch is reset, if it sees both ray_last_pixel_in and video_last_pixel_in signals go high (not necessarily in any order),
-        it signals to the sequential state logic that we are ready to switch states (switch the frame buffers)
-        because one frame buffer is done loading all of its ray computed pixels, and the other is done displaying it to the screen
-    */
-    always_comb begin
-        if (rst_in || switched) begin
-            ready_to_switch = 2'b0;
-        end else if (ray_last_pixel_in || video_last_pixel_in) begin
+    
+    always_ff @(posedge pixel_clk_in) begin
+        if (rst_in) begin
+            state <= 0;
+            switched <= 0;
+            ready_to_switch <= 2'b00;
+        end else if (ready_to_switch == 2'b11) begin
+            state <= !state;
+            switched <= 1;
+            ready_to_switch <= 2'b00;
+        end else begin
+            switched <= 0;
             if (ray_last_pixel_in) begin
-                ready_to_switch[0] = 1;
+                ready_to_switch[0] <= 1;
                 if (video_last_pixel_in) begin // in case they are both true at the same time
-                    ready_to_switch[1] = 1;
+                    ready_to_switch[1] <= 1;
                 end
             end else if (video_last_pixel_in) begin
-                ready_to_switch[1] = 1;
+                ready_to_switch[1] <= 1;
                 if (ray_last_pixel_in) begin
-                    ready_to_switch[0] = 1;
+                    ready_to_switch[0] <= 1;
                 end
             end
         end
     end
 
-    // all state logic done here
-    always_ff @(posedge pixel_clk_in) begin
-        if (rst_in) begin
-            // rgb_out <= 0;
-            // pixel_out1 <= 0;
-            // pixel_out2 <= 0;
-            state <= 0;
-            switched <= 0;
-        end else begin
-            if (ready_to_switch == 2'b11) begin // if we are done displaying all of fb1 and writing to fb2
-                state <= !state;
-                switched <= 1;
-            end else begin
-                switched <= 0;
-            end
-        end
-    end
 
 endmodule
 
