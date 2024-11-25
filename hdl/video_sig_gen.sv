@@ -18,7 +18,7 @@ module video_sig_gen
 (
   input wire pixel_clk_in,
   input wire rst_in,
-  output logic [$clog2(TOTAL_PIXELS)-1:0] hcount_out,
+  output logic [$clog2(LINE_LENGTH)-1:0] hcount_out,
   output logic [$clog2(TOTAL_LINES)-1:0] vcount_out,
   output logic vs_out, //vertical sync out
   output logic hs_out, //horizontal sync out
@@ -27,12 +27,12 @@ module video_sig_gen
   output logic very_last_pixel_out,
   output logic [5:0] fc_out); //frame
 
+  localparam TOTAL_LINES = ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH + V_BACK_PORCH;
   localparam TOTAL_PIXELS = LINE_LENGTH * TOTAL_LINES; //figure this out
     //   localparam TOTAL_LINES = 750; //figure this out
   localparam LINE_LENGTH = ACTIVE_H_PIXELS + H_FRONT_PORCH + H_SYNC_WIDTH + H_BACK_PORCH;
   localparam LAST_V_INDEX = TOTAL_LINES - 1;
   localparam LAST_H_INDEX = LINE_LENGTH - 1;
-  localparam TOTAL_LINES = ACTIVE_LINES + V_FRONT_PORCH + V_SYNC_WIDTH + V_BACK_PORCH;
   localparam H_PORCH_START_INDEX = ACTIVE_H_PIXELS - 1;
   localparam V_PORCH_START_INDEX = ACTIVE_LINES - 1;
   localparam H_SYNC_START = ACTIVE_H_PIXELS + H_FRONT_PORCH;

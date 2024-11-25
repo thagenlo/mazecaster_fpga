@@ -7,7 +7,7 @@
 `endif  /* ! SYNTHESIS */
 
 module controller #(parameter SCREEN_WIDTH = 320,
-  parameter SCREEN_HEIGHT = 240, 
+  parameter SCREEN_HEIGHT = 180, 
   parameter N = 24)
 (
   input wire pixel_clk_in,
@@ -47,7 +47,7 @@ module controller #(parameter SCREEN_WIDTH = 320,
   logic [31:0] newPosX, newPosY;
   logic [31:0] newPlaneX, newPlaneY;
   logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [2:0] map_data;
+  logic [3:0] map_data;
 
   always_comb begin
     // rotAngle = 10;

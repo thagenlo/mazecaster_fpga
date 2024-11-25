@@ -70,7 +70,7 @@ module ray_calculations (
   logic done_rayDirY;
   logic valid_rayDirY;
   logic ready_rayDirY;
-  logic signed [15:0] rayY_recip_out;
+  logic signed [15:0] rayDirY_recip_out;
   logic signed [31:0] tempSideDistY;
 
 //   logic signed [31:0] tempPlaneX;

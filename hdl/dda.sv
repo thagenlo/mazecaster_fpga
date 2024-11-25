@@ -205,7 +205,7 @@ module dda
   ////############ MAP DATA BRAM REQUESTS ###############
 
   // signals for map data requests from each submodule
-  logic [2:0] dda_fsm0_map_data_in, dda_fsm1_map_data_in; //data output from bram (input to submodules)
+  logic [3:0] dda_fsm0_map_data_in, dda_fsm1_map_data_in; //data output from bram (input to submodules)
   logic dda_fsm0_map_data_valid_in, dda_fsm1_map_data_valid_in; //1 cycle high when bram done fetching (input to submodules)
   logic [$clog2(N*N)-1:0] dda_fsm0_map_addra_out, dda_fsm1_map_addra_out; //dda_fsm map data address (out from submodules)
   logic [$clog2(N*N)-1:0] dda_fsm0_map_request_out, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)

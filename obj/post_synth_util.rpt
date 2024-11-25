@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Sun Nov 24 17:35:34 2024
-| Host         : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Sun Nov 24 20:33:07 2024
+| Host         : eecs-digital-25 running 64-bit Ubuntu 24.04.1 LTS
 | Command      : report_utilization -file obj/post_synth_util.rpt -hierarchical -hierarchical_depth 4
 | Design       : top_level
 | Device       : xc7s50csga324-1
@@ -22,11 +22,11 @@ Table of Contents
 +--------------------------------------------+-----------------------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
 |                  Instance                  |                        Module                       | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
 +--------------------------------------------+-----------------------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
-| top_level                                  |                                               (top) |       1389 |       1389 |       0 |    0 | 1415 |     67 |      1 |         14 |
+| top_level                                  |                                               (top) |       1320 |       1320 |       0 |    0 | 1382 |     67 |      1 |         14 |
 |   (top_level)                              |                                               (top) |          7 |          7 |       0 |    0 |    9 |      0 |      0 |          0 |
 |   blue_ser                                 |                                     tmds_serializer |          0 |          0 |       0 |    0 |    0 |      0 |      0 |          0 |
 |   calculating_ray                          |                                    ray_calculations |         21 |         21 |       0 |    0 |    0 |      0 |      0 |          1 |
-|   controller_in                            |                                          controller |        101 |        101 |       0 |    0 |   40 |      0 |      0 |          8 |
+|   controller_in                            |                                          controller |         99 |         99 |       0 |    0 |   40 |      0 |      0 |          8 |
 |   dda_fifo_in                              |                                       dda_fifo_wrap |        163 |        163 |       0 |    0 |  261 |      2 |      0 |          0 |
 |     (dda_fifo_in)                          |                                       dda_fifo_wrap |          1 |          1 |       0 |    0 |    0 |      0 |      0 |          0 |
 |     xpm_fifo_axis_inst                     |                                       xpm_fifo_axis |        162 |        162 |       0 |    0 |  261 |      2 |      0 |          0 |
@@ -71,18 +71,18 @@ Table of Contents
 |         wrpp1_inst                         |                 xpm_counter_updn__parameterized1_12 |         18 |         18 |       0 |    0 |    8 |      0 |      0 |          0 |
 |         wrpp2_inst                         |                    xpm_counter_updn__parameterized2 |         12 |         12 |       0 |    0 |    8 |      0 |      0 |          0 |
 |         xpm_fifo_rst_inst                  |                                        xpm_fifo_rst |         20 |         20 |       0 |    0 |   19 |      0 |      0 |          0 |
-|   dda_module                               |                                                 dda |        489 |        489 |       0 |    0 |  583 |      0 |      1 |          4 |
+|   dda_module                               |                                                 dda |        446 |        446 |       0 |    0 |  560 |      0 |      1 |          4 |
 |     (dda_module)                           |                                                 dda |          2 |          2 |       0 |    0 |  231 |      0 |      0 |          0 |
-|     dda_fsm0                               |                                             dda_fsm |        214 |        214 |       0 |    0 |  160 |      0 |      0 |          2 |
-|       (dda_fsm0)                           |                                             dda_fsm |        157 |        157 |       0 |    0 |   88 |      0 |      0 |          2 |
+|     dda_fsm0                               |                                             dda_fsm |        216 |        216 |       0 |    0 |  160 |      0 |      0 |          2 |
+|       (dda_fsm0)                           |                                             dda_fsm |        159 |        159 |       0 |    0 |   88 |      0 |      0 |          2 |
 |       divu_inst                            |                                              divu_9 |         57 |         57 |       0 |    0 |   72 |      0 |      0 |          0 |
-|     dda_fsm1                               |                                           dda_fsm_8 |        214 |        214 |       0 |    0 |  160 |      0 |      0 |          2 |
-|       (dda_fsm1)                           |                                           dda_fsm_8 |        157 |        157 |       0 |    0 |   88 |      0 |      0 |          2 |
+|     dda_fsm1                               |                                           dda_fsm_8 |        216 |        216 |       0 |    0 |  160 |      0 |      0 |          2 |
+|       (dda_fsm1)                           |                                           dda_fsm_8 |        159 |        159 |       0 |    0 |   88 |      0 |      0 |          2 |
 |       divu_inst                            |                                                divu |         57 |         57 |       0 |    0 |   72 |      0 |      0 |          0 |
-|     ray_counter                            |                                         evt_counter |         53 |         53 |       0 |    0 |   32 |      0 |      0 |          0 |
+|     ray_counter                            |                                         evt_counter |          7 |          7 |       0 |    0 |    9 |      0 |      0 |          0 |
 |     worldMap                               |                   xilinx_single_port_ram_read_first |          6 |          6 |       0 |    0 |    0 |      0 |      1 |          0 |
 |   deb_bwd_btn                              |                                           debouncer |         25 |         25 |       0 |    0 |   21 |      0 |      0 |          0 |
-|   deb_fwd_btn                              |                                         debouncer_0 |         25 |         25 |       0 |    0 |   21 |      0 |      0 |          0 |
+|   deb_fwd_btn                              |                                         debouncer_0 |         27 |         27 |       0 |    0 |   21 |      0 |      0 |          0 |
 |   deb_leftRot_btn                          |                                         debouncer_1 |         25 |         25 |       0 |    0 |   21 |      0 |      0 |          0 |
 |   deb_rightRot_btn                         |                                         debouncer_2 |         25 |         25 |       0 |    0 |   21 |      0 |      0 |          0 |
 |   flattening_module                        |                                      transformation |         66 |         66 |       0 |    0 |   40 |      0 |      0 |          1 |
@@ -92,7 +92,7 @@ Table of Contents
 |     framebuffer_2                          | xilinx_single_port_ram_read_first__parameterized0_7 |         47 |         47 |       0 |    0 |    0 |     32 |      0 |          0 |
 |   green_ser                                |                                   tmds_serializer_3 |          0 |          0 |       0 |    0 |    0 |      0 |      0 |          0 |
 |   mhdmicw                                  |                                   hdmi_clk_wiz_720p |          0 |          0 |       0 |    0 |    0 |      0 |      0 |          0 |
-|   mvg                                      |                                       video_sig_gen |        110 |        110 |       0 |    0 |   32 |      0 |      0 |          0 |
+|   mvg                                      |                                       video_sig_gen |         84 |         84 |       0 |    0 |   22 |      0 |      0 |          0 |
 |   red_ser                                  |                                   tmds_serializer_4 |          1 |          1 |       0 |    0 |    1 |      0 |      0 |          0 |
 |   tmds_blue                                |                                        tmds_encoder |         13 |         13 |       0 |    0 |   21 |      0 |      0 |          0 |
 |   tmds_green                               |                                      tmds_encoder_5 |         13 |         13 |       0 |    0 |   21 |      0 |      0 |          0 |
