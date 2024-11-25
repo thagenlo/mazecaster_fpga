@@ -68,10 +68,10 @@ module frame_buffer #(
         if (rst_in) begin
             rgb_out = 0;
         end else if (state) begin // display from fb1
-            rgb_out = (good_address) ? {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}};
+            rgb_out = (good_address) ? {{red1,3'b0}, {green1, 2'b0}, {blue1,3'b0}} : 0;
             // test_pixel_out1 = {red1, green1, blue1};
         end else if (!state) begin
-            rgb_out = (good_address) ? {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}};
+            rgb_out = (good_address) ? {{red2,3'b0}, {green2, 2'b0}, {blue2,3'b0}} : 0;
             // test_pixel_out2 = {red2, green2, blue2};
         end
     end
