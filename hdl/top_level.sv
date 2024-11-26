@@ -195,6 +195,10 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
+    // dda-out fifo senders
+    logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
+    logic [37:0] dda_fsm_out_tdata;
+
     // DDA MODULE
     dda #(
         .SCREEN_WIDTH(320),
@@ -216,11 +220,7 @@ module top_level(
         .dda_fsm_out_tlast(dda_fsm_out_tlast)
     );
 
-
     //TODO: INSERT DDA-out FIFO
-    //receiver
-    logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
-    logic [37:0] dda_fsm_out_tdata;
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
     logic [39:0] fifo_tdata_out;
