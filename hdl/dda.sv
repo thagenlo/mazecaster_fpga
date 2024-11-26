@@ -10,7 +10,7 @@
 module dda
 #(
   parameter SCREEN_WIDTH = 320,
-  parameter SCREEN_HEIGHT = 240,
+  parameter SCREEN_HEIGHT = 180,
   parameter N = 24
 )
 (
