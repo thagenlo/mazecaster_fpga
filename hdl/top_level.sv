@@ -100,6 +100,7 @@ module top_level(
     logic [15:0] posX, posY;
     logic [15:0] dirX, dirY;
     logic [15:0] planeX, planeY;
+    logic valid_controller_out;
 
     controller controller_in (
         .pixel_clk_in(clk_pixel),
@@ -115,7 +116,7 @@ module top_level(
         .dirY(dirY),
         .planeX(planeX), 
         .planeY(planeY),
-        .valid_out()
+        .valid_out(valid_controller_out)
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
@@ -144,7 +145,7 @@ module top_level(
                 end else begin 
                     hcount_ray_in <= hcount_ray_in + 1;
                 end
-            end (~busy_ray_calc && )
+            end
         end
     end
 

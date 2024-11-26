@@ -34,20 +34,56 @@ async def test_a(dut):
     dut.moveBack.value = 0
 
     await RisingEdge(dut.pixel_clk_in)
+    dut.valid_in.value = 1
 
     # testing forward movement
     # dut.moveDir.value = MOVE_FWD
-    dut.rotLeft.value = 0
-    dut.rotRight.value = 0
     dut.moveFwd.value = 1
     dut.moveBack.value = 0
-    await RisingEdge(dut.pixel_clk_in)
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    await ClockCycles(dut.pixel_clk_in, 10)
+
     dut.rotLeft.value = 0
     dut.rotRight.value = 0
     dut.moveFwd.value = 0
     dut.moveBack.value = 0
+    await RisingEdge(dut.pixel_clk_in)
+
+    dut.moveFwd.value = 1
+    dut.moveBack.value = 0
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    await ClockCycles(dut.pixel_clk_in, 10)
+
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+    await RisingEdge(dut.pixel_clk_in)
     
-    await ClockCycles(dut.pixel_clk_in, 100)
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+    dut.rotLeft.value = 1
+    dut.rotRight.value = 0
+    await ClockCycles(dut.pixel_clk_in, 10)
+
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 0
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+    await RisingEdge(dut.pixel_clk_in)
+
+    dut.moveFwd.value = 0
+    dut.moveBack.value = 0
+    dut.rotLeft.value = 0
+    dut.rotRight.value = 1
+    await ClockCycles(dut.pixel_clk_in, 10)
+
+
+
+
+    # await ClockCycles(dut.pixel_clk_in, 100)
 
 
     # await RisingEdge(dut.pixel_clk_in)

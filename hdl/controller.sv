@@ -39,15 +39,19 @@ module controller #(parameter SCREEN_WIDTH = 320,
   // logic moveFwd, moveBack;
   // logic rotLeft, rotRight;
   // logic [6:0] rotLeft, rotRight;
-  logic [7:0] mapX, mapY;
+  // logic [7:0] mapX, mapY;
   // logic [15:0] posX, posY;
   // logic [15:0] dirX, dirY;
   // logic [32:0] planeX, planeY;
-  logic [31:0] newDirX, newDirY;
-  logic [31:0] newPosX, newPosY;
-  logic [31:0] newPlaneX, newPlaneY;
-  logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [3:0] map_data;
+  // logic [31:0] newDirX, newDirY;
+  // logic [31:0] newPosX, newPosY;
+  // logic [31:0] newPlaneX, newPlaneY;
+  // logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
+  // logic [3:0] map_data;
+
+  logic [31:0] tempDirX, tempDirY;
+  logic [31:0] tempPosX, tempPosY;
+  logic [31:0] tempPlaneX, tempPlaneY;
 
   always_comb begin
     // rotAngle = 10;
@@ -58,19 +62,27 @@ module controller #(parameter SCREEN_WIDTH = 320,
 
     // posX = pos[31:16];
     // posY = pos[15:0];
-    mapX = posX[15:8];
-    mapY = posY[15:8]; //rounded out to nearest int
+    // mapX = posX[15:8];
+    // mapY = posY[15:8]; //rounded out to nearest int
     // mapY = (posY + (1 << 7)) >> 8;
-    map_addra = mapX+mapY*N;
+    // map_addra = mapX+mapY*N;
 
     // dirX = newDirX[23:8]; //middle of dirX and dirY vectors
     // dirY = newDirY[23:8];
-    posX = newPosX[23:8];
-    posY = newPosY[23:8];
-    dirX = newDirX[23:8]; //middle of dirX and dirY vectors
-    dirY = newDirY[23:8];
-    planeX = newPlaneX[23:8]; //.66 -> 0.66015625
-    planeY = newPlaneY[23:8]; //.66 -> 0.66015625
+    // posX = newPosX[23:8];
+    // posY = newPosY[23:8];
+    // dirX = newDirX[23:8]; //middle of dirX and dirY vectors
+    // dirY = newDirY[23:8];
+    // planeX = newPlaneX[23:8]; //.66 -> 0.66015625
+    // planeY = newPlaneY[23:8]; //.66 -> 0.66015625
+
+    tempPosX = dirX * MOVE_SPEED;
+    tempPosY = dirY * MOVE_SPEED;
+    // tempDirX ; //middle of dirX and dirY vectors
+    // tempDirY ;
+    // tempPlaneX ; //.66 -> 0.66015625
+    // tempPlaneY ; //.66 -> 0.66015625
+    
   end
   //dirX and dirY indicate the direction the player is facing, a line extending out from the player's position into the screen
   //it guides center of camera view
@@ -82,18 +94,18 @@ module controller #(parameter SCREEN_WIDTH = 320,
 
   always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
-      // posX <=16'b0000110000000000;
-      // posY <= 0;
-      // dirX <= 0;
-      // dirY <= 16'b0000000100000000;
-      // planeX <= 16'b0; //.66 -> 0.66015625
-      // planeY <= 16'b0000000010101001; //.66 -> 0.66015625
-      newPosX <= 16'b0000110000000000;
-      newPosY <= 0;
-      newDirX <= 0;
-      newDirY <= 16'b0000000100000000;
-      newPlaneX <= 0;
-      newPlaneY <= 16'b0000000010101001;
+      posX <=16'b0000110000000000;
+      posY <= 0;
+      dirX <= 0;
+      dirY <= 16'b0000000100000000;
+      planeX <= 16'b0; //.66 -> 0.66015625
+      planeY <= 16'b0000000010101001; //.66 -> 0.66015625
+      // newPosX <= 32'b00000000000101101000000000000000; 
+      // newPosY <= 32'b00000000000000010000000000000000;
+      // newDirX <= 0;
+      // newDirY <= 32'b00000000000000010000000000000000;
+      // newPlaneX <= 0;
+      // newPlaneY <= 32'b00000000000000001010100011110110;
 
     end else begin
 
@@ -131,56 +143,57 @@ module controller #(parameter SCREEN_WIDTH = 320,
         if (moveFwd) begin
           //TODO: for accuracy may want to keep track of position update offset, so not just rounding to a whole number each movement
           // if (map_data==0) begin
-            // newPosX <= posX + (dirX * MOVE_SPEED);
-            newPosY <= newPosY + (newDirY * MOVE_SPEED);
+            posX <= posX + tempPosX[23:8];
+            posY <= posY + tempPosY[23:8];
+            valid_out <= 1;
             //rounding properly could reduce error: ((dirY * MOVE_SPEED + (1 << 7)) >> 8)
           // end
         end
         else if (moveBack) begin
           // if (map_data==0) begin
-            // newPosX <= posX + (dirX * NEG_MOVE_SPEED);
-            newPosY <= posY + (dirY * NEG_MOVE_SPEED);
+            posX <= posX + (~tempPosX[23:8] + 1'b1);
+            posY <= posY + (~tempPosY[23:8] + 1'b1);
+            valid_out <= 1;
           // end
         end
-        else if (rotLeft) begin
-          //multiplying rot matrix by dir vector to have a rotated direction vector, pointing from player pos to screen,
-          //(also doing this with plane vector to make sure it is always perpendicular to dir vector)
-          newDirX <= (dirX * COS_ROT + dirY * SIN_ROT);
-          newDirY <= (dirX * NEG_SIN_ROT + dirY * COS_ROT);
-          newPlaneX <= (planeX * COS_ROT + planeY * SIN_ROT);
-          newPlaneY <= (planeX * NEG_SIN_ROT + planeY * COS_ROT);
-          //TODO: figure out if you can do this multiply here and just shift it by 8 (will need to make width of dirX bigger anyways)
-        end else if (rotRight) begin
-          newDirX <= (dirX * COS_ROT + dirY * NEG_SIN_ROT);
-          newDirY <= (dirX * SIN_ROT + dirY * COS_ROT);
-          newPlaneX <= (planeX * COS_ROT + planeY * NEG_SIN_ROT);
-          newPlaneY <= (planeX * SIN_ROT + planeY * COS_ROT);
+        // else if (rotLeft) begin
+        //   //multiplying rot matrix by dir vector to have a rotated direction vector, pointing from player pos to screen,
+        //   //(also doing this with plane vector to make sure it is always perpendicular to dir vector)
+        //   newDirX <= (dirX * COS_ROT + dirY * SIN_ROT);
+        //   newDirY <= (dirX * NEG_SIN_ROT + dirY * COS_ROT);
+        //   newPlaneX <= (planeX * COS_ROT + planeY * SIN_ROT);
+        //   newPlaneY <= (planeX * NEG_SIN_ROT + planeY * COS_ROT);
+        //   //TODO: figure out if you can do this multiply here and just shift it by 8 (will need to make width of dirX bigger anyways)
+        // end else if (rotRight) begin
+        //   newDirX <= (dirX * COS_ROT + dirY * NEG_SIN_ROT);
+        //   newDirY <= (dirX * SIN_ROT + dirY * COS_ROT);
+        //   newPlaneX <= (planeX * COS_ROT + planeY * NEG_SIN_ROT);
+        //   newPlaneY <= (planeX * SIN_ROT + planeY * COS_ROT);
+        // end
+        else begin
+          valid_out <= 0;
         end
-        valid_out <= 1;
       end
-    else begin
-      valid_out <= 0;
-    end
     end
   end
     //NEED to get access to grid BRAM
     //to do any type of collision detection
 
-  xilinx_single_port_ram_read_first #(
-    .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-    .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-  ) worldMap (
-    .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
-    .dina(0),       // RAM input data, width determined from RAM_WIDTH
-    .clka(pixel_clk_in),       // Clock
-    .wea(0),         // Write enable
-    .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-    .rsta(rst_in),       // Output reset (does not affect memory contents)
-    .regcea(1),   // Output register enable
-    .douta(map_data)      // RAM output data, width determined from RAM_WIDTH
-  );
+  // xilinx_single_port_ram_read_first #(
+  //   .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+  //   .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+  //   .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+  //   .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+  // ) worldMap (
+  //   .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
+  //   .dina(0),       // RAM input data, width determined from RAM_WIDTH
+  //   .clka(pixel_clk_in),       // Clock
+  //   .wea(0),         // Write enable
+  //   .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+  //   .rsta(rst_in),       // Output reset (does not affect memory contents)
+  //   .regcea(1),   // Output register enable
+  //   .douta(map_data)      // RAM output data, width determined from RAM_WIDTH
+  // );
 
 
 endmodule
