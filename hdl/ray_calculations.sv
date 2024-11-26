@@ -1,4 +1,4 @@
-module testing_x_rays (
+module ray_calculations (
   input wire pixel_clk_in,
   input wire rst_in,
   input wire [8:0] hcount_in, //which column I am calculating ray for on screen (0 to screenwidth-1), was thinking of incrementing in top_level and feedign that into dda

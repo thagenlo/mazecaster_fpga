@@ -164,7 +164,7 @@ module top_level(
         .deltaDistX(deltaDistX),
         .deltaDistY(deltaDistY),
         .hcount_out(hcount_ray),
-        .valid_out(dda_data_valid_in),
+        .valid_ray_out(dda_data_valid_in),
         .dda_data_ready_out(dda_data_ready_out)
     );
 

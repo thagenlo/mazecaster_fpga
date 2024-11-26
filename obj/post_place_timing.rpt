@@ -1,0 +1,112 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
+| Date         : Tue Nov 26 00:23:23 2024
+| Host         : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
+| Command      : report_timing -file obj/post_place_timing.rpt
+| Design       : top_level
+| Device       : 7s50-csga324
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+| Design State : Fully Placed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.893ns  (required time - arrival time)
+  Source:                 hcount_in_ray_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
+  Destination:            dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_1/DIBDI[6]
+                            (rising edge-triggered cell RAMB36E1 clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
+  Path Group:             clk_pixel_clk_wiz_0
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            13.468ns  (clk_pixel_clk_wiz_0 rise@13.468ns - clk_pixel_clk_wiz_0 rise@0.000ns)
+  Data Path Delay:        11.994ns  (logic 7.774ns (64.816%)  route 4.220ns (35.184%))
+  Logic Levels:           12  (CARRY4=9 DSP48E1=1 LUT2=1 LUT3=1)
+  Clock Path Skew:        0.005ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    -1.582ns = ( 11.886 - 13.468 ) 
+    Source Clock Delay      (SCD):    -1.035ns
+    Clock Pessimism Removal (CPR):    0.553ns
+  Clock Uncertainty:      0.168ns  ((TSJ^2 + DJ^2)^1/2) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Discrete Jitter          (DJ):    0.329ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_pixel_clk_wiz_0 rise edge)
+                                                      0.000     0.000 r  
+    N15                                               0.000     0.000 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000     0.000    mhdmicw/clk_100mhz
+    N15                  IBUF (Prop_ibuf_I_O)         1.440     1.440 r  mhdmicw/clkin1_ibufg/O
+                         net (fo=1, estimated)        1.233     2.673    mhdmicw/clk_ref_clk_wiz_0
+    MMCME2_ADV_X0Y0      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKOUT0)
+                                                     -7.025    -4.352 r  mhdmicw/mmcm_adv_inst/CLKOUT0
+                         net (fo=1, estimated)        1.666    -2.686    mhdmicw/clk_pixel_clk_wiz_0
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.096    -2.590 r  mhdmicw/clkout1_buf/O
+                         net (fo=1377, estimated)     1.555    -1.035    clk_pixel
+    SLICE_X57Y23         FDRE                                         r  hcount_in_ray_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X57Y23         FDRE (Prop_fdre_C_Q)         0.419    -0.616 r  hcount_in_ray_reg[4]/Q
+                         net (fo=13, estimated)       0.746     0.130    calculating_ray/Q[4]
+    SLICE_X57Y23         LUT3 (Prop_lut3_I2_O)        0.328     0.458 r  calculating_ray/b1_i_20/O
+                         net (fo=1, estimated)        0.525     0.983    calculating_ray/b1_i_20_n_0
+    SLICE_X56Y22         CARRY4 (Prop_carry4_DI[3]_CO[3])
+                                                      0.599     1.582 r  calculating_ray/b1_i_4/CO[3]
+                         net (fo=1, estimated)        0.000     1.582    calculating_ray/b1_i_4_n_0
+    SLICE_X56Y23         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     1.699 r  calculating_ray/b1_i_3/CO[3]
+                         net (fo=1, estimated)        0.000     1.699    calculating_ray/b1_i_3_n_0
+    SLICE_X56Y24         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.323     2.022 r  calculating_ray/b1_i_8/O[1]
+                         net (fo=2, estimated)        0.540     2.562    calculating_ray/cameraXMultiply0__0[23]
+    SLICE_X55Y24         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.689     3.251 r  calculating_ray/b1_i_2/CO[3]
+                         net (fo=1, estimated)        0.009     3.260    calculating_ray/b1_i_2_n_0
+    SLICE_X55Y25         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     3.594 r  calculating_ray/b1_i_1/O[1]
+                         net (fo=2, estimated)        0.681     4.275    calculating_ray/B[12]
+    DSP48_X1Y9           DSP48E1 (Prop_dsp48e1_B[12]_P[9])
+                                                      3.835     8.110 r  calculating_ray/b1__0/P[9]
+                         net (fo=1, estimated)        0.844     8.954    controller_in/gen_wr_a.gen_word_narrow.mem_reg_1[1]
+    SLICE_X50Y27         LUT2 (Prop_lut2_I1_O)        0.124     9.078 r  controller_in/xpm_fifo_axis_inst_i_41/O
+                         net (fo=1, routed)           0.000     9.078    controller_in/xpm_fifo_axis_inst_i_41_n_0
+    SLICE_X50Y27         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533     9.611 r  controller_in/xpm_fifo_axis_inst_i_9/CO[3]
+                         net (fo=1, estimated)        0.000     9.611    controller_in/xpm_fifo_axis_inst_i_9_n_0
+    SLICE_X50Y28         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     9.728 r  controller_in/xpm_fifo_axis_inst_i_8/CO[3]
+                         net (fo=1, estimated)        0.000     9.728    controller_in/xpm_fifo_axis_inst_i_8_n_0
+    SLICE_X50Y29         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     9.845 r  controller_in/xpm_fifo_axis_inst_i_7/CO[3]
+                         net (fo=1, estimated)        0.000     9.845    controller_in/xpm_fifo_axis_inst_i_7_n_0
+    SLICE_X50Y30         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    10.084 r  controller_in/xpm_fifo_axis_inst_i_6/O[2]
+                         net (fo=1, estimated)        0.875    10.959    dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/dina[110]
+    RAMB36_X1Y5          RAMB36E1                                     r  dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_1/DIBDI[6]
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_pixel_clk_wiz_0 rise edge)
+                                                     13.468    13.468 r  
+    N15                                               0.000    13.468 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000    13.468    mhdmicw/clk_100mhz
+    N15                  IBUF (Prop_ibuf_I_O)         1.370    14.838 r  mhdmicw/clkin1_ibufg/O
+                         net (fo=1, estimated)        1.171    16.010    mhdmicw/clk_ref_clk_wiz_0
+    MMCME2_ADV_X0Y0      MMCME2_ADV (Prop_mmcme2_adv_CLKIN1_CLKOUT0)
+                                                     -7.279     8.731 r  mhdmicw/mmcm_adv_inst/CLKOUT0
+                         net (fo=1, estimated)        1.583    10.314    mhdmicw/clk_pixel_clk_wiz_0
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.091    10.405 r  mhdmicw/clkout1_buf/O
+                         net (fo=1377, estimated)     1.481    11.886    dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/clkb
+    RAMB36_X1Y5          RAMB36E1                                     r  dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_1/CLKBWRCLK
+                         clock pessimism              0.553    12.439    
+                         clock uncertainty           -0.168    12.271    
+    RAMB36_X1Y5          RAMB36E1 (Setup_ramb36e1_CLKBWRCLK_DIBDI[6])
+                                                     -0.418    11.853    dda_fifo_in/xpm_fifo_axis_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg_1
+  -------------------------------------------------------------------
+                         required time                         11.853    
+                         arrival time                         -10.959    
+  -------------------------------------------------------------------
+                         slack                                  0.893    
+
+
+
+
