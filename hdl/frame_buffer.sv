@@ -85,7 +85,7 @@ module frame_buffer #(
         .addra(address1),           // address
         .dina(ray_pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
-        .wea(!state),               // Write enabled when state == 0
+        .wea(!state && !ready_to_switch[0]),               // Write enabled when state == 0 AND ready_to_switch[0] != 1
         .ena(1),   // RAM Enable = only enabled when we have a valid address (cannot read from invalid address)
         .rsta(rst_in),              // Output reset (does not affect memory contents)
         .regcea(1),             // Output register enabled when state == 1
@@ -102,7 +102,7 @@ module frame_buffer #(
         .addra(address2),           // address
         .dina(ray_pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
-        .wea(state),                // Write enabled when state == 1
+        .wea(state && !ready_to_switch[0]),   // Write enabled when state == 1 AND ready_to_switch[0] != 1 (don't want to overwrite when we're done writing the ray data)
         .ena(1),   // RAM Enable = only enabled when we have a valid address
         .rsta(rst_in),              // Output reset (does not affect memory contents)
         .regcea(1),            // Output register enabled when state == 0
