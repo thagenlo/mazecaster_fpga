@@ -108,22 +108,22 @@ module top_level(
         .moveBack(bwd_btn),
         .rotLeft(leftRot_btn),
         .rotRight(rightRot_btn),
-        .valid_in(1),
+        .valid_in(),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
         .planeY(planeY),
-        .valid_out(1)
+        .valid_out()
     );
 
     //TODO: INSERT RAY CALCULATION MODULE
 
     //TODO: sending in 320 hcounts
 
-    logic [8:0] hcount_in_ray;
-    logic [8:0] hcount_ray;
+    logic [8:0] hcount_ray_in;
+    logic [8:0] hcount_ray_out;
     logic stepX;
     logic stepY;
     logic signed [15:0] rayDirX;
@@ -136,19 +136,28 @@ module top_level(
     //generate all hcounts
     always_ff @(posedge clk_pixel) begin
         if (sys_rst) begin
-        hcount_in_ray <= 0;
+            hcount_ray_in <= 0;
         end else begin
-            hcount_in_ray <= hcount_in_ray + 1;
+            if (valid_ray_out && dda_data_ready_out) begin
+                if (hcount_ray_in == 320) begin
+                    hcount_ray_in <= 0;
+                end else begin 
+                    hcount_ray_in <= hcount_ray_in + 1;
+                end
+            end (~busy_ray_calc && )
         end
     end
 
 
     logic dda_data_valid_in, dda_data_ready_out;
+    logic valid_ray_out;
+    logic busy_ray_calc;
+
 
     ray_calculations calculating_ray (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
-        .hcount_in(hcount_in_ray),
+        .hcount_in(hcount_ray_in),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),
@@ -163,11 +172,12 @@ module top_level(
         .sideDistY(sideDistY),
         .deltaDistX(deltaDistX),
         .deltaDistY(deltaDistY),
-        .hcount_out(hcount_ray),
-        .valid_ray_out(dda_data_valid_in),
-        .dda_data_ready_out(dda_data_ready_out)
+        // .hcount_out(hcount_ray),
+        .dda_data_ready_out(dda_data_ready_out),
+        .hcount_out(hcount_ray_out),
+        .busy_ray_calc(busy_ray_calc),
+        .valid_ray_out(valid_ray_out)
     );
-
 
     //TODO: INSERT DDA-in FIFO
     logic dda_fsm_in_tvalid, dda_fsm_in_tready;
@@ -183,9 +193,9 @@ module top_level(
         .sender_clk(clk_pixel),
         .receiver_clk(clk_pixel),
         // sender interface (input to FIFO)
-        .sender_axis_tvalid(dda_data_valid_in), // Heba input
+        .sender_axis_tvalid(valid_ray_out), // Heba input
         .sender_axis_tready(dda_data_ready_out), // FIFO
-        .sender_axis_tdata({5'b0_0000, hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
+        .sender_axis_tdata({5'b0_0000, hcount_ray_out, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)
