@@ -20,11 +20,11 @@ import random
 
 # Constants
 screen_width = 320
-posX = 11.5
-posY = 11.5
-dirX = 0.0
-dirY = 1.0
-planeX = 0.0
+# posX = 11.5
+# posY = 11.5
+dirX = 1.0
+dirY = 0.0
+planeX =  0.0
 planeY = 0.66
 
 
@@ -79,81 +79,86 @@ async def test_a(dut):
     await ClockCycles(dut.pixel_clk_in, 5)
     dut.rst_in.value = 0
 
-    # Apply test inputs
-    for i in range(screen_width):
-        # Calculate cameraX for the current pixel
-        cameraX = 2 * i / screen_width - 1
+    for posX in [20.5]:  # [11.5, 12.5, 20.5]:
+        for posY in [11.5]:  # [11.5, 12.5, 20.5]:
 
-        # Calculate ray direction
-        rayDirX = dirX + planeX * cameraX
-        rayDirY = dirY + planeY * cameraX
+            # Apply test inputs
+            for i in range(screen_width):
+                # Calculate cameraX for the current pixel
+                cameraX = 2 * i / screen_width - 1
 
-        # Calculate deltaDist
-        deltaDistX = 1e30 if rayDirX == 0 else abs(1 / rayDirX)
-        deltaDistY = 1e30 if rayDirY == 0 else abs(1 / rayDirY)
+                # Calculate ray direction
+                rayDirX = dirX + planeX * cameraX
+                rayDirY = dirY + planeY * cameraX
 
-        # Determine the current map position
-        mapX = int(posX)
-        mapY = int(posY)
+                # Calculate deltaDist
+                deltaDistX = 1e30 if rayDirX == 0 else abs(1 / rayDirX)
+                deltaDistY = 1e30 if rayDirY == 0 else abs(1 / rayDirY)
 
-        # Calculate steps and initial side distances
-        if rayDirX < 0:
-            stepX = 0  # Representing -1 as 0 in 1-bit
-            sideDistX = (posX - mapX) * deltaDistX
-        else:
-            stepX = 1
-            sideDistX = (mapX + 1.0 - posX) * deltaDistX
+                # Determine the current map position
+                mapX = int(posX)
+                mapY = int(posY)
 
-        if rayDirY < 0:
-            stepY = 0  # Representing -1 as 0 in 1-bit
-            sideDistY = (posY - mapY) * deltaDistY
-        else:
-            stepY = 1
-            sideDistY = (mapY + 1.0 - posY) * deltaDistY
+                # Calculate steps and initial side distances
+                if rayDirX < 0:
+                    stepX = 0  # Representing -1 as 0 in 1-bit
+                    sideDistX = (posX - mapX) * deltaDistX
+                else:
+                    stepX = 1
+                    sideDistX = (mapX + 1.0 - posX) * deltaDistX
 
-        # Convert to fixed-point representation
-        rayDirX_fixed = to_fixed(rayDirX)
-        rayDirY_fixed = to_fixed(rayDirY)
-        deltaDistX_fixed = to_fixed(deltaDistX)
-        deltaDistY_fixed = to_fixed(deltaDistY)
-        posX_fixed = to_fixed(posX)
-        posY_fixed = to_fixed(posY)
-        sideDistX_fixed = to_fixed(sideDistX)
-        sideDistY_fixed = to_fixed(sideDistY)
+                if rayDirY < 0:
+                    stepY = 0  # Representing -1 as 0 in 1-bit
+                    sideDistY = (posY - mapY) * deltaDistY
+                else:
+                    stepY = 1
+                    sideDistY = (mapY + 1.0 - posY) * deltaDistY
 
-        # Pack data
-        dda_input_data = pack_data(
-            i,
-            stepX,
-            stepY,
-            rayDirX_fixed,
-            rayDirY_fixed,
-            deltaDistX_fixed,
-            deltaDistY_fixed,
-            posX_fixed,
-            posY_fixed,
-            sideDistX_fixed,
-            sideDistY_fixed,
-        )
+                # Convert to fixed-point representation
+                rayDirX_fixed = to_fixed(rayDirX)
+                rayDirY_fixed = to_fixed(rayDirY)
+                deltaDistX_fixed = to_fixed(deltaDistX)
+                deltaDistY_fixed = to_fixed(deltaDistY)
+                posX_fixed = to_fixed(posX)
+                posY_fixed = to_fixed(posY)
+                sideDistX_fixed = to_fixed(sideDistX)
+                sideDistY_fixed = to_fixed(sideDistY)
 
-        # Apply data to DUT
-        dut.dda_fsm_in_tdata.value = dda_input_data
-        dut.dda_fsm_in_tvalid.value = 1
-        dut.dda_fsm_out_tready.value = 1
+                # Pack data
+                dda_input_data = pack_data(
+                    i,
+                    stepX,
+                    stepY,
+                    rayDirX_fixed,
+                    rayDirY_fixed,
+                    deltaDistX_fixed,
+                    deltaDistY_fixed,
+                    posX_fixed,
+                    posY_fixed,
+                    sideDistX_fixed,
+                    sideDistY_fixed,
+                )
 
-        # Wait for one clock cycle
-        await RisingEdge(dut.pixel_clk_in)
+                # Apply data to DUT
+                dut.dda_fsm_in_tdata.value = dda_input_data
+                dut.dda_fsm_in_tvalid.value = 1
+                dut.dda_fsm_out_tready.value = 1
 
-        # Wait for output to be valid
-        while not dut.dda_fsm_out_tvalid.value:
-            await RisingEdge(dut.pixel_clk_in)
+                # Wait for one clock cycle
+                await RisingEdge(dut.pixel_clk_in)
 
-        # Read and log output data
-        output_data = dut.dda_fsm_out_tdata.value
-        dut._log.info(f"Input: {hex(dda_input_data)}, Output: {hex(output_data)}")
+                # Wait for output to be valid
+                while not dut.dda_fsm_out_tvalid.value:
+                    await RisingEdge(dut.pixel_clk_in)
 
-        # Deassert valid signal
-        dut.dda_fsm_in_tvalid.value = 0
+                # Read and log output data
+                output_data = dut.dda_fsm_out_tdata.value
+                dut._log.info(
+                    f"Input: {hex(dda_input_data)}, Output: {hex(output_data)}"
+                )
+
+                # Deassert valid signal
+                dut.dda_fsm_in_tvalid.value = 0
 
 
 def is_runner():
@@ -170,7 +175,7 @@ def is_runner():
     ]
     sources += [proj_path / "hdl" / "xilinx_single_port_ram_read_first.v"]
     build_test_args = ["-Wall"]
-    parameters = {"SCREEN_WIDTH": 320, "SCREEN_HEIGHT": 240, "N": 24}
+    parameters = {"SCREEN_WIDTH": 320, "SCREEN_HEIGHT": 180, "N": 24}
     sys.path.append(str(proj_path / "sim"))
     runner = get_runner(sim)
     runner.build(
