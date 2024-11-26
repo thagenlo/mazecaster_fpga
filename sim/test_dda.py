@@ -79,7 +79,7 @@ async def test_a(dut):
     await ClockCycles(dut.pixel_clk_in, 5)
     dut.rst_in.value = 0
 
-    for posX in [20.5]:  # [11.5, 12.5, 20.5]:
+    for posX in [11.5]:  # [11.5, 12.5, 20.5]:
         for posY in [11.5]:  # [11.5, 12.5, 20.5]:
 
             # Apply test inputs

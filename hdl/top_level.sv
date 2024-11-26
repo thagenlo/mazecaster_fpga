@@ -251,8 +251,8 @@ module top_level(
         .sender_axis_tready(dda_fsm_out_tready), // out - FIFO is ready to accept data from the sender
         .sender_axis_tdata({2'b00, dda_fsm_out_tdata}), // in - actual data being written into the FIFO
         .sender_axis_tlast(dda_fsm_out_tlast), // in - last piece of data in a frame or packet being sent to the FIFO
-        .sender_axis_prog_full(), //TODO: to here ???
-        .receiver_clk(clk_pixel), //TODO: Replace names starting from here
+        .sender_axis_prog_full(),
+        .receiver_clk(clk_pixel),
         .receiver_axis_tvalid(fifo_tvalid_out),
         .receiver_axis_tready(transformer_tready),
         .receiver_axis_tdata(fifo_tdata_out),
