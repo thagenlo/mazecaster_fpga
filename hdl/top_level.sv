@@ -223,7 +223,7 @@ module top_level(
     //TODO: INSERT DDA-out FIFO
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
-    logic [39:0] fifo_tdata_out;
+    logic [37:0] fifo_tdata_out;
     logic fifo_tlast_out;
     logic fifo_prog_empty;
     // transformer signal to fifo-out
