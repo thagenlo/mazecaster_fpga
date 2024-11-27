@@ -221,7 +221,7 @@ module top_level(
     // DDA MODULE
     dda #(
         .SCREEN_WIDTH(320),
-        .SCREEN_HEIGHT(240), 
+        .SCREEN_HEIGHT(180), 
         .N(24)
     ) dda_module (
         .pixel_clk_in(clk_pixel),
