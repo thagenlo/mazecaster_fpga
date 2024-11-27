@@ -36,25 +36,25 @@ module dda
   
   );
 
-  logic dda_fsm0_busy, dda_fsm1_busy, dda_fsm0_valid_out, dda_fsm1_valid_out,
-        dda_fsm0_valid_in, dda_fsm1_valid_in;
-  logic [138:0] dda_fsm0_in, dda_fsm1_in;
-  logic [8:0] dda_fsm0_hcount_ray_out, dda_fsm1_hcount_ray_out;
-  logic [7:0] dda_fsm0_lineHeight_out, dda_fsm1_lineHeight_out;
-  logic dda_fsm0_wallType_out, dda_fsm1_wallType_out;
-  logic [3:0] dda_fsm0_mapData_out, dda_fsm1_mapData_out;
-  logic [15:0] dda_fsm0_wallX_out, dda_fsm1_wallX_out;
+  logic dda_fsm0_busy, dda_fsm0_valid_out, dda_fsm0_valid_in;
+  //logic dda_fsm1_busy, dda_fsm1_valid_out, dda_fsm1_valid_in;
+  logic [138:0] dda_fsm0_in;//, dda_fsm1_in;
+  logic [8:0] dda_fsm0_hcount_ray_out;//, dda_fsm1_hcount_ray_out;
+  logic [7:0] dda_fsm0_lineHeight_out;///, dda_fsm1_lineHeight_out;
+  logic dda_fsm0_wallType_out;//, dda_fsm1_wallType_out;
+  logic [3:0] dda_fsm0_mapData_out;//, dda_fsm1_mapData_out;
+  logic [15:0] dda_fsm0_wallX_out;//, dda_fsm1_wallX_out;
   logic tLast_out;
 
 
   ////############ DDA FIFO ###############
-  assign dda_fsm_in_tready = !dda_fsm0_busy || !dda_fsm1_busy; // ready if either FSMs are free
+  assign dda_fsm_in_tready = !dda_fsm0_busy //|| !dda_fsm1_busy; // ready if either FSMs are free
   always_ff @(posedge pixel_clk_in) begin
       if (rst_in) begin
           dda_fsm0_valid_in <= 1'b0;
-          dda_fsm1_valid_in <= 1'b0;
+          //dda_fsm1_valid_in <= 1'b0;
           dda_fsm0_in <= 0;
-          dda_fsm1_in <= 0;
+          //dda_fsm1_in <= 0;
       end else begin
           // // provide data to FSM0 when valid and FSM0 is ready
           // if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
@@ -75,15 +75,15 @@ module dda
             dda_fsm0_in <= dda_fsm_in_tdata;
             dda_fsm0_valid_in <= 1'b1;
 
-            dda_fsm1_valid_in <= 1'b0;
-        end else if (dda_fsm_in_tvalid && !dda_fsm1_busy) begin
-            dda_fsm1_in <= dda_fsm_in_tdata;
-            dda_fsm1_valid_in <= 1'b1;
+            //dda_fsm1_valid_in <= 1'b0;
+        //end else if (dda_fsm_in_tvalid && !dda_fsm1_busy) begin
+            // dda_fsm1_in <= dda_fsm_in_tdata;
+            // dda_fsm1_valid_in <= 1'b1;
 
-            dda_fsm0_valid_in <= 1'b0;
+            // dda_fsm0_valid_in <= 1'b0;
         end else begin
             dda_fsm0_valid_in <= 1'b0;
-            dda_fsm1_valid_in <= 1'b0;
+            //dda_fsm1_valid_in <= 1'b0;
         end
       end
   end
@@ -102,14 +102,14 @@ module dda
                               dda_fsm0_wallX_out};
         dda_fsm_out_tlast <= tLast_out;
         dda_fsm_out_tvalid <= 1'b1;
-      end else if (dda_fsm1_valid_out) begin //single cycle valid out
-        dda_fsm_out_tdata <= {dda_fsm1_hcount_ray_out, 
-                             dda_fsm1_lineHeight_out, 
-                             dda_fsm1_wallType_out, 
-                             dda_fsm1_mapData_out, 
-                             dda_fsm1_wallX_out};
-        dda_fsm_out_tlast <= tLast_out;
-        dda_fsm_out_tvalid <= 1'b1;
+      // end else if (dda_fsm1_valid_out) begin //single cycle valid out
+      //   dda_fsm_out_tdata <= {dda_fsm1_hcount_ray_out, 
+      //                        dda_fsm1_lineHeight_out, 
+      //                        dda_fsm1_wallType_out, 
+      //                        dda_fsm1_mapData_out, 
+      //                        dda_fsm1_wallX_out};
+      //   dda_fsm_out_tlast <= tLast_out;
+      //   dda_fsm_out_tvalid <= 1'b1;
       end else begin
         dda_fsm_out_tlast <= 1'b0;
         dda_fsm_out_tvalid <= 1'b0;
@@ -149,58 +149,58 @@ module dda
   );
 
   // DDA FSM module 1 HERE
-  dda_fsm #(
-    .SCREEN_WIDTH(SCREEN_WIDTH),
-    .SCREEN_HEIGHT(SCREEN_HEIGHT),
-    .N(N)
-  ) dda_fsm1 (
-    .pixel_clk_in(pixel_clk_in),
-    .rst_in(rst_in),
-    .dda_data_in(dda_fsm1_in),
-    .valid_in(dda_fsm1_valid_in),
+  // dda_fsm #(
+  //   .SCREEN_WIDTH(SCREEN_WIDTH),
+  //   .SCREEN_HEIGHT(SCREEN_HEIGHT),
+  //   .N(N)
+  // ) dda_fsm1 (
+  //   .pixel_clk_in(pixel_clk_in),
+  //   .rst_in(rst_in),
+  //   .dda_data_in(dda_fsm1_in),
+  //   .valid_in(dda_fsm1_valid_in),
 
-    .dda_fsm_out_tready(dda_fsm_out_tready),
+  //   .dda_fsm_out_tready(dda_fsm_out_tready),
 
-    .map_data_in(dda_fsm1_map_data_in),
-    .map_data_valid_in(dda_fsm1_map_data_valid_in),
-    .map_addra_out(dda_fsm1_map_addra_out),
-    .map_request_out(dda_fsm1_map_request_out),
+  //   .map_data_in(dda_fsm1_map_data_in),
+  //   .map_data_valid_in(dda_fsm1_map_data_valid_in),
+  //   .map_addra_out(dda_fsm1_map_addra_out),
+  //   .map_request_out(dda_fsm1_map_request_out),
 
-    .hcount_ray_out(dda_fsm1_hcount_ray_out),
-    .lineHeight_out(dda_fsm1_lineHeight_out),
-    .wallType_out(dda_fsm1_wallType_out),
-    .mapData_out(dda_fsm1_mapData_out),
-    .wallX_out(dda_fsm1_wallX_out),
+  //   .hcount_ray_out(dda_fsm1_hcount_ray_out),
+  //   .lineHeight_out(dda_fsm1_lineHeight_out),
+  //   .wallType_out(dda_fsm1_wallType_out),
+  //   .mapData_out(dda_fsm1_mapData_out),
+  //   .wallX_out(dda_fsm1_wallX_out),
     
-    .dda_busy_out(dda_fsm1_busy),
-    .dda_valid_out(dda_fsm1_valid_out)
-  );
+  //   .dda_busy_out(dda_fsm1_busy),
+  //   .dda_valid_out(dda_fsm1_valid_out)
+  // );
 
   ////############ TLAST COUNTER ###############
 
   // internal signals to detect rising edges
   logic dda_fsm0_valid_out_d; // delayed version of dda_fsm0_valid_out
-  logic dda_fsm1_valid_out_d; // delayed version of dda_fsm1_valid_out
+  //logic dda_fsm1_valid_out_d; // delayed version of dda_fsm1_valid_out
   logic dda_fsm0_rising_edge; // rising edge detection for dda_fsm0_valid_out
-  logic dda_fsm1_rising_edge; // rising edge detection for dda_fsm1_valid_out
+  //logic dda_fsm1_rising_edge; // rising edge detection for dda_fsm1_valid_out
 
   // detect rising edges
   always_ff @(posedge pixel_clk_in) begin
       if (rst_in) begin
           dda_fsm0_valid_out_d <= 1'b0;
-          dda_fsm1_valid_out_d <= 1'b0;
+          //dda_fsm1_valid_out_d <= 1'b0;
       end else begin
           dda_fsm0_valid_out_d <= dda_fsm0_valid_out;
-          dda_fsm1_valid_out_d <= dda_fsm1_valid_out;
+          //dda_fsm1_valid_out_d <= dda_fsm1_valid_out;
       end
   end
 
   assign dda_fsm0_rising_edge = dda_fsm0_valid_out && !dda_fsm0_valid_out_d; // high only on rising edge
-  assign dda_fsm1_rising_edge = dda_fsm1_valid_out && !dda_fsm1_valid_out_d; // high only on rising edge
+  //assign dda_fsm1_rising_edge = dda_fsm1_valid_out && !dda_fsm1_valid_out_d; // high only on rising edge
 
   // calculate increment (0, 1, or 2)
   logic [1:0] increment;
-  assign increment = dda_fsm0_rising_edge + dda_fsm1_rising_edge;
+  assign increment = dda_fsm0_rising_edge ;//+ dda_fsm1_rising_edge;
 
   logic [8:0] ray_counter_out; 
   evt_counter #(
@@ -212,17 +212,17 @@ module dda
       .count_out(ray_counter_out)
   );
 
-  assign tLast_out = (ray_counter_out == SCREEN_WIDTH-1) || 
-                     (ray_counter_out + increment > SCREEN_WIDTH-1 && ray_counter_out <= SCREEN_WIDTH-1);
+  assign tLast_out = (ray_counter_out == SCREEN_WIDTH-1); //|| 
+                     //(ray_counter_out + increment > SCREEN_WIDTH-1 && ray_counter_out <= SCREEN_WIDTH-1);
 
 
   ////############ MAP DATA BRAM REQUESTS ###############
 
   // signals for map data requests from each submodule
-  logic [3:0] dda_fsm0_map_data_in, dda_fsm1_map_data_in; //data output from bram (input to submodules)
-  logic dda_fsm0_map_data_valid_in, dda_fsm1_map_data_valid_in; //1 cycle high when bram done fetching (input to submodules)
-  logic [$clog2(N*N)-1:0] dda_fsm0_map_addra_out, dda_fsm1_map_addra_out; //dda_fsm map data address (out from submodules)
-  logic [$clog2(N*N)-1:0] dda_fsm0_map_request_out, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)
+  logic [3:0] dda_fsm0_map_data_in;//, dda_fsm1_map_data_in; //data output from bram (input to submodules)
+  logic dda_fsm0_map_data_valid_in;//, dda_fsm1_map_data_valid_in; //1 cycle high when bram done fetching (input to submodules)
+  logic [$clog2(N*N)-1:0] dda_fsm0_map_addra_out;//, dda_fsm1_map_addra_out; //dda_fsm map data address (out from submodules)
+  logic [$clog2(N*N)-1:0] dda_fsm0_map_request_out;//, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)
   
   logic last_granted_fsm;
 
@@ -239,47 +239,56 @@ module dda
     if (rst_in) begin
       MAP_ARBITER_STATE <= IDLE;
       dda_fsm0_map_data_in <= 0;
-      dda_fsm1_map_data_in <= 0;
+      //dda_fsm1_map_data_in <= 0;
       dda_fsm0_map_data_valid_in <= 1'b0;
-      dda_fsm1_map_data_valid_in <= 1'b0;
-      last_granted_fsm <= 1'b0; // Initialize to a default FSM
+      //dda_fsm1_map_data_valid_in <= 1'b0;
+      //last_granted_fsm <= 1'b0; // Initialize to a default FSM
     end else begin
       case (MAP_ARBITER_STATE)
         IDLE: begin
           dda_fsm0_map_data_valid_in <= 1'b0;
-          dda_fsm1_map_data_valid_in <= 1'b0;
+          //dda_fsm1_map_data_valid_in <= 1'b0;
 
-          if (dda_fsm0_map_request_out && dda_fsm1_map_request_out) begin
-            // alternate granting based on last_granted_fsm
-            map_addra <= (last_granted_fsm) ? dda_fsm0_map_addra_out : dda_fsm1_map_addra_out;
-            MAP_ARBITER_STATE <= (last_granted_fsm) ? GRANT_FSM0 : GRANT_FSM1;
-          end else if (dda_fsm0_map_request_out) begin
+          // if (dda_fsm0_map_request_out && dda_fsm1_map_request_out) begin
+          //   // alternate granting based on last_granted_fsm
+          //   map_addra <= (last_granted_fsm) ? dda_fsm0_map_addra_out : dda_fsm1_map_addra_out;
+          //   MAP_ARBITER_STATE <= (last_granted_fsm) ? GRANT_FSM0 : GRANT_FSM1;
+          // end else if (dda_fsm0_map_request_out) begin
+          //   map_addra <= dda_fsm0_map_addra_out;
+          //   MAP_ARBITER_STATE <= GRANT_FSM0;
+          // end else if (dda_fsm1_map_request_out) begin
+          //   map_addra <= dda_fsm1_map_addra_out;
+          //   MAP_ARBITER_STATE <= GRANT_FSM1;
+          // end
+
+          if (dda_fsm0_map_request_out) begin
             map_addra <= dda_fsm0_map_addra_out;
             MAP_ARBITER_STATE <= GRANT_FSM0;
-          end else if (dda_fsm1_map_request_out) begin
-            map_addra <= dda_fsm1_map_addra_out;
-            MAP_ARBITER_STATE <= GRANT_FSM1;
           end
+
+
         end
         
         GRANT_FSM0: begin //cycle 1
           MAP_ARBITER_STATE <= ASSIGN;
-          last_granted_fsm <= 1'b1;
+          //last_granted_fsm <= 1'b1;
         end
 
-        GRANT_FSM1: begin //cycle 1
-          MAP_ARBITER_STATE <= ASSIGN;
-          last_granted_fsm <= 1'b0;
-        end
+        // GRANT_FSM1: begin //cycle 1
+        //   MAP_ARBITER_STATE <= ASSIGN;
+        //   last_granted_fsm <= 1'b0;
+        // end
 
         ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
-          if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
-            dda_fsm0_map_data_valid_in <= 1'b1;
-            dda_fsm0_map_data_in <= map_data;
-          end else begin
-            dda_fsm1_map_data_valid_in <= 1'b1;
-            dda_fsm1_map_data_in <= map_data;
-          end
+          // if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
+          //   dda_fsm0_map_data_valid_in <= 1'b1;
+          //   dda_fsm0_map_data_in <= map_data;
+          // end else begin
+          //   dda_fsm1_map_data_valid_in <= 1'b1;
+          //   dda_fsm1_map_data_in <= map_data;
+          // end
+          dda_fsm0_map_data_valid_in <= 1'b1;
+          dda_fsm0_map_data_in <= map_data;
           MAP_ARBITER_STATE <= IDLE;
         end
 
