@@ -119,8 +119,8 @@ module top_level(
     //     .valid_out(valid_controller_out)
     // );
 
-    assign posX = 16'b0000110000000000;
-    assign posY = 0;
+    assign posX = 16'b0000_1011_1000_0000;
+    assign posY = 16'b0000_1011_1000_0000;
     assign dirX = 16'b0000000100000000;
     assign dirY = 0;
     assign planeX = 0;
@@ -167,6 +167,7 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .hcount_in(hcount_ray_in),
+        .start_ray_calc(1),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),

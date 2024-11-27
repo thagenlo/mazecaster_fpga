@@ -142,14 +142,12 @@ module ray_calculations (
             RESTING: begin
               if (~div_busy) begin
                 valid_ray_out <= 0;
-                if (start_ray_calc) begin
-                    start_rayDirX <= 1;
-                    start_rayDirY <= 1;
-                    // currentRayDirY <= rayDirY;
-                    // currentRayDirX <= rayDirX;
-                    div_busy <= 1;
-                    state <= DIVIDING;
-                end
+                start_rayDirX <= 1;
+                start_rayDirY <= 1;
+                // currentRayDirY <= rayDirY;
+                // currentRayDirX <= rayDirX;
+                div_busy <= 1;
+                state <= DIVIDING;
               end
             end
             DIVIDING: begin
