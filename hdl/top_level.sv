@@ -100,24 +100,32 @@ module top_level(
     logic [15:0] posX, posY;
     logic [15:0] dirX, dirY;
     logic [15:0] planeX, planeY;
-    logic valid_controller_out;
+    // logic valid_controller_out;
 
-    controller controller_in (
-        .pixel_clk_in(clk_pixel),
-        .rst_in(sys_rst),
-        .moveFwd(fwd_btn),
-        .moveBack(bwd_btn),
-        .rotLeft(leftRot_btn),
-        .rotRight(rightRot_btn),
-        .valid_in(),
-        .posX(posX),
-        .posY(posY),
-        .dirX(dirX),
-        .dirY(dirY),
-        .planeX(planeX), 
-        .planeY(planeY),
-        .valid_out(valid_controller_out)
-    );
+    // controller controller_in (
+    //     .pixel_clk_in(clk_pixel),
+    //     .rst_in(sys_rst),
+    //     .moveFwd(fwd_btn),
+    //     .moveBack(bwd_btn),
+    //     .rotLeft(leftRot_btn),
+    //     .rotRight(rightRot_btn),
+    //     .valid_in(),
+    //     .posX(posX),
+    //     .posY(posY),
+    //     .dirX(dirX),
+    //     .dirY(dirY),
+    //     .planeX(planeX), 
+    //     .planeY(planeY),
+    //     .valid_out(valid_controller_out)
+    // );
+
+    assign posX = 16'b0000110000000000;
+    assign posY = 0;
+    assign dirX = 16'b0000000100000000;
+    assign dirY = 0;
+    assign planeX = 0;
+    assign planeY = 16'b0000000010101001;
+
 
     //TODO: INSERT RAY CALCULATION MODULE
 
