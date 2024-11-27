@@ -215,13 +215,17 @@ module ray_calculations (
                 sideDistY <= tempSideDistY[23:8];
                 hcount_out <= hcount_in;
                 state <= VALID_OUT;
+                valid_ray_out <= 1;
             end
             VALID_OUT: begin
-                valid_ray_out <= 1;
+                //valid_ray_out <= 1;
                   if (dda_data_ready_out) begin
                     // data is not sent to the FIFO unless dda_data_ready_out is high
                     // sideDistX <= tempSideDistX[23:8];
                     // valid_ray_out <= 1'b1;
+
+                    valid_ray_out <= 0;
+
                     div_busy <= 1'b0;
                     state <= RESTING;
                   end

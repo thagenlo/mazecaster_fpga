@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date             : Tue Nov 26 23:05:47 2024
-| Host             : eecs-digital-02 running 64-bit Ubuntu 24.04.1 LTS
+| Date             : Wed Nov 27 15:02:26 2024
+| Host             : eecs-digital-44 running 64-bit Ubuntu 24.04.1 LTS
 | Command          : report_power -file obj/post_route_power.rpt
 | Design           : top_level
 | Device           : xc7s50csga324-1
@@ -53,14 +53,14 @@ Table of Contents
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
 | Clocks         |     0.007 |        6 |       --- |             --- |
-| Slice Logic    |     0.005 |     3218 |       --- |             --- |
-|   LUT as Logic |     0.005 |     1253 |     32600 |            3.84 |
+| Slice Logic    |     0.005 |     3204 |       --- |             --- |
+|   LUT as Logic |     0.004 |     1249 |     32600 |            3.83 |
 |   CARRY4       |    <0.001 |      127 |      8150 |            1.56 |
-|   Register     |    <0.001 |     1272 |     65200 |            1.95 |
+|   Register     |    <0.001 |     1259 |     65200 |            1.93 |
 |   BUFG         |    <0.001 |        1 |        32 |            3.13 |
 |   Others       |     0.000 |      111 |       --- |             --- |
-| Signals        |     0.006 |     2646 |       --- |             --- |
-| Block RAM      |     0.101 |     68.5 |        75 |           91.33 |
+| Signals        |     0.007 |     2638 |       --- |             --- |
+| Block RAM      |     0.100 |     68.5 |        75 |           91.33 |
 | MMCM           |     0.105 |        1 |         5 |           20.00 |
 | DSPs           |     0.003 |        9 |       120 |            7.50 |
 | I/O            |     0.140 |       32 |       210 |           15.24 |
@@ -148,9 +148,9 @@ Table of Contents
 | top_level                |     0.368 |
 |   calculating_ray        |     0.004 |
 |     rayDirY_recip        |     0.001 |
-|   dda_fifo_in            |     0.008 |
-|     xpm_fifo_axis_inst   |     0.008 |
-|       xpm_fifo_base_inst |     0.008 |
+|   dda_fifo_in            |     0.007 |
+|     xpm_fifo_axis_inst   |     0.007 |
+|       xpm_fifo_base_inst |     0.007 |
 |   dda_fifo_out           |     0.004 |
 |     xpm_fifo_axis_inst   |     0.004 |
 |       xpm_fifo_base_inst |     0.004 |

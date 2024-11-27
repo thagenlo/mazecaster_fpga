@@ -282,7 +282,9 @@ module dda_fsm
                         wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
 
                         //TODO div_quotient_out is zero when player is super close to wall
-                        lineHeight_out <= (div_quotient_out == 0)? SCREEN_HEIGHT : div_quotient_out[15:8];
+                        //lineHeight_out <= (div_quotient_out == 0)? SCREEN_HEIGHT : div_quotient_out[15:8];
+                        lineHeight_out <=  (div_quotient_out[15:8] >= SCREEN_HEIGHT)? SCREEN_HEIGHT:
+                                                                                div_quotient_out[15:8];
 
                         DDA_FSM_STATE <= VALID_OUT;
                     end

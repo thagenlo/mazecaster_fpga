@@ -48,7 +48,7 @@ module dda
 
 
   ////############ DDA FIFO ###############
-  assign dda_fsm_in_tready = !dda_fsm0_busy || !dda_fsm1_busy; // ready if either FSMs are free
+  assign dda_fsm_in_tready = (!dda_fsm0_busy && !dda_fsm0_valid_in) || (!dda_fsm1_busy && !dda_fsm1_valid_in); // ready if either FSMs are free
   always_ff @(posedge pixel_clk_in) begin
       if (rst_in) begin
           dda_fsm0_valid_in <= 1'b0;
@@ -71,12 +71,12 @@ module dda
           // end else begin
           //     dda_fsm1_valid_in <= 1'b0;
           // end
-        if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
+        if (dda_fsm_in_tvalid && !dda_fsm0_busy && !dda_fsm0_valid_in) begin
             dda_fsm0_in <= dda_fsm_in_tdata;
             dda_fsm0_valid_in <= 1'b1;
 
             dda_fsm1_valid_in <= 1'b0;
-        end else if (dda_fsm_in_tvalid && !dda_fsm1_busy) begin
+        end else if (dda_fsm_in_tvalid && !dda_fsm1_busy && !dda_fsm1_valid_in) begin
             dda_fsm1_in <= dda_fsm_in_tdata;
             dda_fsm1_valid_in <= 1'b1;
 
@@ -110,7 +110,7 @@ module dda
                              dda_fsm1_wallX_out};
         dda_fsm_out_tlast <= tLast_out;
         dda_fsm_out_tvalid <= 1'b1;
-      end else begin
+      end else begin //TODO VALID OUT HIGH AT SAME TIME???
         dda_fsm_out_tlast <= 1'b0;
         dda_fsm_out_tvalid <= 1'b0;
       end
@@ -231,7 +231,7 @@ module dda
   logic [2:0] map_data;
 
   enum {
-    IDLE, GRANT_FSM0, GRANT_FSM1, ASSIGN
+    IDLE, GRANT_FSM0, GRANT_FSM1, HOLD_CYCLE, ASSIGN
   } MAP_ARBITER_STATE;
 
   // arbiter logic
@@ -263,13 +263,17 @@ module dda
         end
         
         GRANT_FSM0: begin //cycle 1
-          MAP_ARBITER_STATE <= ASSIGN;
+          MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
           last_granted_fsm <= 1'b1;
         end
 
         GRANT_FSM1: begin //cycle 1
-          MAP_ARBITER_STATE <= ASSIGN;
+          MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
           last_granted_fsm <= 1'b0;
+        end
+
+        HOLD_CYCLE:begin
+          MAP_ARBITER_STATE <= ASSIGN;
         end
 
         ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
