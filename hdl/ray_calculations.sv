@@ -215,7 +215,7 @@ module ray_calculations (
                 // end
                 sideDistX <= tempSideDistX[23:8];
                 sideDistY <= tempSideDistY[23:8];
-                hcount_out <= hcount_ray_in;
+                hcount_out <= hcount_in;
                 state <= VALID_OUT;
             end
             VALID_OUT: begin
