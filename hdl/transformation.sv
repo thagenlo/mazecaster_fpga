@@ -133,7 +133,7 @@ always_ff @(posedge pixel_clk_in) begin
             end
 
             FLATTENING: begin
-                if (vcount_ray < SCREEN_HEIGHT) begin
+                if (vcount_ray < SCREEN_HEIGHT-1) begin
                     vcount_ray <= vcount_ray + 1;
                     ray_last_pixel_out <= 0;
                     state <= FLATTENING;
