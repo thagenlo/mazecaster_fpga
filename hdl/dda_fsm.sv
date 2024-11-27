@@ -1,14 +1,3 @@
-// `ifdef SIMULATION
-//     always @(posedge pixel_clk_in) begin
-//         $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d", 
-//                 $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY);
-        
-//         // $display("Time: %0t | State: %0d | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", 
-//         //         $time, DDA_FSM_STATE, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
-
-//     end
-// `endif
-
 module dda_fsm
 #(
   parameter SCREEN_WIDTH = 320,
@@ -179,7 +168,7 @@ module dda_fsm
                 end
 
                 X_STEP: begin
-                    //$display("Time: %0t | X_STEP State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
+                    // $display("Time: %0t | X_STEP State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
 
                     sideDistX <= sideDistX + deltaDistX;
 
@@ -199,7 +188,7 @@ module dda_fsm
                 end
 
                 Y_STEP: begin
-                    //$display("Time: %0t | Y_STEP State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
+                    // $display("Time: %0t | Y_STEP State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
 
                     sideDistY <= sideDistY + deltaDistY;
 
@@ -219,12 +208,12 @@ module dda_fsm
                 end
 
                 CHECK_WALL: begin
-                    //$display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
+                    // $display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
 
                     if (map_data_valid_in) begin
                         map_request_out <= 1'b0;  // clear the request signal
                         mapData_store <= map_data_in; //store map data locally
-                        if (map_data_in != 0) begin
+                        if (map_data_in != 0 || (mapX == 0 || mapY == 0 || mapX == N-1 || mapY == N-1)) begin
                             //$display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
                             
                             //TODO WHEN TEXTURES NEEDED
@@ -252,7 +241,7 @@ module dda_fsm
                 end
 
                 WALL_CALC: begin
-                    //$display("Time: %0t | WALL_CALC State | perpWallDist: %0d", $time, perpWallDist);
+                    //LATER$display("Time: %0t | WALL_CALC State | perpWallDist: %0d", $time, perpWallDist);
                     //$display("Time: %0t | WALL_CALC State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY);
                     
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall

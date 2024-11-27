@@ -123,7 +123,7 @@ async def test_a(dut):
     cocotb.start_soon(Clock(dut.pixel_clk_in, 1, units="ns").start())
 
     dut.rst_in.value = 1
-    dut.dda_fsm_in_tvalid.value = 1  # FIFO has valid data for the receiver to consume
+    #dut.dda_fsm_in_tvalid.value = 1  # FIFO has valid data for the receiver to consume
     dut.dda_fsm_out_tready.value = 1  # FIFO is ready to accept data from the sender
     await ClockCycles(dut.pixel_clk_in, 5)
     dut.rst_in.value = 0
