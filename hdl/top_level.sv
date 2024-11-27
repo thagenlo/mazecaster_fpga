@@ -119,13 +119,38 @@ module top_level(
     //     .valid_out(valid_controller_out)
     // );
 
+
+    // *** TEST 1: pos X,Y (11.5, 11.5) - dir X,Y (1?,0) ***
     assign posX = 16'b0000_1011_1000_0000;
     assign posY = 16'b0000_1011_1000_0000;
-    assign dirX = 16'b0000000100000000;
+    assign dirX = 16'b0000000100000000; //should be -1 (see test 1 1/2)
     assign dirY = 0;
     assign planeX = 0;
     assign planeY = 16'b0000000010101001;
-
+    // *****************************************************
+    // *** TEST 1 1/2: pos X,Y (11.5, 11.5) - dir X,Y (-1,0) ***
+    // assign posX = 16'b0000_1011_1000_0000;
+    // assign posY = 16'b0000_1011_1000_0000;
+    // assign dirX = 16'b1111_1111_0000_0000; //modified from test 1
+    // assign dirY = 0;
+    // assign planeX = 0;
+    // assign planeY = 16'b0000000010101001;
+    // *****************************************************
+    // *** TEST 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0) *** (flashing @ half duty cucle)
+    // assign posX = 16'b0001_0100_1000_0000;
+    // assign posY = 16'b0000_1011_1000_0000;
+    // assign dirX = 16'b1111_1111_0000_0000;
+    // assign dirY = 0;
+    // assign planeX = 0;
+    // assign planeY = 16'b0000_0000_1010_1001;
+    // *****************************************************
+    // *** TEST 2: pos X,Y (4.5, 11.5) - dir X,Y (0,1) *** (flashing @ half duty cucle)
+    // assign posX = 16'b0000_0100_1000_0000;
+    // assign posY = 16'b0000_1011_1000_0000;
+    // assign dirX = 0;
+    // assign dirY = 16'b0000_0001_0000_0000;
+    // assign planeX = 16'b0000_0000_1010_1001;
+    // assign planeY = 0;
 
     //TODO: INSERT RAY CALCULATION MODULE
 
