@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Tue Nov 26 23:05:48 2024
-| Host         : eecs-digital-02 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Wed Nov 27 14:23:13 2024
+| Host         : eecs-digital-41 running 64-bit Ubuntu 24.04.1 LTS
 | Command      : report_drc -file obj/post_imp_drc.rpt
 | Design       : top_level
 | Device       : xc7s50csga324-1
@@ -24,12 +24,12 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max violations: <unlimited>
-             Violations found: 9
+             Violations found: 7
 +-----------+----------+-----------------------------------------------------+------------+
 | Rule      | Severity | Description                                         | Violations |
 +-----------+----------+-----------------------------------------------------+------------+
 | CFGBVS-1  | Warning  | Missing CFGBVS and CONFIG_VOLTAGE Design Properties | 1          |
-| DPIP-1    | Warning  | Input pipelining                                    | 6          |
+| DPIP-1    | Warning  | Input pipelining                                    | 4          |
 | PDRC-153  | Warning  | Gated clock check                                   | 1          |
 | RTSTAT-10 | Warning  | No routable loads                                   | 1          |
 +-----------+----------+-----------------------------------------------------+------------+
@@ -66,22 +66,12 @@ Related violations: <none>
 
 DPIP-1#4 Warning
 Input pipelining  
-DSP dda_module/dda_fsm0/p_0_out input dda_module/dda_fsm0/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
-Related violations: <none>
-
-DPIP-1#5 Warning
-Input pipelining  
-DSP dda_module/dda_fsm1/map_addra_out_reg input dda_module/dda_fsm1/map_addra_out_reg/C[47:0] is not pipelined. Pipelining DSP48 input will improve performance.
-Related violations: <none>
-
-DPIP-1#6 Warning
-Input pipelining  
-DSP dda_module/dda_fsm1/p_0_out input dda_module/dda_fsm1/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP dda_module/p_0_out input dda_module/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 PDRC-153#1 Warning
 Gated clock check  
-Net flattening_module/ray_pixel_out_reg[15]_i_2_n_0 is a gated clock net sourced by a combinational pin flattening_module/ray_pixel_out_reg[15]_i_2/O, cell flattening_module/ray_pixel_out_reg[15]_i_2. This is not good design practice and will likely impact performance. For SLICE registers, for example, use the CE pin to control the loading of data.
+Net flattening_module/ray_pixel_out_reg[11]_i_2_n_1 is a gated clock net sourced by a combinational pin flattening_module/ray_pixel_out_reg[11]_i_2/O, cell flattening_module/ray_pixel_out_reg[11]_i_2. This is not good design practice and will likely impact performance. For SLICE registers, for example, use the CE pin to control the loading of data.
 Related violations: <none>
 
 RTSTAT-10#1 Warning

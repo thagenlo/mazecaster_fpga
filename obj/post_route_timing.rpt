@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Tue Nov 26 23:05:47 2024
-| Host         : eecs-digital-02 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Wed Nov 27 14:23:11 2024
+| Host         : eecs-digital-41 running 64-bit Ubuntu 24.04.1 LTS
 | Command      : report_timing -file obj/post_route_timing.rpt
 | Design       : top_level
 | Device       : 7s50-csga324
@@ -12,19 +12,19 @@ Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanc
 
 Timing Report
 
-Slack (MET) :             0.667ns  (required time - arrival time)
-  Source:                 hcount_ray_in_reg[4]/C
+Slack (VIOLATED) :        -0.044ns  (required time - arrival time)
+  Source:                 hcount_ray_in_reg[5]/C
                             (rising edge-triggered cell FDRE clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
-  Destination:            calculating_ray/rayDirX_recip/bu_reg[0]/CE
+  Destination:            calculating_ray/rayDirX_recip/bu_reg[12]/CE
                             (rising edge-triggered cell FDRE clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
   Path Group:             clk_pixel_clk_wiz_0
   Path Type:              Setup (Max at Slow Process Corner)
   Requirement:            13.468ns  (clk_pixel_clk_wiz_0 rise@13.468ns - clk_pixel_clk_wiz_0 rise@0.000ns)
-  Data Path Delay:        12.424ns  (logic 7.709ns (62.047%)  route 4.715ns (37.953%))
-  Logic Levels:           10  (CARRY4=5 DSP48E1=1 LUT3=1 LUT4=1 LUT5=1 LUT6=1)
-  Clock Path Skew:        -0.039ns (DCD - SCD + CPR)
-    Destination Clock Delay (DCD):    -1.566ns = ( 11.902 - 13.468 ) 
-    Source Clock Delay      (SCD):    -0.965ns
+  Data Path Delay:        13.094ns  (logic 7.963ns (60.812%)  route 5.131ns (39.188%))
+  Logic Levels:           12  (CARRY4=5 DSP48E1=1 LUT1=1 LUT3=1 LUT4=2 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.044ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    -1.576ns = ( 11.892 - 13.468 ) 
+    Source Clock Delay      (SCD):    -0.970ns
     Clock Pessimism Removal (CPR):    0.562ns
   Clock Uncertainty:      0.168ns  ((TSJ^2 + DJ^2)^1/2) / 2 + PE
     Total System Jitter     (TSJ):    0.071ns
@@ -43,38 +43,42 @@ Slack (MET) :             0.667ns  (required time - arrival time)
                                                      -6.965    -4.291 r  mhdmicw/mmcm_adv_inst/CLKOUT0
                          net (fo=1, routed)           1.666    -2.625    mhdmicw/clk_pixel_clk_wiz_0
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.096    -2.529 r  mhdmicw/clkout1_buf/O
-                         net (fo=1316, routed)        1.564    -0.965    clk_pixel
-    SLICE_X55Y15         FDRE                                         r  hcount_ray_in_reg[4]/C
+                         net (fo=1049, routed)        1.559    -0.970    clk_pixel
+    SLICE_X57Y19         FDRE                                         r  hcount_ray_in_reg[5]/C
   -------------------------------------------------------------------    -------------------
-    SLICE_X55Y15         FDRE (Prop_fdre_C_Q)         0.419    -0.546 f  hcount_ray_in_reg[4]/Q
-                         net (fo=16, routed)          0.717     0.171    calculating_ray/Q[4]
-    SLICE_X57Y16         LUT3 (Prop_lut3_I0_O)        0.296     0.467 r  calculating_ray/b1_i_14/O
-                         net (fo=1, routed)           0.339     0.806    calculating_ray/b1_i_14_n_0
-    SLICE_X54Y16         CARRY4 (Prop_carry4_DI[1]_CO[3])
-                                                      0.520     1.326 r  calculating_ray/b1_i_3/CO[3]
-                         net (fo=1, routed)           0.000     1.326    calculating_ray/b1_i_3_n_0
-    SLICE_X54Y17         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.117     1.443 r  calculating_ray/b1_i_8/CO[3]
-                         net (fo=1, routed)           0.000     1.443    calculating_ray/b1_i_8_n_0
-    SLICE_X54Y18         CARRY4 (Prop_carry4_CI_CO[0])
-                                                      0.254     1.697 r  calculating_ray/b1_i_7/CO[0]
-                         net (fo=4, routed)           0.635     2.332    calculating_ray/b1_i_7_n_3
-    SLICE_X55Y18         CARRY4 (Prop_carry4_S[1]_O[2])
-                                                      0.947     3.279 r  calculating_ray/b1_i_1/O[2]
-                         net (fo=10, routed)          0.739     4.017    calculating_ray/B[15]
-    DSP48_X1Y6           DSP48E1 (Prop_dsp48e1_B[16]_P[18])
-                                                      3.834     7.851 r  calculating_ray/b1/P[18]
-                         net (fo=1, routed)           0.645     8.497    calculating_ray/rayDirX_recip/P[10]
-    SLICE_X54Y19         CARRY4 (Prop_carry4_S[1]_O[3])
-                                                      0.767     9.264 r  calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_2/O[3]
-                         net (fo=3, routed)           0.654     9.918    calculating_ray/rayDirX_recip/rayDirX[3]
-    SLICE_X55Y19         LUT4 (Prop_lut4_I3_O)        0.307    10.225 f  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_3/O
-                         net (fo=1, routed)           0.151    10.377    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_3_n_0
-    SLICE_X55Y19         LUT6 (Prop_lut6_I0_O)        0.124    10.501 f  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2/O
-                         net (fo=3, routed)           0.178    10.678    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2_n_0
-    SLICE_X55Y19         LUT5 (Prop_lut5_I4_O)        0.124    10.802 r  calculating_ray/rayDirX_recip/bu[14]_i_1/O
-                         net (fo=16, routed)          0.657    11.460    calculating_ray/rayDirX_recip/sig_diff_0
-    SLICE_X56Y17         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[0]/CE
+    SLICE_X57Y19         FDRE (Prop_fdre_C_Q)         0.456    -0.514 r  hcount_ray_in_reg[5]/Q
+                         net (fo=12, routed)          0.854     0.341    calculating_ray/Q[5]
+    SLICE_X55Y19         LUT3 (Prop_lut3_I0_O)        0.150     0.491 r  calculating_ray/cameraXMultiply0__0_carry__0_i_4/O
+                         net (fo=2, routed)           0.561     1.052    calculating_ray/cameraXMultiply0__0_carry__0_i_4_n_1
+    SLICE_X55Y20         LUT4 (Prop_lut4_I3_O)        0.332     1.384 r  calculating_ray/cameraXMultiply0__0_carry__0_i_8/O
+                         net (fo=1, routed)           0.000     1.384    calculating_ray/cameraXMultiply0__0_carry__0_i_8_n_1
+    SLICE_X55Y20         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532     1.916 r  calculating_ray/cameraXMultiply0__0_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     1.916    calculating_ray/cameraXMultiply0__0_carry__0_n_1
+    SLICE_X55Y21         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334     2.250 f  calculating_ray/cameraXMultiply0__0_carry__1/O[1]
+                         net (fo=2, routed)           0.587     2.837    calculating_ray/cameraXMultiply0__0[23]
+    SLICE_X54Y21         LUT1 (Prop_lut1_I0_O)        0.303     3.140 r  calculating_ray/cameraX_carry_i_3/O
+                         net (fo=1, routed)           0.000     3.140    calculating_ray/cameraX_carry_i_3_n_1
+    SLICE_X54Y21         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533     3.673 r  calculating_ray/cameraX_carry/CO[3]
+                         net (fo=1, routed)           0.000     3.673    calculating_ray/cameraX_carry_n_1
+    SLICE_X54Y22         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239     3.912 r  calculating_ray/cameraX_carry__0/O[2]
+                         net (fo=10, routed)          0.741     4.653    calculating_ray/B[15]
+    DSP48_X1Y8           DSP48E1 (Prop_dsp48e1_B[16]_P[18])
+                                                      3.833     8.486 r  calculating_ray/b1/P[18]
+                         net (fo=1, routed)           0.905     9.391    calculating_ray/p_0_in0_in[10]
+    SLICE_X54Y23         CARRY4 (Prop_carry4_S[1]_O[2])
+                                                      0.702    10.093 r  calculating_ray/b0_carry/O[2]
+                         net (fo=3, routed)           0.583    10.676    calculating_ray/rayDirX_recip/s_axis_tdata[12]
+    SLICE_X55Y24         LUT4 (Prop_lut4_I1_O)        0.301    10.977 r  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_5/O
+                         net (fo=1, routed)           0.151    11.128    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_5_n_1
+    SLICE_X55Y24         LUT6 (Prop_lut6_I3_O)        0.124    11.252 f  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2_comp_1/O
+                         net (fo=3, routed)           0.355    11.607    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2_n_1
+    SLICE_X52Y24         LUT5 (Prop_lut5_I4_O)        0.124    11.731 r  calculating_ray/rayDirX_recip/bu[14]_i_1/O
+                         net (fo=16, routed)          0.394    12.125    calculating_ray/rayDirX_recip/sig_diff_0
+    SLICE_X53Y25         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[12]/CE
   -------------------------------------------------------------------    -------------------
 
                          (clock clk_pixel_clk_wiz_0 rise edge)
@@ -87,16 +91,16 @@ Slack (MET) :             0.667ns  (required time - arrival time)
                                                      -7.221     8.779 r  mhdmicw/mmcm_adv_inst/CLKOUT0
                          net (fo=1, routed)           1.587    10.366    mhdmicw/clk_pixel_clk_wiz_0
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.091    10.457 r  mhdmicw/clkout1_buf/O
-                         net (fo=1316, routed)        1.445    11.902    calculating_ray/rayDirX_recip/clk_pixel
-    SLICE_X56Y17         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[0]/C
-                         clock pessimism              0.562    12.464    
-                         clock uncertainty           -0.168    12.296    
-    SLICE_X56Y17         FDRE (Setup_fdre_C_CE)      -0.169    12.127    calculating_ray/rayDirX_recip/bu_reg[0]
+                         net (fo=1049, routed)        1.435    11.892    calculating_ray/rayDirX_recip/clk_pixel
+    SLICE_X53Y25         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[12]/C
+                         clock pessimism              0.562    12.454    
+                         clock uncertainty           -0.168    12.286    
+    SLICE_X53Y25         FDRE (Setup_fdre_C_CE)      -0.205    12.081    calculating_ray/rayDirX_recip/bu_reg[12]
   -------------------------------------------------------------------
-                         required time                         12.127    
-                         arrival time                         -11.460    
+                         required time                         12.081    
+                         arrival time                         -12.125    
   -------------------------------------------------------------------
-                         slack                                  0.667    
+                         slack                                 -0.044    
 
 
 

@@ -222,7 +222,7 @@ module dda
   logic [3:0] dda_fsm0_map_data_in;//, dda_fsm1_map_data_in; //data output from bram (input to submodules)
   logic dda_fsm0_map_data_valid_in;//, dda_fsm1_map_data_valid_in; //1 cycle high when bram done fetching (input to submodules)
   logic [$clog2(N*N)-1:0] dda_fsm0_map_addra_out;//, dda_fsm1_map_addra_out; //dda_fsm map data address (out from submodules)
-  logic [$clog2(N*N)-1:0] dda_fsm0_map_request_out;//, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)
+  logic dda_fsm0_map_request_out;//, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)
   
   logic last_granted_fsm;
 
@@ -231,7 +231,7 @@ module dda
   logic [2:0] map_data;
 
   enum {
-    IDLE, GRANT_FSM0, GRANT_FSM1, ASSIGN
+    IDLE, GRANT_FSM0, GRANT_FSM1, HOLD_CYCLE, ASSIGN
   } MAP_ARBITER_STATE;
 
   // arbiter logic
@@ -270,7 +270,7 @@ module dda
         end
         
         GRANT_FSM0: begin //cycle 1
-          MAP_ARBITER_STATE <= ASSIGN;
+          MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
           //last_granted_fsm <= 1'b1;
         end
 
@@ -278,6 +278,9 @@ module dda
         //   MAP_ARBITER_STATE <= ASSIGN;
         //   last_granted_fsm <= 1'b0;
         // end
+        HOLD_CYCLE: begin
+          MAP_ARBITER_STATE <= ASSIGN;
+        end
 
         ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
           // if (last_granted_fsm == 1'b1) begin //GRANT_FSM0

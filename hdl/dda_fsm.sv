@@ -208,12 +208,16 @@ module dda_fsm
                 end
 
                 CHECK_WALL: begin
-                    // $display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
+                    //$display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
+                    
+                    map_request_out <= 1'b0; //change back when more FSMs present
 
                     if (map_data_valid_in) begin
-                        map_request_out <= 1'b0;  // clear the request signal
+                        //map_request_out <= 1'b0;  // clear the request signal
                         mapData_store <= map_data_in; //store map data locally
                         if (map_data_in != 0) begin
+                            $display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
+
                             //|| (mapX == 0 || mapY == 0 || mapX == N-1 || mapY == N-1)) begin
                             //$display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
                             
@@ -230,6 +234,12 @@ module dda_fsm
                             div_denominator_in <= (wallType == 1'b0)? (sideDistX - deltaDistX): 
                                                                        (sideDistY - deltaDistY);
                             div_numerator_in <= 16'b1011_0100_0000_0000; //screen_height = 180
+
+                            // if (wallType == 1'b0) begin
+                            //     $display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | div_denominator_in: %0d | div_numerator_in: %0d", $time, hcount_ray_out, (sideDistX - deltaDistX), 16'b1011_0100_0000_0000);
+                            // end else begin
+                            //     $display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | div_denominator_in: %0d | div_numerator_in: %0d", $time, hcount_ray_out, (sideDistX - deltaDistX), 16'b1011_0100_0000_0000);
+                            // end
 
                             DDA_FSM_STATE <= WALL_CALC; // wall detected
 
@@ -272,7 +282,8 @@ module dda_fsm
                         wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
 
                         //TODO div_quotient_out is zero when player is super close to wall
-                        lineHeight_out <= (div_quotient_out == 0)? SCREEN_HEIGHT : div_quotient_out[15:8];
+                        lineHeight_out <=  (div_quotient_out[15:8] >= SCREEN_HEIGHT)? SCREEN_HEIGHT:
+                                                                                div_quotient_out[15:8];
 
                         DDA_FSM_STATE <= VALID_OUT;
                     end
