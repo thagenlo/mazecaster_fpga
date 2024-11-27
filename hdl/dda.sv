@@ -56,21 +56,35 @@ module dda
           dda_fsm0_in <= 0;
           dda_fsm1_in <= 0;
       end else begin
-          // provide data to FSM0 when valid and FSM0 is ready
-          if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
-              dda_fsm0_in <= dda_fsm_in_tdata;
-              dda_fsm0_valid_in <= 1'b1;
-          end else begin
-              dda_fsm0_valid_in <= 1'b0;
-          end
+          // // provide data to FSM0 when valid and FSM0 is ready
+          // if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
+          //     dda_fsm0_in <= dda_fsm_in_tdata;
+          //     dda_fsm0_valid_in <= 1'b1;
+          // end else begin
+          //     dda_fsm0_valid_in <= 1'b0;
+          // end
 
-          // provide data to FSM1 when valid and FSM1 is ready
-          if (dda_fsm_in_tvalid && !dda_fsm1_busy && dda_fsm0_busy) begin
-              dda_fsm1_in <= dda_fsm_in_tdata;
-              dda_fsm1_valid_in <= 1'b1;
-          end else begin
-              dda_fsm1_valid_in <= 1'b0;
-          end
+          // // provide data to FSM1 when valid and FSM1 is ready
+          // if (dda_fsm_in_tvalid && !dda_fsm1_busy && dda_fsm0_busy) begin
+          //     dda_fsm1_in <= dda_fsm_in_tdata;
+          //     dda_fsm1_valid_in <= 1'b1;
+          // end else begin
+          //     dda_fsm1_valid_in <= 1'b0;
+          // end
+        if (dda_fsm_in_tvalid && !dda_fsm0_busy) begin
+            dda_fsm0_in <= dda_fsm_in_tdata;
+            dda_fsm0_valid_in <= 1'b1;
+
+            dda_fsm1_valid_in <= 1'b0;
+        end else if (dda_fsm_in_tvalid && !dda_fsm1_busy) begin
+            dda_fsm1_in <= dda_fsm_in_tdata;
+            dda_fsm1_valid_in <= 1'b1;
+
+            dda_fsm0_valid_in <= 1'b0;
+        end else begin
+            dda_fsm0_valid_in <= 1'b0;
+            dda_fsm1_valid_in <= 1'b0;
+        end
       end
   end
 

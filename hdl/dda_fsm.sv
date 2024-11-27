@@ -158,6 +158,7 @@ module dda_fsm
 
                     if (valid_in) begin
                         DDA_FSM_STATE <= READY;
+                        dda_busy_out <= 1'b1;
                     end
                 end
 
@@ -165,7 +166,7 @@ module dda_fsm
                     // $display("Time: %0t | READY State | posX: %0d | posY: %0d | sideDistX: %0d | sideDistY: %0d",
                     //      $time, posX, posY, sideDistX, sideDistY);
 
-                    dda_busy_out <= 1'b1;
+                    //dda_busy_out <= 1'b1;
 
                     sideDistX <= dda_data_in[31:16];
                     sideDistY <= dda_data_in[15:0];
