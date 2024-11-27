@@ -213,7 +213,8 @@ module dda_fsm
                     if (map_data_valid_in) begin
                         map_request_out <= 1'b0;  // clear the request signal
                         mapData_store <= map_data_in; //store map data locally
-                        if (map_data_in != 0 || (mapX == 0 || mapY == 0 || mapX == N-1 || mapY == N-1)) begin
+                        if (map_data_in != 0) begin
+                            //|| (mapX == 0 || mapY == 0 || mapX == N-1 || mapY == N-1)) begin
                             //$display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
                             
                             //TODO WHEN TEXTURES NEEDED
