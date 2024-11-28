@@ -8,7 +8,6 @@ module ray_calculations (
   input wire [15:0] dirY,
   input wire [15:0] planeX,
   input wire [15:0] planeY,
-  input wire start_ray_calc,
   input wire dda_data_ready_out,
   output logic stepX,      //direction in which the ray moves through the grid, for X and Y (-1 or 1)
   output logic stepY,
@@ -18,7 +17,7 @@ module ray_calculations (
   output logic [15:0] sideDistY,
   output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
   output logic [15:0] deltaDistY,
-  output logic [8:0] hcount_out,
+  // output logic [8:0] hcount_out,
   output logic busy_ray_calc,
   output logic valid_ray_out
   );
@@ -141,7 +140,7 @@ module ray_calculations (
           case(state)
             RESTING: begin
               if (~div_busy) begin
-                valid_ray_out <= 0;
+                // valid_ray_out <= 0;
                 start_rayDirX <= 1;
                 start_rayDirY <= 1;
                 // currentRayDirY <= rayDirY;
@@ -175,7 +174,7 @@ module ray_calculations (
               end
             end
             DELTA_DIST_CALC: begin
-                if (valid_ray_calculated) begin //if raydirection is - in x
+                if (valid_ray_calculated) begin
                     valid_ray_calculated <= 0;
                     if (deltaDistX[15]) begin //positive values of delta distance, need step/sidedist for DDA
                         stepX <= 0; //meaning this is negative 1
@@ -213,7 +212,7 @@ module ray_calculations (
                 // end
                 sideDistX <= tempSideDistX[23:8];
                 sideDistY <= tempSideDistY[23:8];
-                hcount_out <= hcount_in;
+                // hcount_out <= hcount_in;
                 state <= VALID_OUT;
                 valid_ray_out <= 1;
             end
@@ -222,7 +221,6 @@ module ray_calculations (
                   if (dda_data_ready_out) begin
                     // data is not sent to the FIFO unless dda_data_ready_out is high
                     // sideDistX <= tempSideDistX[23:8];
-                    // valid_ray_out <= 1'b1;
 
                     valid_ray_out <= 0;
 
