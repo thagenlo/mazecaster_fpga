@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Thu Nov 28 00:10:20 2024
-| Host         : eecs-digital-08 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Fri Nov 29 02:33:38 2024
+| Host         : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
 | Command      : report_utilization -file obj/post_synth_util.rpt -hierarchical -hierarchical_depth 4
 | Design       : top_level
 | Device       : xc7s50csga324-1
@@ -22,13 +22,13 @@ Table of Contents
 +--------------------------------------------+-----------------------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
 |                  Instance                  |                        Module                       | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
 +--------------------------------------------+-----------------------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
-| top_level                                  |                                               (top) |       1427 |       1427 |       0 |    0 | 1446 |     68 |      1 |          9 |
+| top_level                                  |                                               (top) |       1412 |       1412 |       0 |    0 | 1437 |     68 |      1 |          9 |
 |   (top_level)                              |                                               (top) |          7 |          7 |       0 |    0 |    9 |      0 |      0 |          0 |
 |   blue_ser                                 |                                     tmds_serializer |          0 |          0 |       0 |    0 |    0 |      0 |      0 |          0 |
-|   calculating_ray                          |                                    ray_calculations |        338 |        338 |       0 |    0 |  198 |      0 |      0 |          4 |
-|     (calculating_ray)                      |                                    ray_calculations |         62 |         62 |       0 |    0 |   52 |      0 |      0 |          4 |
-|     rayDirX_recip                          |                                             divider |        135 |        135 |       0 |    0 |   73 |      0 |      0 |          0 |
-|     rayDirY_recip                          |                                          divider_20 |        141 |        141 |       0 |    0 |   73 |      0 |      0 |          0 |
+|   calculating_ray                          |                                    ray_calculations |        322 |        322 |       0 |    0 |  189 |      0 |      0 |          4 |
+|     (calculating_ray)                      |                                    ray_calculations |         32 |         32 |       0 |    0 |   43 |      0 |      0 |          4 |
+|     rayDirX_recip                          |                                             divider |        141 |        141 |       0 |    0 |   73 |      0 |      0 |          0 |
+|     rayDirY_recip                          |                                          divider_20 |        149 |        149 |       0 |    0 |   73 |      0 |      0 |          0 |
 |   dda_fifo_in                              |                                       dda_fifo_wrap |        162 |        162 |       0 |    0 |  301 |      3 |      0 |          0 |
 |     (dda_fifo_in)                          |                                       dda_fifo_wrap |          0 |          0 |       0 |    0 |    0 |      0 |      0 |          0 |
 |     xpm_fifo_axis_inst                     |                                       xpm_fifo_axis |        162 |        162 |       0 |    0 |  301 |      3 |      0 |          0 |
@@ -73,10 +73,10 @@ Table of Contents
 |         wrpp1_inst                         |                  xpm_counter_updn__parameterized1_9 |         18 |         18 |       0 |    0 |    8 |      0 |      0 |          0 |
 |         wrpp2_inst                         |                    xpm_counter_updn__parameterized2 |         12 |         12 |       0 |    0 |    8 |      0 |      0 |          0 |
 |         xpm_fifo_rst_inst                  |                                        xpm_fifo_rst |         20 |         20 |       0 |    0 |   19 |      0 |      0 |          0 |
-|   dda_module                               |                                                 dda |        438 |        438 |       0 |    0 |  547 |      0 |      1 |          4 |
+|   dda_module                               |                                                 dda |        439 |        439 |       0 |    0 |  547 |      0 |      1 |          4 |
 |     (dda_module)                           |                                                 dda |          2 |          2 |       0 |    0 |  234 |      0 |      0 |          0 |
-|     dda_fsm0                               |                                             dda_fsm |        222 |        222 |       0 |    0 |  152 |      0 |      0 |          2 |
-|       (dda_fsm0)                           |                                             dda_fsm |        162 |        162 |       0 |    0 |   88 |      0 |      0 |          2 |
+|     dda_fsm0                               |                                             dda_fsm |        223 |        223 |       0 |    0 |  152 |      0 |      0 |          2 |
+|       (dda_fsm0)                           |                                             dda_fsm |        163 |        163 |       0 |    0 |   88 |      0 |      0 |          2 |
 |       divu_inst                            |                                              divu_6 |         60 |         60 |       0 |    0 |   64 |      0 |      0 |          0 |
 |     dda_fsm1                               |                                           dda_fsm_5 |        206 |        206 |       0 |    0 |  152 |      0 |      0 |          2 |
 |       (dda_fsm1)                           |                                           dda_fsm_5 |        146 |        146 |       0 |    0 |   88 |      0 |      0 |          2 |

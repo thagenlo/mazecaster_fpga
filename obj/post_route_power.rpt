@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date             : Thu Nov 28 00:10:41 2024
-| Host             : eecs-digital-08 running 64-bit Ubuntu 24.04.1 LTS
+| Date             : Fri Nov 29 02:34:28 2024
+| Host             : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
 | Command          : report_power -file obj/post_route_power.rpt
 | Design           : top_level
 | Device           : xc7s50csga324-1
@@ -30,10 +30,10 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.444        |
+| Total On-Chip Power (W)  | 0.446        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.369        |
+| Dynamic (W)              | 0.370        |
 | Device Static (W)        | 0.076        |
 | Effective TJA (C/W)      | 4.9          |
 | Max Ambient (C)          | 82.8         |
@@ -53,19 +53,19 @@ Table of Contents
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
 | Clocks         |     0.007 |        6 |       --- |             --- |
-| Slice Logic    |     0.005 |     3203 |       --- |             --- |
-|   LUT as Logic |     0.005 |     1248 |     32600 |            3.83 |
-|   CARRY4       |    <0.001 |      127 |      8150 |            1.56 |
-|   Register     |    <0.001 |     1259 |     65200 |            1.93 |
+| Slice Logic    |     0.005 |     3193 |       --- |             --- |
+|   LUT as Logic |     0.005 |     1251 |     32600 |            3.84 |
+|   CARRY4       |    <0.001 |      133 |      8150 |            1.63 |
+|   Register     |    <0.001 |     1250 |     65200 |            1.92 |
 |   BUFG         |    <0.001 |        1 |        32 |            3.13 |
 |   Others       |     0.000 |      111 |       --- |             --- |
-| Signals        |     0.006 |     2636 |       --- |             --- |
+| Signals        |     0.007 |     2631 |       --- |             --- |
 | Block RAM      |     0.101 |     68.5 |        75 |           91.33 |
 | MMCM           |     0.105 |        1 |         5 |           20.00 |
-| DSPs           |     0.003 |        9 |       120 |            7.50 |
+| DSPs           |     0.005 |        9 |       120 |            7.50 |
 | I/O            |     0.140 |       32 |       210 |           15.24 |
 | Static Power   |     0.076 |          |           |                 |
-| Total          |     0.444 |          |           |                 |
+| Total          |     0.446 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -75,7 +75,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.130 |       0.118 |      0.012 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.131 |       0.120 |      0.012 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.071 |       0.058 |      0.013 |       NA    | Unspecified | NA         |
 | Vcco33    |       3.300 |     0.043 |       0.042 |      0.001 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -145,8 +145,9 @@ Table of Contents
 +--------------------------+-----------+
 | Name                     | Power (W) |
 +--------------------------+-----------+
-| top_level                |     0.369 |
-|   calculating_ray        |     0.004 |
+| top_level                |     0.370 |
+|   calculating_ray        |     0.006 |
+|     rayDirX_recip        |     0.001 |
 |     rayDirY_recip        |     0.001 |
 |   dda_fifo_in            |     0.008 |
 |     xpm_fifo_axis_inst   |     0.008 |
@@ -154,7 +155,7 @@ Table of Contents
 |   dda_fifo_out           |     0.004 |
 |     xpm_fifo_axis_inst   |     0.004 |
 |       xpm_fifo_base_inst |     0.004 |
-|   dda_module             |     0.008 |
+|   dda_module             |     0.007 |
 |     dda_fsm0             |     0.003 |
 |     dda_fsm1             |     0.003 |
 |   flattening_module      |     0.001 |

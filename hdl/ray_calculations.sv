@@ -52,7 +52,14 @@ module ray_calculations (
   // logic tabulate_in;
   logic valid_ray_calculated;
 
-  logic [6:0] mapX, mapY;
+  // logic [6:0] mapX, mapY;
+  logic [7:0] mapX, mapY; // Extract the integer portion of posX and posY
+  // logic [15:0] fracPosX, fracPosY; // Extract the fractional portion of posX and posY
+
+  // assign mapX = posX[15:8]; // Integer part of posX
+  // assign mapY = posY[15:8]; // Integer part of posY
+  // assign fracPosX = posX[7:0]; // Fractional part of posX
+  // assign fracPosY = posY[7:0]; // Fractional part of posY
 
   logic start_rayDirX;
   logic busy_rayDirX;
@@ -74,6 +81,7 @@ module ray_calculations (
   logic signed [15:0] tempCameraX;
 
   logic signed [31:0] tempRayDirYMultiply;
+  logic [15:0] full_mapX, full_mapY;
 
   // logic signed [15:0] currentRayDirX;
 //   logic signed [15:0] currentRayDirY;
@@ -88,8 +96,75 @@ module ray_calculations (
 
     // abs_posX = (posX[15])? (~(posX) + 16'b0000_0000_0000_0001): posX;
     
-    tempSideDistX = (~stepX)? ({8'b0, posX[7:0]}) * $signed(deltaDistX): (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX);
-    tempSideDistY = (~stepY)? ({8'b0, posY[7:0]}) * $signed(deltaDistY): (({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posY) * $signed(deltaDistY);
+    // tempSideDistX = (~stepX)? ({8'b0, posX[7:0]}) * $signed(deltaDistX): (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX);
+    // tempSideDistY = (~stepY)? ({8'b0, posY[7:0]}) * $signed(deltaDistY): (({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posY) * $signed(deltaDistY);
+    // tempSideDistX = (~stepX) ? ({8'b0, posX[7:0]}) * $signed(deltaDistX) : 
+    //             (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX);
+    // tempSideDistY = (~stepY) ? ({8'b0, posY[7:0]}) * $signed(deltaDistY) : 
+    //             (({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posY) * $signed(deltaDistY);
+
+    // if ($signed(rayDirX) < 0) begin
+    //     // sideDistX = (posX - mapX) * deltaDistX
+    //     tempSideDistX = ($signed(posX) - $signed({posX[15:8], 8'b0})) * $signed(deltaDistX);
+    // end else begin
+    //     // sideDistX = (mapX + 1.0 - posX) * deltaDistX
+    //     tempSideDistX = ($signed({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - $signed(posX)) * $signed(deltaDistX);
+    // end
+
+    // if ($signed(rayDirY) < 0) begin
+    //     // sideDistY = (posY - mapY) * deltaDistY
+    //     tempSideDistY = ($signed(posY) - $signed({posY[15:8], 8'b0})) * $signed(deltaDistX);
+    // end else begin
+    //     // sideDistY = (mapY + 1.0 - posY) * deltaDistY
+    //     tempSideDistY = ($signed({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - $signed(posY)) * $signed(deltaDistY);
+    // end
+
+    // if ($signed(rayDirX) < 0) begin
+    //     // sideDistX = (posX - mapX) * deltaDistX
+    //     // Calculate difference between posX and mapX, preserving fixed-point accuracy
+    //     tempSideDistX = ($signed(fracPosX) * $signed(deltaDistX));
+    // end else begin
+    //     // sideDistX = (mapX + 1.0 - posX) * deltaDistX
+    //     tempSideDistX = ((256 - $signed(fracPosX)) * $signed(deltaDistX));
+    // end
+
+    // if ($signed(rayDirY) < 0) begin
+    //     // sideDistY = (posY - mapY) * deltaDistY
+    //     tempSideDistY = ($signed(fracPosY) * $signed(deltaDistY));
+    // end else begin
+    //     // sideDistY = (mapY + 1.0 - posY) * deltaDistY
+    //     tempSideDistY = ((256 - $signed(fracPosY)) * $signed(deltaDistY));
+    // end
+
+
+    if (~stepX) begin
+        // sideDistX = (posX - mapX) * deltaDistX;
+        // Assuming mapX is the integer part of posX[15:8]
+        mapX = posX[15:8];
+        full_mapX = {mapX, 8'b0};
+        tempSideDistX = ($signed(posX) - $signed(full_mapX)) * $signed(deltaDistX);
+    end else begin
+        // sideDistX = (mapX + 1.0 - posX) * deltaDistX;
+        mapX = posX[15:8] + 1 ;
+        full_mapX = {mapX, 8'b0};
+        tempSideDistX = ($signed(full_mapX) - $signed(posX)) * $signed(deltaDistX);
+    end
+
+    if (~stepY) begin
+        // sideDistY = (posY - mapY) * deltaDistY;
+        mapY = posY[15:8];
+        full_mapY = {mapY, 8'b0};
+        tempSideDistY = ($signed(posY) - $signed(full_mapY)) * $signed(deltaDistY);
+    end else begin
+        // sideDistY = (mapY + 1.0 - posY) * deltaDistY;
+        mapY = posY[15:8] + 1;
+        full_mapY = {mapY, 8'b0};
+        tempSideDistY = ($signed(full_mapY) - $signed(posY)) * $signed(deltaDistY);
+    end
+
+    // $display("Time: %0t | tempCameraX: %h", $time, tempCameraX);
+    // $display("Time: %0t | tempRayDirXMultiply: %h, tempRayDirYMultiply: %h", $time, tempRayDirXMultiply, tempRayDirYMultiply);
+    // $display("Time: %0t | tempSideDistX: %h, tempSideDistY: %h", $time, tempSideDistX, tempSideDistY);
 
     busy_ray_calc = div_busy;
   end
@@ -147,43 +222,60 @@ module ray_calculations (
               end if (done_rayDirX) begin
                 //TODO have intermediate registers with what current posX,Y etc are
                   ready_rayDirX <= 1;
-                  deltaDistX <= rayDirX_recip_out;
-                  // $display("Time: %0t | deltaDistX (divider result): %d", $time, deltaDistX);
+                  // deltaDistX <= rayDirX_recip_out;
+                  deltaDistX <= (rayDirX_recip_out[15])?  ~(rayDirX_recip_out) + 16'b0000_0000_0000_0001: rayDirX_recip_out;
+                  $display("Time: %0t | deltaDistX (divider result): %d", $time, deltaDistX);
                   state <= DIVIDING;
               end if (done_rayDirY) begin
                   ready_rayDirY <= 1;
-                  deltaDistY <= rayDirY_recip_out;
-                  // $display("Time: %0t | deltaDistY (divider result): %h", $time, deltaDistY);
+                  deltaDistY <= (rayDirY_recip_out[15])?  ~(rayDirY_recip_out) + 16'b0000_0000_0000_0001: rayDirY_recip_out;
+                  $display("Time: %0t | deltaDistY (divider result): %h", $time, deltaDistY);
                   state <= DIVIDING;
               end
             end
             DELTA_DIST_CALC: begin
                 if (valid_ray_calculated) begin
                     valid_ray_calculated <= 0;
-                    if (deltaDistX[15]) begin //positive values of delta distance, need step/sidedist for DDA
+                    if (rayDirX[15]) begin //positive values of delta distance, need step/sidedist for DDA
                         stepX <= 0; //meaning this is negative 1
-                        deltaDistX <= ~(deltaDistX) + 16'b0000_0000_0000_0001; //twos complement of delta dis
+                        // deltaDistX <= ~(deltaDistX) + 16'b0000_0000_0000_0001; //twos complement of delta dis
                     end else begin
                         stepX <= 1; //meaning this is positive 1
                     end
-                    if (deltaDistY[15]) begin
+                    if (rayDirY[15]) begin
                         stepY <= 0; //meaning this is negative 1
-                        deltaDistY <= ~(deltaDistY) + 16'b0000_0000_0000_0001; //twos complement of delta dis
+                        // deltaDistY <= ~(deltaDistY) + 16'b0000_0000_0000_0001; //twos complement of delta dis
                     end else begin
                         stepY <= 1; //meaning this is positive 1
                     end
+
                     state <= SIDE_DIST_CALC;
                 end
             end
             SIDE_DIST_CALC: begin
+                sideDistX <= tempSideDistX[23:8];  // Extracting bits 23 to 8 from tempSideDistX
+                sideDistY <= tempSideDistY[23:8];
                 $display("Time: %0t | final deltaDistX: %h", $time, deltaDistX);
                 $display("Time: %0t | final deltaDistY: %h", $time, deltaDistY);
-                sideDistX <= tempSideDistX[23:8];
-                sideDistY <= tempSideDistY[23:8];
+                $display("Time: %0t | tempSideDistX: %h", $time, tempSideDistX);
+                $display("Time: %0t | tempSideDistY: %h", $time, tempSideDistY);
+                // if (deltaDistX > 0 && deltaDistY > 0) begin
+                //   sideDistX <= tempSideDistX[23:8];
+                //   sideDistY <= tempSideDistY[23:8];
+                // end else begin
+                //   $display("Error: Invalid deltaDistX or deltaDistY values!");
+                //   sideDistX <= 16'hFFFF;  // Set to max value to indicate an error
+                //   sideDistY <= 16'hFFFF;
+                // end 
+                // sideDistX <= tempSideDistX[23:8];  // Extracting bits 23 to 8 from tempSideDistX
+                // sideDistY <= tempSideDistY[23:8];
                 state <= VALID_OUT;
                 valid_ray_out <= 1;
             end
             VALID_OUT: begin
+                $display("Time: %0t | sideDistX: %h", $time, sideDistX);
+                $display("Time: %0t | sideDistY: %h", $time, sideDistY);
+
                   if (dda_data_ready_out) begin
                     valid_ray_out <= 0;
                     div_busy <= 1'b0;

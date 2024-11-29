@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Thu Nov 28 00:10:41 2024
-| Host         : eecs-digital-08 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Fri Nov 29 02:34:29 2024
+| Host         : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
 | Command      : report_drc -file obj/post_imp_drc.rpt
 | Design       : top_level
 | Device       : xc7s50csga324-1
@@ -24,12 +24,12 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max violations: <unlimited>
-             Violations found: 9
+             Violations found: 11
 +-----------+----------+-----------------------------------------------------+------------+
 | Rule      | Severity | Description                                         | Violations |
 +-----------+----------+-----------------------------------------------------+------------+
 | CFGBVS-1  | Warning  | Missing CFGBVS and CONFIG_VOLTAGE Design Properties | 1          |
-| DPIP-1    | Warning  | Input pipelining                                    | 6          |
+| DPIP-1    | Warning  | Input pipelining                                    | 8          |
 | PDRC-153  | Warning  | Gated clock check                                   | 1          |
 | RTSTAT-10 | Warning  | No routable loads                                   | 1          |
 +-----------+----------+-----------------------------------------------------+------------+
@@ -51,30 +51,40 @@ Related violations: <none>
 
 DPIP-1#1 Warning
 Input pipelining  
-DSP calculating_ray/b1 input calculating_ray/b1/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP calculating_ray/sideDistX_reg input calculating_ray/sideDistX_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#2 Warning
 Input pipelining  
-DSP calculating_ray/b1__0 input calculating_ray/b1__0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP calculating_ray/sideDistY_reg input calculating_ray/sideDistY_reg/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#3 Warning
 Input pipelining  
-DSP dda_module/dda_fsm0/map_addra_out_reg input dda_module/dda_fsm0/map_addra_out_reg/C[47:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP calculating_ray/stepX2 input calculating_ray/stepX2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#4 Warning
 Input pipelining  
-DSP dda_module/dda_fsm0/p_0_out input dda_module/dda_fsm0/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP calculating_ray/stepY2 input calculating_ray/stepY2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#5 Warning
 Input pipelining  
-DSP dda_module/dda_fsm1/map_addra_out_reg input dda_module/dda_fsm1/map_addra_out_reg/C[47:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP dda_module/dda_fsm0/map_addra_out_reg input dda_module/dda_fsm0/map_addra_out_reg/C[47:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#6 Warning
+Input pipelining  
+DSP dda_module/dda_fsm0/p_0_out input dda_module/dda_fsm0/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#7 Warning
+Input pipelining  
+DSP dda_module/dda_fsm1/map_addra_out_reg input dda_module/dda_fsm1/map_addra_out_reg/C[47:0] is not pipelined. Pipelining DSP48 input will improve performance.
+Related violations: <none>
+
+DPIP-1#8 Warning
 Input pipelining  
 DSP dda_module/dda_fsm1/p_0_out input dda_module/dda_fsm1/p_0_out/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>

@@ -193,7 +193,7 @@ def sim_raycast(h_count_float, posX_float, posY_float, dirX_float, dirY_float, p
         stepY_float = -1
         stepY.set_val(stepY_float)
         sideDistY_float = (mapY_float + 1.0 - posY_float) * deltaDistY_float
-        sideDistY.set_val(((mapY + 1 - posY) * deltaDistY).get_val())
+        sideDistY.set_val(((posY - mapY) * deltaDistY).get_val())
     else:
         stepY_float = 1
         stepY.set_val(stepY_float)
@@ -278,13 +278,22 @@ async def test_a(dut):
     screenWidth_float = 320
 
 
-    #PASSED TEST 1: 
-    posX_float = 22.5
-    posY_float = 12.5
+    #PASSED TEST 1: looking forward
+    posX_float = 22
+    posY_float = 12
     dirX_float = -1
     dirY_float = 0
     planeX_float = 0
     planeY_float = .66
+
+
+    #TEST 2: 45 DEGREE ANGLE
+    # posX_float = 15.5
+    # posY_float = 15.5
+    # dirX_float = -0.707
+    # dirY_float = -0.707
+    # planeX_float = .466
+    # planeY_float = -.466
 
     posX_fp = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
     posY_fp = Fxp(posY_float, signed=True, n_word=16, n_frac=8, rounding='around')
@@ -303,10 +312,11 @@ async def test_a(dut):
     await RisingEdge(dut.valid_ray_out)
 
 
-    for hcount_ray in range(screenWidth_float):
+    for hcount_ray in range(360):
         dut.hcount_in.value = hcount_ray
         simulated_ray = sim_raycast(hcount_ray, posX_float, posY_float, dirX_float, dirY_float, planeX_float, planeY_float)
-        print(simulated_ray)
+        print( simulated_ray)
+        print('simulated list values:')
         print([x.hex() for x in simulated_ray])
         # simulated_rayX = simulated_ray[0]
         # assert dut.rayDirX.value.integer == int(simulated_ray[0].raw())
@@ -319,7 +329,7 @@ async def test_a(dut):
         # assert dut.stepY.value.integer == simulated_ray[7]
 
         await RisingEdge(dut.valid_ray_out)
-        await ClockCycles(dut.pixel_clk_in, 1)
+        # await ClockCycles(dut.pixel_clk_in, 1)
         dut._log.info(f"hcount_ray={dut.hcount_in.value}, "
                     f"cameraX={hex(dut.cameraX.value)}, "
                     f"rayDirX={hex(dut.rayDirX.value)}, "

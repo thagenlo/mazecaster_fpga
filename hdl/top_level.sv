@@ -121,12 +121,12 @@ module top_level(
 
 
     // *** TEST 1: pos X,Y (11.5, 11.5) - dir X,Y (1?,0) ***
-    assign posX = 16'b0000_1011_1000_0000;
-    assign posY = 16'b0000_1011_1000_0000;
-    assign dirX = 16'b0000000100000000; //should be -1 (see test 1 1/2)
-    assign dirY = 0;
-    assign planeX = 0;
-    assign planeY = 16'b0000000010101001;
+    // assign posX = 16'b0000_1011_1000_0000;
+    // assign posY = 16'b0000_1011_1000_0000;
+    // assign dirX = 16'b0000000100000000; //should be -1 (see test 1 1/2)
+    // assign dirY = 0;
+    // assign planeX = 0;
+    // assign planeY = 16'b0000000010101001;
     // *****************************************************
     // *** TEST 1 1/2: pos X,Y (11.5, 11.5) - dir X,Y (-1,0) ***
     // assign posX = 16'b0000_1011_1000_0000;
@@ -151,6 +151,34 @@ module top_level(
     // assign dirY = 16'b0000_0001_0000_0000;
     // assign planeX = 16'b0000_0000_1010_1001;
     // assign planeY = 0;
+
+
+
+    // *****************************************************
+    // *** TEST 3 (HEBA): pos X,Y (15.5, 15.5) - dir X,Y (-.707, -.707) - plane X,Y (.466, -.466)
+    // assign posX = 16'b0000_1111_1000_0000;
+    // assign posY = 16'b0000_1111_1000_0000;
+    // assign dirX = 16'b1111_1111_1011_0100;
+    // assign dirY = 16'b1111_1111_1011_0100;
+    // assign planeX = 16'b0000_0000_0111_0110; 
+    // assign planeY = 16'b1111_1111_1000_1010;
+
+    // *****************************************************
+    // *** TEST 4 (HEBA) 45 DEG & CLOSER TO CORNER: pos X,Y (20.5, 20.5) - dir X,Y (-.707, -.707) - plane X,Y (.466, -.466)
+    // assign posX = 16'b0001010010000000;
+    // assign posY = 16'b0001010010000000;
+    // assign dirX = 16'b1111_1111_1011_0100;
+    // assign dirY = 16'b1111_1111_1011_0100;
+    // assign planeX = 16'b0000_0000_0111_0110; 
+    // assign planeY = 16'b1111_1111_1000_1010;
+
+    // *** TEST 4 (HEBA) 45 DEG & CLOSER TO CORNER: pos X,Y (20.5, 4.5) - dir X,Y (-.707, -.707) - plane X,Y (.466, -.466)
+    assign posX = 16'b0001010010000000;
+    assign posY = 16'b00000100_10000000;
+    assign dirX = 16'b1111_1111_1011_0100;
+    assign dirY = 16'b1111_1111_1011_0100;
+    assign planeX = 16'b0000_0000_0111_0110; 
+    assign planeY = 16'b1111_1111_1000_1010;
 
     //TODO: INSERT RAY CALCULATION MODULE
 
@@ -192,7 +220,6 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .hcount_in(hcount_ray_in),
-        .start_ray_calc(1),
         .posX(posX),
         .posY(posY),
         .dirX(dirX),
@@ -209,7 +236,6 @@ module top_level(
         .deltaDistY(deltaDistY),
         // .hcount_out(hcount_ray),
         .dda_data_ready_out(dda_data_ready_out),
-        .hcount_out(hcount_ray_out),
         .busy_ray_calc(busy_ray_calc),
         .valid_ray_out(valid_ray_out)
     );
@@ -230,7 +256,7 @@ module top_level(
         // sender interface (input to FIFO)
         .sender_axis_tvalid(valid_ray_out), // Heba input
         .sender_axis_tready(dda_data_ready_out), // FIFO
-        .sender_axis_tdata({5'b0_0000, hcount_ray_out, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
+        .sender_axis_tdata({5'b0_0000, hcount_ray_in, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY}), // Heba input
         .sender_axis_tlast(),
         .sender_axis_prog_full(),
         // receiver interface (output from FIFO)
