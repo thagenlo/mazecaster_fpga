@@ -1,6 +1,6 @@
 module cocotb_iverilog_dump();
 initial begin
-    $dumpfile("/Users/heba/Documents/GitHub/mazecaster_fpga/sim/sim_build/test_raycaster2.fst");
-    $dumpvars(0, test_raycaster2);
+    $dumpfile("/Users/heba/Documents/GitHub/mazecaster_fpga/sim/sim_build/ray_calculations.fst");
+    $dumpvars(0, ray_calculations);
 end
 endmodule

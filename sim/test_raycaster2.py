@@ -1,5 +1,6 @@
 import cocotb
 import os
+from fxpmath import Fxp
 import random
 import sys
 import math
@@ -10,14 +11,13 @@ from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, RisingEdge, FallingEdge, ReadOnly,with_timeout
 from cocotb.utils import get_sim_time as gst
 from cocotb.runner import get_runner
-from fxpmath import Fxp
-import numpy
 
-N = 24
-screenWidth_float = 320
-screenHeight_float = 180
 
 def generate_map():
+    N = 24
+    screenWidth_float = 320
+    screenHeight_float = 180
+
     worldMap = []
     for i in range(N):
         worldMap.append([])
@@ -30,6 +30,10 @@ def generate_map():
     return worldMap
 
 def sim_dda(hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY): #posX, posY, mapX, mapY, planeX, planeY, deltaDistX, deltaDistY, sideDistX, sideDistY, stepX, stepY):
+    N = 24
+    screenWidth_float = 320
+    screenHeight_float = 180
+    
     worldMap = generate_map()
     mapX_float = math.floor(posX)
     mapY_float = math.floor(posY)
@@ -104,6 +108,9 @@ def sim_dda(hcount_ray, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, 
     return hcount_ray, lineHeight, side
 
 def sim_raycast(h_count_float, posX_float, posY_float, dirX_float, dirY_float, planeX_float, planeY_float):
+    N = 24
+    screenWidth_float = 320
+    screenHeight_float = 180
     screenWidth = Fxp(screenWidth_float, signed=True, n_word=24, n_frac=12)
 
     # posX_float = 22.5
@@ -112,6 +119,7 @@ def sim_raycast(h_count_float, posX_float, posY_float, dirX_float, dirY_float, p
     # dirY_float = 0
     # planeX_float = 0
     # planeY_float = .66
+
     
 
     posX = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
@@ -156,12 +164,13 @@ def sim_raycast(h_count_float, posX_float, posY_float, dirX_float, dirY_float, p
 
     deltaDistX_float = abs(1 / rayDirX_float) if (rayDirY_float != 0) else 0
     deltaDistY_float = abs(1 / rayDirY_float) if (rayDirY_float != 0) else 0
+    # print(f"deltaDist_float: {deltaDistX_float}, {deltaDistY_float}")
 
     deltaDistX = Fxp(None, signed=True, n_word=16, n_frac=8, rounding='around')
     deltaDistY = Fxp(None, signed=True, n_word=16, n_frac=8, rounding='around')
 
-    deltaDistX.set_val((abs(1 / rayDirX) if (rayDirX.astype(float) != 0) else 0).get_val())
-    deltaDistY.set_val((abs(1 / rayDirY) if (rayDirY.astype(float) != 0) else 0).get_val())
+    deltaDistX.set_val((abs(1 / rayDirX).get_val() if (float(rayDirX) != 0) else 0))
+    deltaDistY.set_val((abs(1 / rayDirY).get_val() if (float(rayDirY) != 0) else 0))
 
     sideDistX = Fxp(None, signed=True, n_word=16, n_frac=8, rounding='around')
     sideDistY = Fxp(None, signed=True, n_word=16, n_frac=8, rounding='around')
@@ -197,16 +206,61 @@ def sim_raycast(h_count_float, posX_float, posY_float, dirX_float, dirY_float, p
     # print(f"cameraX as float: {cameraX_Q12_12.astype(float)}")
     # print(f"cameraX in hex: {cameraX_Q12_12.hex()}")
     # print(f"cameraX in 8.8: {cameraX.astype(float)}")
-    print(f"cameraX in 8.8: {cameraX.hex()}")
-    print(f"rayDir w/o fp math: {rayDirX_float}, {rayDirY_float}, deltaDist w/o fp math: {deltaDistX_float}, {deltaDistY_float}, sideDist w/o fp math: {sideDistX_float}, {sideDistY_float}")
-    print(f"rayDir: {rayDirX.astype(float)}, {rayDirY.astype(float)}, (HEX: {rayDirX.hex()}, {rayDirY.hex()}), (BIN: {rayDirX.bin(frac_dot=True)}, {rayDirY.bin(frac_dot=True)})")
-    print(f"deltaDist: {deltaDistX.astype(float)}, {deltaDistY.astype(float)}, (HEX: {deltaDistX.hex()}, {deltaDistY.hex()}), (BIN: {deltaDistX.bin(frac_dot=True)}, {deltaDistY.bin(frac_dot=True)})")
-    print(f"sideDist: {sideDistX.astype(float)}, {sideDistY.astype(float)}, (HEX: {sideDistX.hex()}, {sideDistY.hex()}), (BIN: {sideDistX.bin(frac_dot=True)}, {sideDistY.bin(frac_dot=True)})")
-    print(f"step: {stepX}, {stepY}")
+    # print(f"cameraX in 8.8: {cameraX.hex()}")
+    # print(f"rayDir w/o fp math: {rayDirX_float}, {rayDirY_float}, deltaDist w/o fp math: {deltaDistX_float}, {deltaDistY_float}, sideDist w/o fp math: {sideDistX_float}, {sideDistY_float}")
+    # print(f"rayDir: {rayDirX.astype(float)}, {rayDirY.astype(float)}, (HEX: {rayDirX.hex()}, {rayDirY.hex()}), (BIN: {rayDirX.bin(frac_dot=True)}, {rayDirY.bin(frac_dot=True)})")
+    # print(f"deltaDist: {deltaDistX.astype(float)}, {deltaDistY.astype(float)}, (HEX: {deltaDistX.hex()}, {deltaDistY.hex()}), (BIN: {deltaDistX.bin(frac_dot=True)}, {deltaDistY.bin(frac_dot=True)})")
+    # print(f"sideDist: {sideDistX.astype(float)}, {sideDistY.astype(float)}, (HEX: {sideDistX.hex()}, {sideDistY.hex()}), (BIN: {sideDistX.bin(frac_dot=True)}, {sideDistY.bin(frac_dot=True)})")
+    # print(f"step: {stepX}, {stepY}")
     # print(f"sideDist: {sideDistX}, {sideDistY}")
     # print('values here should be correctly adjusted when dda_data_ready_out')
+    return [rayDirX, rayDirY, deltaDistX, deltaDistY, sideDistX, sideDistY, stepX, stepY, cameraX]
 
     # print(sim_dda(h_count_float, stepX, stepY, rayDirX, rayDirY, deltaDistX, deltaDistY, posX, posY, sideDistX, sideDistY))
+
+def calculate_percent_error(dut, simulated_ray):
+    def hex_to_float(hex_val):
+        """Convert Q8.8 fixed-point hex value to float."""
+        signed_val = int(hex_val, 16)
+        if signed_val & 0x8000:  # Check if the sign bit is set
+            signed_val -= 0x10000  # Convert to negative two's complement
+        return signed_val / 256.0
+
+    def percent_error(dut_val, sim_val):
+        """Calculate percent error, handle division by zero."""
+        if sim_val == 0:
+            return float('inf')  # Infinite percent error if simulated value is 0
+        return abs(dut_val - sim_val) / abs(sim_val) * 100
+
+    # Extract DUT and Simulated values
+    dut_stepX = -1 if dut.stepX.value == 0 else 1
+    dut_stepY = -1 if dut.stepY.value == 0 else 1
+    # sim_stepX = -1 if simulated_ray[6].astype(int) == 0 else 1
+    # sim_stepY = -1 if simulated_ray[7].astype(int) == 0 else 1
+
+    params = [
+        ("rayDirX", dut.rayDirX.value, simulated_ray[0].hex()),
+        ("rayDirY", dut.rayDirY.value, simulated_ray[1].hex()),
+        ("deltaDistX", dut.deltaDistX.value, simulated_ray[2].hex()),
+        ("deltaDistY", dut.deltaDistY.value, simulated_ray[3].hex()),
+        ("sideDistX", dut.sideDistX.value, simulated_ray[4].hex()),
+        ("sideDistY", dut.sideDistY.value, simulated_ray[5].hex()),
+        # ("stepX", dut.stepX.value, simulated_ray[6].hex()),
+        # ("stepY", dut.stepY.value, simulated_ray[7].hex())
+    ]
+
+    for name, dut_hex, sim_hex in params:
+        dut_val = hex_to_float(hex(dut_hex))
+        sim_val = hex_to_float(sim_hex)
+        error = percent_error(dut_val, sim_val)
+        print(f"{name}: DUT={dut_val:.6f}, Sim={sim_val:.6f}, Percent Error={error:.2f}%")
+
+    # print(f"stepX: DUT={dut_stepX}, Sim={sim_stepX}, Match={dut_stepX == sim_stepX}")
+    # print(f"stepY: DUT={dut_stepY}, Sim={sim_stepY}, Match={dut_stepY == sim_stepY}")
+
+    print(f"stepX: DUT={dut_stepX}, Sim={simulated_ray[6].astype(int)}")
+    print(f"stepY: DUT={dut_stepY}, Sim={simulated_ray[7].astype(int)}")
+
 
 @cocotb.test()
 async def test_a(dut):
@@ -221,6 +275,10 @@ async def test_a(dut):
 
     await ClockCycles(dut.pixel_clk_in, 2)
 
+    screenWidth_float = 320
+
+
+    #PASSED TEST 1: 
     posX_float = 22.5
     posY_float = 12.5
     dirX_float = -1
@@ -228,34 +286,82 @@ async def test_a(dut):
     planeX_float = 0
     planeY_float = .66
 
-    posX = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    posY = Fxp(posY_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    dirX = Fxp(dirX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    dirY = Fxp(dirY_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    planeX = Fxp(planeX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    planeY = Fxp(planeY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    posX_fp = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    posY_fp = Fxp(posY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    dirX_fp = Fxp(dirX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    dirY_fp = Fxp(dirY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    planeX_fp = Fxp(planeX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    planeY_fp = Fxp(planeY_float, signed=True, n_word=16, n_frac=8, rounding='around')
 
-    dut.posX.value = posX
-    dut.posY.value = posY
-    dut.dirX.value = dirX
-    dut.dirY.value = dirY
-    dut.planeX.value = planeX
-    dut.planeY.value = planeY
+    dut.posX.value = int(posX_fp.raw())
+    dut.posY.value = int(posY_fp.raw())
+    dut.dirX.value = int(dirX_fp.raw())
+    dut.dirY.value = int(dirY_fp.raw())
+    dut.planeX.value = int(planeX_fp.raw())
+    dut.planeY.value = int(planeY_fp.raw())
+    dut.dda_data_ready_out.value = 1
+    await RisingEdge(dut.valid_ray_out)
 
 
     for hcount_ray in range(screenWidth_float):
         dut.hcount_in.value = hcount_ray
-        sim_raycast(hcount_ray, posX_float, posY_float, dirX_float, dirY_float, planeX_float, planeY_float)
+        simulated_ray = sim_raycast(hcount_ray, posX_float, posY_float, dirX_float, dirY_float, planeX_float, planeY_float)
+        print(simulated_ray)
+        print([x.hex() for x in simulated_ray])
+        # simulated_rayX = simulated_ray[0]
+        # assert dut.rayDirX.value.integer == int(simulated_ray[0].raw())
+        # assert dut.rayDirY.value.integer == simulated_ray[1].raw()
+        # assert dut.deltaDistX.value.integer == simulated_ray[2].raw()
+        # assert dut.deltaDistY.value.integer == simulated_ray[3]
+        # assert dut.sideDistX.value.integer == simulated_ray[4]
+        # assert dut.sideDistY.value.integer == simulated_ray[5]
+        # assert dut.stepX.value.integer == simulated_ray[6]
+        # assert dut.stepY.value.integer == simulated_ray[7]
+
+        await RisingEdge(dut.valid_ray_out)
+        await ClockCycles(dut.pixel_clk_in, 1)
         dut._log.info(f"hcount_ray={dut.hcount_in.value}, "
-                    f"cameraX={dut.cameraX.value}, "
-                    f"rayDirX={dut.rayDirX.value}, "
-                    f"rayDirY={dut.rayDirY.value}, "
-                    f"deltaDistX={dut.deltaDistX.value},"
-                    f"deltaDistY={dut.deltaDistY.value},"
-                    f"stepX={dut.stepX.value},"
-                    f"stepY={dut.stepX.value},"
-                    f"sideDistX={dut.sideDistX.value},"
-                    f"sideDistY={dut.sideDistY.value},")
+                    f"cameraX={hex(dut.cameraX.value)}, "
+                    f"rayDirX={hex(dut.rayDirX.value)}, "
+                    f"rayDirY={hex(dut.rayDirY.value)}, "
+                    f"deltaDistX={hex(dut.deltaDistX.value)},"
+                    f"deltaDistY={hex(dut.deltaDistY.value)},"
+                    f"stepX={hex(dut.stepX.value)},"
+                    f"stepY={hex(dut.stepX.value)},"
+                    f"sideDistX={hex(dut.sideDistX.value)},"
+                    f"sideDistY={hex(dut.sideDistY.value)},")
+        
+        # print(f"rayDirX (DUT vs Sim): {hex(dut.rayDirX.value)} vs {simulated_ray[0].hex()}")
+        # print(f"rayDirY (DUT vs Sim): {hex(dut.rayDirY.value)} vs {simulated_ray[1].hex()}")
+        # print(f"deltaDistX (DUT vs Sim): {hex(dut.deltaDistX.value)} vs {simulated_ray[2].hex()}")
+        # print(f"deltaDistY (DUT vs Sim): {hex(dut.deltaDistY.value)} vs {simulated_ray[3].hex()}")
+        # print(f"sideDistX (DUT vs Sim): {hex(dut.sideDistX.value)} vs {simulated_ray[4].hex()}")
+        # print(f"sideDistY (DUT vs Sim): {hex(dut.sideDistY.value)} vs {simulated_ray[5].hex()}")
+        # print(f"stepX (DUT vs Sim): {hex(dut.stepX.value)} vs {simulated_ray[6].hex()}")
+        # print(f"stepY (DUT vs Sim): {hex(dut.stepY.value)} vs {simulated_ray[7].hex()}")
+
+        calculate_percent_error(dut, simulated_ray)
+
+        #1980.00ns
+        # print(f"rayDirX (DUT vs Sim): {float(dut.rayDirX.value) / 256.0} vs {simulated_ray[0].astype(float)}")
+        # print(f"rayDirY (DUT vs Sim): {float(dut.rayDirY.value) / 256.0} vs {simulated_ray[1].astype(float)}")
+        # print(f"deltaDistX (DUT vs Sim): {float(dut.deltaDistX.value) / 256.0} vs {simulated_ray[2].astype(float)}")
+        # print(f"deltaDistY (DUT vs Sim): {float(dut.deltaDistY.value) / 256.0} vs {simulated_ray[3].astype(float)}")
+        # print(f"sideDistX (DUT vs Sim): {float(dut.sideDistX.value) / 256.0} vs {simulated_ray[4].astype(float)}")
+        # print(f"sideDistY (DUT vs Sim): {float(dut.sideDistY.value) / 256.0} vs {simulated_ray[5].astype(float)}")
+        # print(f"stepX (DUT vs Sim): {dut.stepX.value} vs {simulated_ray[6].astype(float)}")
+        # print(f"stepY (DUT vs Sim): {dut.stepY.value} vs {simulated_ray[7].astype(float)}")
+        
+        # assert dut.rayDirX.value.integer == int(simulated_ray[0].raw())
+        # assert dut.rayDirY.value.integer == int(simulated_ray[1].raw())
+        # await ClockCycles(dut.pixel_clk_in, 1)
+    
+            # assert dut.deltaDistX.value.integer == simulated_ray[2].raw()
+            # assert dut.deltaDistY.value.integer == simulated_ray[3]
+            # assert dut.sideDistX.value.integer == simulated_ray[4]
+            # assert dut.sideDistY.value.integer == simulated_ray[5]
+            # assert dut.stepX.value.integer == simulated_ray[6]
+            # assert dut.stepY.value.integer == simulated_ray[7]
 
 def raycaster_runner():
     """Python runner."""

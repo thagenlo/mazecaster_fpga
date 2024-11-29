@@ -44,7 +44,7 @@ module ray_calculations (
   logic signed [47:0] cameraXMultiply; //is Q8.8 fixed point, TODO: try Q2.
   logic signed [31:0] cameraX;
   assign cameraXMultiply = ((fixed_pt_hcount * SCREEN_WIDTH_RECIPRICAL) << 1); // 2*x/w- 1 // (12.12)*(12.12)
-  assign cameraX = cameraXMultiply[39:8] + 32'b11111111111111110000000000000000;
+  assign cameraX = (cameraXMultiply[39:8]) + 32'b11111111111111110000000000000000;
   
   //might need to pipeline this multiplication once or twice
 
@@ -53,9 +53,6 @@ module ray_calculations (
   logic valid_ray_calculated;
 
   logic [6:0] mapX, mapY;
-  // logic [15:0] posX, posY;
-  // logic [15:0] dirX, dirY;
-  // logic [32:0] planeX, planeY;
 
   logic start_rayDirX;
   logic busy_rayDirX;
@@ -73,8 +70,6 @@ module ray_calculations (
   logic signed [15:0] rayDirY_recip_out;
   logic signed [31:0] tempSideDistY;
 
-//   logic signed [31:0] tempPlaneX;
-//   logic signed [31:0] tempPosX;
   logic signed [31:0] tempRayDirXMultiply;
   logic signed [15:0] tempCameraX;
 
@@ -111,8 +106,6 @@ module ray_calculations (
 
   always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
-    //   rayDirX <= 0;
-      // currentRayDirX <= 0;
       stepX <= 0;
       sideDistX <= 0;
       deltaDistX <= 0;
@@ -120,7 +113,6 @@ module ray_calculations (
       start_rayDirX <= 0;
       ready_rayDirX <= 0;
 
-    //   currentRayDirY <= 0;
       stepY <= 0;
       sideDistY <= 0;
       deltaDistY <= 0;
@@ -128,9 +120,7 @@ module ray_calculations (
       start_rayDirY <= 0;
       ready_rayDirY <= 0;
 
-      div_busy <= 0;
-      // tabulate_in <= 0; //triggering the divide
-      
+      div_busy <= 0;      
       valid_ray_calculated <= 0;
       state <= RESTING;
       valid_ray_out <= 0;
@@ -140,11 +130,8 @@ module ray_calculations (
           case(state)
             RESTING: begin
               if (~div_busy) begin
-                // valid_ray_out <= 0;
                 start_rayDirX <= 1;
                 start_rayDirY <= 1;
-                // currentRayDirY <= rayDirY;
-                // currentRayDirX <= rayDirX;
                 div_busy <= 1;
                 state <= DIVIDING;
               end
@@ -154,22 +141,19 @@ module ray_calculations (
               start_rayDirY <= 0;
               if (ready_rayDirX & ready_rayDirY) begin
                   valid_ray_calculated <= 1;
-                  // div_busy <= 0;
                   ready_rayDirX <= 0;
                   ready_rayDirY <= 0;
-                //   tempSideDistX <= (({8'b0, posX[7:0]})) * $signed(deltaDistX);
-                //   tempSideDistY <= (({8'b0, posY[7:0]})) * $signed(deltaDistY);
-                //   deltaDistX <= ~(rayX_recip_out) + 16'b0000_0001_0000_0000; //taking absolute value
-                  
                   state <= DELTA_DIST_CALC;
               end if (done_rayDirX) begin
                 //TODO have intermediate registers with what current posX,Y etc are
                   ready_rayDirX <= 1;
                   deltaDistX <= rayDirX_recip_out;
+                  // $display("Time: %0t | deltaDistX (divider result): %d", $time, deltaDistX);
                   state <= DIVIDING;
               end if (done_rayDirY) begin
                   ready_rayDirY <= 1;
                   deltaDistY <= rayDirY_recip_out;
+                  // $display("Time: %0t | deltaDistY (divider result): %h", $time, deltaDistY);
                   state <= DIVIDING;
               end
             end
@@ -179,12 +163,8 @@ module ray_calculations (
                     if (deltaDistX[15]) begin //positive values of delta distance, need step/sidedist for DDA
                         stepX <= 0; //meaning this is negative 1
                         deltaDistX <= ~(deltaDistX) + 16'b0000_0000_0000_0001; //twos complement of delta dis
-                        // tempSideDistX <= (({8'b0, posX[7:0]})) * $signed(deltaDistX);
-                        // sideDistX <= tempSideDistX[23:8]; //mapX is the floor of posX
                     end else begin
                         stepX <= 1; //meaning this is positive 1
-                        // sideDistX <= (~tempSideDistY[23:8]) + 16'b0000_0000_0000_0001;
-                        // tempSideDistX <= (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000) * $signed(deltaDistX);
                     end
                     if (deltaDistY[15]) begin
                         stepY <= 0; //meaning this is negative 1
@@ -192,38 +172,20 @@ module ray_calculations (
                     end else begin
                         stepY <= 1; //meaning this is positive 1
                     end
-
-                    // if (rayDirY[15]) begin
-                    //     stepY <= 0;
-                    //     sideDistY <= tempSideDistY[23:8];
-                    // end else begin
-                    //     stepX <= 1;
-                    //     sideDistY <= (~tempSideDistY[23:8]) + 16'b1111111100000000;
-                    // end 
                     state <= SIDE_DIST_CALC;
                 end
             end
             SIDE_DIST_CALC: begin
-                // if (~stepX) begin //if stepX is -1
-                //     tempSideDistX <= ({8'b0, posX[7:0]}) * $signed(deltaDistX); //sideDistX = (posX - mapX) * deltaDistX;
-                //     // sideDistX <= tempSideDistX[23:8]; //mapX is the floor of posX
-                // end else begin //if stepX is +1
-                //     tempSideDistX <= (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX); //sideDistX = (mapX + 1.0 - posX) * deltaDistX;
-                // end
+                $display("Time: %0t | final deltaDistX: %h", $time, deltaDistX);
+                $display("Time: %0t | final deltaDistY: %h", $time, deltaDistY);
                 sideDistX <= tempSideDistX[23:8];
                 sideDistY <= tempSideDistY[23:8];
-                // hcount_out <= hcount_in;
                 state <= VALID_OUT;
                 valid_ray_out <= 1;
             end
             VALID_OUT: begin
-                //valid_ray_out <= 1;
                   if (dda_data_ready_out) begin
-                    // data is not sent to the FIFO unless dda_data_ready_out is high
-                    // sideDistX <= tempSideDistX[23:8];
-
                     valid_ray_out <= 0;
-
                     div_busy <= 1'b0;
                     state <= RESTING;
                   end
