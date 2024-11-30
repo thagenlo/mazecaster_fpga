@@ -172,13 +172,21 @@ module top_level(
     // assign planeX = 16'b0000_0000_0111_0110; 
     // assign planeY = 16'b1111_1111_1000_1010;
 
-    // *** TEST 4 (HEBA) 45 DEG & CLOSER TO CORNER: pos X,Y (20.5, 4.5) - dir X,Y (-.707, -.707) - plane X,Y (.466, -.466)
-    assign posX = 16'b0001010010000000;
-    assign posY = 16'b00000100_10000000;
-    assign dirX = 16'b1111_1111_1011_0100;
-    assign dirY = 16'b1111_1111_1011_0100;
-    assign planeX = 16'b0000_0000_0111_0110; 
-    assign planeY = 16'b1111_1111_1000_1010;
+    // *** TEST 5 (HEBA) 45 DEG & CLOSER TO CORNER: pos X,Y (20.5, 4.5) - dir X,Y (-.707, -.707) - plane X,Y (.466, -.466)
+    // assign posX = 16'b0001010010000000;
+    // assign posY = 16'b00000100_10000000;
+    // assign dirX = 16'b1111_1111_1011_0100;
+    // assign dirY = 16'b1111_1111_1011_0100;
+    // assign planeX = 16'b0000_0000_0111_0110; 
+    // assign planeY = 16'b1111_1111_1000_1010;
+
+    // *** TEST 5 (HEBA) MOVING TO TOP RIGHT QUAD: pos X,Y (6.5, 17.5) - dir X,Y (.707, -.707) - plane X,Y (.5, .5)
+    assign posX = 16'b0000011010000000; 
+    assign posY = 16'b0001000100000000; 
+    assign dirX = 16'b0000001011011110; 
+    assign dirY = 16'b1111111011011110; 
+    assign planeX = 16'b0000001000000000; 
+    assign planeY = 16'b0000001000000000; 
 
     //TODO: INSERT RAY CALCULATION MODULE
 
@@ -411,6 +419,5 @@ module top_level(
     OBUFDS OBUFDS_green(.I(tmds_signal[1]), .O(hdmi_tx_p[1]), .OB(hdmi_tx_n[1]));
     OBUFDS OBUFDS_red  (.I(tmds_signal[2]), .O(hdmi_tx_p[2]), .OB(hdmi_tx_n[2]));
     OBUFDS OBUFDS_clock(.I(clk_pixel), .O(hdmi_clk_p), .OB(hdmi_clk_n));
-
 endmodule
 `default_nettype wire

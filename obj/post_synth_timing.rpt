@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date         : Fri Nov 29 02:33:38 2024
-| Host         : eecs-digital-37 running 64-bit Ubuntu 24.04.1 LTS
+| Date         : Sat Nov 30 16:07:42 2024
+| Host         : eecs-digital-03 running 64-bit Ubuntu 24.04 LTS
 | Command      : report_timing -file obj/post_synth_timing.rpt
 | Design       : top_level
 | Device       : 7s50-csga324
@@ -15,7 +15,7 @@ Timing Report
 Slack (VIOLATED) :        -1.566ns  (required time - arrival time)
   Source:                 hcount_ray_in_reg[4]/C
                             (rising edge-triggered cell FDRE clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
-  Destination:            calculating_ray/rayDirY_recip/bu_reg[0]/CE
+  Destination:            calculating_ray/rayDirX_recip/bu_reg[0]/CE
                             (rising edge-triggered cell FDRE clocked by clk_pixel_clk_wiz_0  {rise@0.000ns fall@6.734ns period=13.468ns})
   Path Group:             clk_pixel_clk_wiz_0
   Path Type:              Setup (Max at Slow Process Corner)
@@ -62,24 +62,24 @@ Slack (VIOLATED) :        -1.566ns  (required time - arrival time)
                          CARRY4 (Prop_carry4_CI_O[1])
                                                       0.348     3.389 r  calculating_ray/stepX2_i_1/O[1]
                          net (fo=2, unplaced)         0.800     4.189    calculating_ray/B[12]
-                         DSP48E1 (Prop_dsp48e1_B[12]_P[12])
-                                                      3.835     8.024 f  calculating_ray/stepY2/P[12]
-                         net (fo=1, unplaced)         0.800     8.823    calculating_ray/rayDirY_recip/P[4]
-                         LUT1 (Prop_lut1_I0_O)        0.124     8.947 r  calculating_ray/rayDirY_recip/xpm_fifo_axis_inst_i_30/O
-                         net (fo=1, unplaced)         0.000     8.947    calculating_ray/rayDirY_recip/xpm_fifo_axis_inst_i_30_n_0
+                         DSP48E1 (Prop_dsp48e1_B[12]_P[11])
+                                                      3.835     8.024 f  calculating_ray/stepX2/P[11]
+                         net (fo=1, unplaced)         0.800     8.823    calculating_ray/rayDirX_recip/P[3]
+                         LUT1 (Prop_lut1_I0_O)        0.124     8.947 r  calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_15/O
+                         net (fo=1, unplaced)         0.000     8.947    calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_15_n_0
                          CARRY4 (Prop_carry4_S[1]_CO[3])
-                                                      0.550     9.497 r  calculating_ray/rayDirY_recip/xpm_fifo_axis_inst_i_8/CO[3]
-                         net (fo=1, unplaced)         0.009     9.506    calculating_ray/rayDirY_recip/xpm_fifo_axis_inst_i_8_n_0
+                                                      0.550     9.497 r  calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_4/CO[3]
+                         net (fo=1, unplaced)         0.009     9.506    calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_4_n_0
                          CARRY4 (Prop_carry4_CI_O[2])
-                                                      0.256     9.762 r  calculating_ray/rayDirY_recip/xpm_fifo_axis_inst_i_7/O[2]
-                         net (fo=3, unplaced)         0.923    10.685    calculating_ray/rayDirY_recip/rayDirY[6]
-                         LUT4 (Prop_lut4_I0_O)        0.301    10.986 f  calculating_ray/rayDirY_recip/FSM_sequential_state[0]_i_3__0/O
-                         net (fo=1, unplaced)         0.902    11.888    calculating_ray/rayDirY_recip/FSM_sequential_state[0]_i_3__0_n_0
-                         LUT6 (Prop_lut6_I0_O)        0.124    12.012 f  calculating_ray/rayDirY_recip/FSM_sequential_state[0]_i_2__0/O
-                         net (fo=3, unplaced)         0.467    12.479    calculating_ray/rayDirY_recip/FSM_sequential_state[0]_i_2__0_n_0
-                         LUT5 (Prop_lut5_I4_O)        0.124    12.603 r  calculating_ray/rayDirY_recip/bu[14]_i_1__0/O
-                         net (fo=16, unplaced)        0.527    13.130    calculating_ray/rayDirY_recip/sig_diff
-                         FDRE                                         r  calculating_ray/rayDirY_recip/bu_reg[0]/CE
+                                                      0.256     9.762 r  calculating_ray/rayDirX_recip/xpm_fifo_axis_inst_i_3/O[2]
+                         net (fo=3, unplaced)         0.923    10.685    calculating_ray/rayDirX_recip/rayDirX[6]
+                         LUT4 (Prop_lut4_I0_O)        0.301    10.986 f  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_3/O
+                         net (fo=1, unplaced)         0.902    11.888    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_3_n_0
+                         LUT6 (Prop_lut6_I0_O)        0.124    12.012 f  calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2/O
+                         net (fo=3, unplaced)         0.467    12.479    calculating_ray/rayDirX_recip/FSM_sequential_state[0]_i_2_n_0
+                         LUT5 (Prop_lut5_I4_O)        0.124    12.603 r  calculating_ray/rayDirX_recip/bu[14]_i_1/O
+                         net (fo=16, unplaced)        0.527    13.130    calculating_ray/rayDirX_recip/sig_diff_0
+                         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[0]/CE
   -------------------------------------------------------------------    -------------------
 
                          (clock clk_pixel_clk_wiz_0 rise edge)
@@ -92,11 +92,11 @@ Slack (VIOLATED) :        -1.566ns  (required time - arrival time)
                                                      -5.378     9.899 r  mhdmicw/mmcm_adv_inst/CLKOUT0
                          net (fo=1, unplaced)         0.760    10.659    mhdmicw/clk_pixel_clk_wiz_0
                          BUFG (Prop_bufg_I_O)         0.091    10.750 r  mhdmicw/clkout1_buf/O
-                         net (fo=1481, unplaced)      0.655    11.405    calculating_ray/rayDirY_recip/clk_pixel
-                         FDRE                                         r  calculating_ray/rayDirY_recip/bu_reg[0]/C
+                         net (fo=1481, unplaced)      0.655    11.405    calculating_ray/rayDirX_recip/clk_pixel
+                         FDRE                                         r  calculating_ray/rayDirX_recip/bu_reg[0]/C
                          clock pessimism              0.530    11.935    
                          clock uncertainty           -0.168    11.767    
-                         FDRE (Setup_fdre_C_CE)      -0.202    11.565    calculating_ray/rayDirY_recip/bu_reg[0]
+                         FDRE (Setup_fdre_C_CE)      -0.202    11.565    calculating_ray/rayDirX_recip/bu_reg[0]
   -------------------------------------------------------------------
                          required time                         11.565    
                          arrival time                         -13.130    
