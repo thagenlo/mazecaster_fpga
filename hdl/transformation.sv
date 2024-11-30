@@ -85,9 +85,9 @@ assign mapData_in = fifo_data_store[19:16];
 assign wallX_in = fifo_data_store[15:0];
 
 // TO USE IN MODULE
-logic [9:0] vcount_ray;
-logic [9:0] draw_start;
-logic [9:0] draw_end;
+logic [7:0] vcount_ray;
+logic [7:0] draw_start;
+logic [7:0] draw_end;
 
 always_comb begin
     case (state)
