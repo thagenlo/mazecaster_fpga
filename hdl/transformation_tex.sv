@@ -66,7 +66,6 @@ logic [7:0] draw_end;
 logic [15:0] tex_pixel;
 logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
-//TODO: INSERT TEXTURE MODULE INTSTANTIATION
 
 textures texture_mod (
     .pixel_clk_in(clk_pixel),
@@ -125,7 +124,7 @@ always_ff @(posedge pixel_clk_in) begin
             end
 
             FLATTENING: begin
-                if ((vcount_ray >= draw_start) && (vcount_ray < draw_end)) begin
+                if ((vcount_ray >= draw_start) && (vcount_ray < draw_end)) begin // if we've hit a wall
                     case (mapData_in) // based on map data
                         // easy 1 cycle cases
                         0, 1, 2: begin
@@ -162,6 +161,7 @@ always_ff @(posedge pixel_clk_in) begin
                                 // method
                                 ray_last_pixel_out <= tex_pixel_out;
                                 ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
+                                tex_counter <= 0;
                                 // state transitions
                                 if (vcount_ray < SCREEN_HEIGHT-1) begin
                                     vcount_ray <= vcount_ray + 1;
@@ -190,8 +190,6 @@ always_ff @(posedge pixel_clk_in) begin
                     end
                 end
             end
-
-            default : vcount_ray <= 0;
         endcase
     end
 end
