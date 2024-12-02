@@ -56,29 +56,6 @@ module top_level(
     // assign fwd_btn = btn[3];
     // assign bwd_btn = btn[2];
  
-    // debouncer deb_leftRot_btn (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .dirty_in(btn[1]),
-    //     .clean_out(leftRot_btn));
-
-    // debouncer deb_rightRot_btn (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .dirty_in(btn[0]),
-    //     .clean_out(rightRot_btn));
-    
-    // debouncer deb_fwd_btn (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .dirty_in(btn[3]),
-    //     .clean_out(fwd_btn));
-
-    // debouncer deb_bwd_btn (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .dirty_in(btn[2]),
-    //     .clean_out(bwd_btn));
 
     //TODO: PIPELINING
 
@@ -102,21 +79,19 @@ module top_level(
     logic [15:0] planeX, planeY;
     // logic valid_controller_out;
 
-    // controller controller_in (
+    // btn_control controller (
     //     .pixel_clk_in(clk_pixel),
     //     .rst_in(sys_rst),
-    //     .moveFwd(fwd_btn),
-    //     .moveBack(bwd_btn),
-    //     .rotLeft(leftRot_btn),
-    //     .rotRight(rightRot_btn),
-    //     .valid_in(),
+    //     .fwd_btn(fwd_btn),
+    //     .bwd_btn(bwd_btn),
+    //     .leftRot_btn(leftRot_btn),
+    //     .rightRot_btn(rightRot_btn),
     //     .posX(posX),
     //     .posY(posY),
     //     .dirX(dirX),
     //     .dirY(dirY),
     //     .planeX(planeX), 
     //     .planeY(planeY),
-    //     .valid_out(valid_controller_out)
     // );
 
 
