@@ -13,7 +13,8 @@ module textures (
     input wire [15:0] wallX_in,
     input wire [7:0] vcount_ray_in,
     input wire [3:0] texture_in, // which texture (map_data)
-    output logic [15:0] tex_pixel_out
+    output logic [15:0] tex_pixel_out,
+    output logic valid_tex_out
 );
 
 localparam [4:0] PIXEL_WIDTH = 16;
@@ -30,6 +31,9 @@ logic [17:0] second_part;
 logic [15:0] tex1_out;
 logic [15:0] tex2_out;
 logic [15:0] tex3_out;
+logic [1:0] valid_out_pipe;
+
+assign valid_tex_out = valid_out_pipe[1];
 
 always_comb begin
     case (texture_in) 
@@ -45,6 +49,21 @@ always_comb begin
         address = first_part + second_part;
     end   
 end
+
+// pipelining  to signal 2 cycle wait for texture bram valid output
+logic valid_req_past;
+
+always_ff @(posedge pixel_clk_in) begin
+    if (rst_in) begin
+        valid_out_pipe <= 2'b0;
+        valid_req_past <= 0;
+    end else begin
+        valid_req_past <= valid_req_in;
+        valid_out_pipe[0] <= (valid_req_in && !valid_req_past);
+        valid_out_pipe[1] <= valid_out_pipe[0];
+    end
+end
+
 
 //TODO: insert texture files
 xilinx_single_port_ram_read_first #(

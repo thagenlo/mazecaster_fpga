@@ -58,6 +58,9 @@ assign wallType_in = fifo_data_store[20];
 assign mapData_in = fifo_data_store[19:16];
 assign wallX_in = fifo_data_store[15:0];
 
+assign draw_start = HALF_SCREEN_HEIGHT - half_line_height;
+assign draw_end = HALF_SCREEN_HEIGHT + half_line_height;
+
 // TO USE IN MODULE
 logic [7:0] vcount_ray;
 logic [7:0] draw_start;
@@ -66,6 +69,7 @@ logic [7:0] draw_end;
 logic [15:0] tex_pixel;
 logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
+logic valid_tex_out;
 
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),
@@ -74,7 +78,8 @@ textures texture_module (
     .wallX_in(wallX_in),
     .vcount_ray_in(vcount_ray),
     .texture_in(mapData_in),
-    .tex_pixel_out(tex_pixel)
+    .tex_pixel_out(tex_pixel),
+    .valid_tex_out(valid_tex_out)
 );
 
 // always_comb begin
@@ -93,17 +98,17 @@ always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
         vcount_ray <= 0;
         state <= FIFO_DATA_WAIT;
-        tex_counter <= 0;
         tex_req <= 0;
         transformer_tready_out <= 1;
+
     end else begin
         case (state)
             FIFO_DATA_WAIT: begin
-                transformer_tready_out <= 0;
                 ray_last_pixel_out <= 0;
                 if (dda_fifo_tvalid_in) begin // handshake for fifo data
-                    state <= FLATTENING;
+                    transformer_tready_out <= 0; // only set ready back to 0 when we have a valid handshake
                     fifo_data_store <= dda_fifo_tdata_in; // store fifo data in a register
+                    state <= FLATTENING;
                 end else begin
                     state <= FIFO_DATA_WAIT;
                 end
@@ -136,19 +141,11 @@ always_ff @(posedge pixel_clk_in) begin
 
                         // accessing texture modules
                         3, 4, 5: begin
-                            if (tex_counter == 0) begin
-                                tex_req <= 1;
-                                tex_counter <= tex_counter + 1;
-                                state <= FLATTENING;
-                            end else if (tex_counter == 1) begin
+                            if (valid_tex_out) begin // handshake with texture data
                                 tex_req <= 0;
-                                tex_counter <= tex_counter + 1;
-                                state <= FLATTENING;
-                            end else if (tex_counter == 2) begin
                                 // method
-                                ray_last_pixel_out <= tex_pixel;
+                                ray_pixel_out <= tex_pixel;
                                 ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-                                tex_counter <= 0;
                                 // state transitions
                                 if (vcount_ray < SCREEN_HEIGHT-1) begin
                                     vcount_ray <= vcount_ray + 1;
@@ -160,6 +157,8 @@ always_ff @(posedge pixel_clk_in) begin
                                     vcount_ray <= 0;
                                     state <= FIFO_DATA_WAIT;
                                 end
+                            end else begin
+                                tex_req <= 1;
                             end
                         end
                     endcase
