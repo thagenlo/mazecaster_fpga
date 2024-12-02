@@ -52,6 +52,7 @@ logic [3:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
 logic [15:0] wallX_in; //where on wall the ray hits
 
 logic [37:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+logic fifo_tlast_store;
 
 assign hcount_ray_in = fifo_data_store[37:29];
 assign half_line_height = (fifo_data_store[28:21] >> 1);
@@ -109,6 +110,7 @@ always_ff @(posedge pixel_clk_in) begin
                 if (dda_fifo_tvalid_in) begin // handshake for fifo data
                     transformer_tready_out <= 0; // only set ready back to 0 when we have a valid handshake
                     fifo_data_store <= dda_fifo_tdata_in; // store fifo data in a register
+                    fifo_tlast_store <= dda_fifo_tlast_in;
                     state <= FLATTENING;
                 end else begin
                     state <= FIFO_DATA_WAIT;
@@ -133,7 +135,7 @@ always_ff @(posedge pixel_clk_in) begin
                                 ray_last_pixel_out <= 0;
                                 state <= FLATTENING;
                             end else begin
-                                if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                                if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
                                     ray_last_pixel_out <= 1;
                                     if (frame_buff_ready_in) begin
                                         transformer_tready_out <= 1;
@@ -162,7 +164,7 @@ always_ff @(posedge pixel_clk_in) begin
                                     ray_last_pixel_out <= 0;
                                     state <= FLATTENING;
                                 end else begin
-                                    if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                                    if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
                                         ray_last_pixel_out <= 1;
                                         if (frame_buff_ready_in) begin
                                             transformer_tready_out <= 1;
@@ -190,7 +192,7 @@ always_ff @(posedge pixel_clk_in) begin
                         ray_last_pixel_out <= 0;
                         state <= FLATTENING;
                     end else begin
-                        if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                        if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
                             ray_last_pixel_out <= 1;
                             if (frame_buff_ready_in) begin
                                 transformer_tready_out <= 1;

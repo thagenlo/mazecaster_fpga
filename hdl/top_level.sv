@@ -369,7 +369,7 @@ module top_level(
         .dda_fifo_tvalid_in(fifo_tvalid_out),
         .dda_fifo_tdata_in(fifo_tdata_out[37:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
-        .frame_buffer_ready_in(frame_buff_ready).
+        .frame_buff_ready_in(frame_buff_ready),
         .transformer_tready_out(transformer_tready),
         .ray_address_out(ray_address_out),
         .ray_pixel_out(ray_pixel_out),
