@@ -70,13 +70,13 @@ localparam [15:0] WALL_COLOR = 0;
 localparam [7:0] HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 
 // FROM DDA FIFO
-logic [10:0] hcount_ray_in; //pipelined x_coord
-logic [9:0] half_line_height; // = SCREEN_HEIGHT/perpWallDist
+logic [8:0] hcount_ray_in; //pipelined x_coord
+logic [7:0] half_line_height; // = SCREEN_HEIGHT/perpWallDist
 logic wallType_in; // 0 = X wall hit, 1 = Y wall hit
 logic [3:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
 logic [15:0] wallX_in; //where on wall the ray hits
 
-logic [38:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+logic [37:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
 
 assign hcount_ray_in = fifo_data_store[37:29];
 assign half_line_height = (fifo_data_store[28:21] >> 1);
@@ -85,9 +85,9 @@ assign mapData_in = fifo_data_store[19:16];
 assign wallX_in = fifo_data_store[15:0];
 
 // TO USE IN MODULE
-logic [9:0] vcount_ray;
-logic [9:0] draw_start;
-logic [9:0] draw_end;
+logic [7:0] vcount_ray;
+logic [7:0] draw_start;
+logic [7:0] draw_end;
 
 always_comb begin
     case (state)
@@ -118,7 +118,6 @@ always_ff @(posedge pixel_clk_in) begin
         vcount_ray <= 0;
         state <= FIFO_DATA_WAIT;
         transformer_tready_out <= 1;
-        bram_counter <= 0;
     end else begin
         case (state)
             FIFO_DATA_WAIT: begin
