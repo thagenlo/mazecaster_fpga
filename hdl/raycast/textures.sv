@@ -21,11 +21,15 @@ localparam [8:0] TEX_WIDTH = 320;
 localparam [8:0] TEX_HEIGHT = 320;
 localparam [7:0] SCREEN_HEIGHT = 180;
 localparam [17:0] CONSTANT = TEX_WIDTH*TEX_HEIGHT/SCREEN_HEIGHT; // used in calc of texture address
-localparam [$clog2(CONST)-1:0] C = CONST; // 10 bits
+// localparam [$clog2(CONST)-1:0] C = CONST; // 10 bits
 
 logic [18:0] address;
 logic [16:0] first_part;
 logic [17:0] second_part;
+
+logic [15:0] tex1_out;
+logic [15:0] tex2_out;
+logic [15:0] tex3_out;
 
 always_comb begin
     case (texture_in) 
@@ -36,9 +40,9 @@ always_comb begin
     
     // calculating address (only calculate when we have a texture request)
     if (valid_req_in) begin
-        first_part = (wallX_in[7:0]*T_W)>>8;
-        second_part = vcount_ray_in*CONST;
-        address = (wallX_in*TEX_WIDTH)>>8 + vcount_ray_in*CONSTANT; 
+        first_part = (wallX_in[7:0]*TEX_WIDTH)>>8;
+        second_part = vcount_ray_in*CONSTANT;
+        address = first_part + second_part;
     end   
 end
 
