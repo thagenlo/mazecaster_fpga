@@ -32,6 +32,7 @@ module frame_buffer #(
                     input wire [15:0] ray_pixel_in,
                     input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
                     input wire video_last_pixel_in, // indicates the last 
+                    output logic switched,
                     output logic [23:0] rgb_out);
 
     // localparam PIXEL_WIDTH = 16;
@@ -76,7 +77,7 @@ module frame_buffer #(
         end
     end
 
-    logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
+    // logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
     logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
     
     // FRAME BUFFER 1

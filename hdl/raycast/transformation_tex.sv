@@ -23,6 +23,7 @@ module transformation_tex  #(
                         input wire dda_fifo_tvalid_in,
                         input wire [37:0] dda_fifo_tdata_in,
                         input wire dda_fifo_tlast_in,
+                        input wire frame_buff_ready_in,
 
                         output logic transformer_tready_out,         // tells FIFO that we're ready to receive next data (need a vcount counter)
 
@@ -152,10 +153,19 @@ always_ff @(posedge pixel_clk_in) begin
                                     ray_last_pixel_out <= 0;
                                     state <= FLATTENING;
                                 end else begin
-                                    ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
-                                    transformer_tready_out <= 1;
-                                    vcount_ray <= 0;
-                                    state <= FIFO_DATA_WAIT;
+                                    if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                                        ray_last_pixel_out <= 1;
+                                        if (frame_buff_ready_in) begin
+                                            transformer_tready_out <= 1;
+                                            vcount_ray <= 0;
+                                            state <= FIFO_DATA_WAIT;
+                                        end
+                                    end else begin
+                                        transformer_tready_out <= 1;
+                                        vcount_ray <= 0;
+                                        ray_last_pixel_out <= 0;
+                                        state <= FIFO_DATA_WAIT;
+                                    end
                                 end
                             end else begin
                                 tex_req <= 1;
@@ -171,10 +181,19 @@ always_ff @(posedge pixel_clk_in) begin
                         ray_last_pixel_out <= 0;
                         state <= FLATTENING;
                     end else begin
-                        transformer_tready_out <= 1;
-                        ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
-                        vcount_ray <= 0;
-                        state <= FIFO_DATA_WAIT;
+                        if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                            ray_last_pixel_out <= 1;
+                            if (frame_buff_ready) begin
+                                transformer_tready_out <= 1;
+                                vcount_ray <= 0;
+                                state <= FIFO_DATA_WAIT;
+                            end
+                        end else begin
+                            transformer_tready_out <= 1;
+                            vcount_ray <= 0;
+                            ray_last_pixel_out <= 0;
+                            state <= FIFO_DATA_WAIT;
+                        end
                     end
                 end
             end
