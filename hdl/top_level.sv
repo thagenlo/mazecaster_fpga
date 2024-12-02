@@ -95,6 +95,59 @@ module top_level(
     // );
 
 
+    always_comb begin
+        if (sys_rst) begin
+            // default or reset state (TEST 1)
+            posX = 16'b0000_1011_1000_0000;
+            posY = 16'b0000_1011_1000_0000;
+            dirX = 16'b0000_0001_0000_0000;
+            dirY = 16'b0000_0000_0000_0000;
+            planeX = 16'b0000_0000_0000_0000;
+            planeY = 16'b0000_0000_1010_1001;
+        end else begin
+            case (sw[2:1])  // use sw[2:1] to select among 4 cases
+                2'b00: begin
+                    // Test 1
+                    posX = 16'b0000_1011_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b0000_0001_0000_0000;
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b01: begin
+                    // Test 1 1/2 : pos X,Y (11.5, 11.5) - dir X,Y (-1,0)
+                    posX = 16'b0000_1011_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b1111_1111_0000_0000; // -1
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b10: begin
+                    // Test 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0)
+                    posX = 16'b0001_0100_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b1111_1111_0000_0000; // -1
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b11: begin
+                    // Test 3:pos X,Y (4.5, 11.5) - dir X,Y (0,1)
+                    posX = 16'b0000_0100_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b0000_0000_0000_0000;
+                    dirY = 16'b0000_0001_0000_0000; // +1
+                    planeX = 16'b0000_0000_1010_1001;
+                    planeY = 16'b0000_0000_0000_0000;
+                end
+            endcase
+        end
+    end
+
+    ////######////######////######////######////######////######////######////######////######
+
     // *** TEST 1: pos X,Y (11.5, 11.5) - dir X,Y (1?,0) ***
     // assign posX = 16'b0000_1011_1000_0000;
     // assign posY = 16'b0000_1011_1000_0000;
@@ -119,7 +172,7 @@ module top_level(
     // assign planeX = 0;
     // assign planeY = 16'b0000_0000_1010_1001;
     // *****************************************************
-    // *** TEST 2: pos X,Y (4.5, 11.5) - dir X,Y (0,1) *** (flashing @ half duty cucle)
+    // *** TEST 3: pos X,Y (4.5, 11.5) - dir X,Y (0,1) *** (flashing @ half duty cucle)
     // assign posX = 16'b0000_0100_1000_0000;
     // assign posY = 16'b0000_1011_1000_0000;
     // assign dirX = 0;
@@ -156,12 +209,14 @@ module top_level(
     // assign planeY = 16'b1111_1111_1000_1010;
 
     // *** TEST 5 (HEBA) MOVING TO TOP RIGHT QUAD: pos X,Y (6.5, 17.5) - dir X,Y (.707, -.707) - plane X,Y (.5, .5)
-    assign posX = 16'b0000011010000000; 
-    assign posY = 16'b0001000100000000; 
-    assign dirX = 16'b0000001011011110; 
-    assign dirY = 16'b1111111011011110; 
-    assign planeX = 16'b0000001000000000; 
-    assign planeY = 16'b0000001000000000; 
+    // assign posX = 16'b0000011010000000; 
+    // assign posY = 16'b0001000100000000; 
+    // assign dirX = 16'b0000001011011110; 
+    // assign dirY = 16'b1111111011011110; 
+    // assign planeX = 16'b0000001000000000; 
+    // assign planeY = 16'b0000001000000000; 
+
+    ////######////######////######////######////######////######////######////######////######
 
     //TODO: INSERT RAY CALCULATION MODULE
 
