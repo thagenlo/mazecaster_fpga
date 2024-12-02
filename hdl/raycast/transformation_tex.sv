@@ -133,10 +133,19 @@ always_ff @(posedge pixel_clk_in) begin
                                 ray_last_pixel_out <= 0;
                                 state <= FLATTENING;
                             end else begin
-                                transformer_tready_out <= 1;
-                                ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
-                                vcount_ray <= 0;
-                                state <= FIFO_DATA_WAIT;
+                                if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                                    ray_last_pixel_out <= 1;
+                                    if (frame_buff_ready_in) begin
+                                        transformer_tready_out <= 1;
+                                        vcount_ray <= 0;
+                                        state <= FIFO_DATA_WAIT;
+                                    end
+                                end else begin
+                                    transformer_tready_out <= 1;
+                                    vcount_ray <= 0;
+                                    ray_last_pixel_out <= 0;
+                                    state <= FIFO_DATA_WAIT;
+                                end
                             end
                         end
 
@@ -183,7 +192,7 @@ always_ff @(posedge pixel_clk_in) begin
                     end else begin
                         if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
                             ray_last_pixel_out <= 1;
-                            if (frame_buff_ready) begin
+                            if (frame_buff_ready_in) begin
                                 transformer_tready_out <= 1;
                                 vcount_ray <= 0;
                                 state <= FIFO_DATA_WAIT;

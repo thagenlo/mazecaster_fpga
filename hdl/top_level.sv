@@ -361,6 +361,7 @@ module top_level(
     logic [15:0] ray_address_out;
     logic [15:0] ray_pixel_out;
     logic ray_last_pixel_out;
+    logic frame_buff_ready;
 
     transformation flattening_module (
         .pixel_clk_in(clk_pixel),
@@ -368,6 +369,7 @@ module top_level(
         .dda_fifo_tvalid_in(fifo_tvalid_out),
         .dda_fifo_tdata_in(fifo_tdata_out[37:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
+        .frame_buffer_ready_in(frame_buff_ready).
         .transformer_tready_out(transformer_tready),
         .ray_address_out(ray_address_out),
         .ray_pixel_out(ray_pixel_out),
@@ -386,6 +388,7 @@ module top_level(
         .ray_pixel_in(ray_pixel_out),
         .ray_last_pixel_in(ray_last_pixel_out),
         .video_last_pixel_in(last_screen_pixel),
+        .switched_out(frame_buff_ready),
         .rgb_out(rgb_out) // should I create a valid signal so that 
     );
 

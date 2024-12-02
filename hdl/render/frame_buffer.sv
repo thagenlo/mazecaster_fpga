@@ -32,7 +32,7 @@ module frame_buffer #(
                     input wire [15:0] ray_pixel_in,
                     input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
                     input wire video_last_pixel_in, // indicates the last 
-                    output logic switched,
+                    output logic switched_out,
                     output logic [23:0] rgb_out);
 
     // localparam PIXEL_WIDTH = 16;
@@ -77,8 +77,8 @@ module frame_buffer #(
         end
     end
 
-    // logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
-    logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
+    logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
+    // logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
     
     // FRAME BUFFER 1
     xilinx_single_port_ram_read_first #( // could have width be equal to PIXEL_WIDTH * height
@@ -117,14 +117,14 @@ module frame_buffer #(
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
             state <= 0;
-            switched <= 0;
+            switched_out <= 0;
             ready_to_switch <= 2'b00;
         end else if (ready_to_switch == 2'b11) begin
             state <= !state;
-            switched <= 1;
+            switched_out <= 1;
             ready_to_switch <= 2'b00;
         end else if (ready_to_switch == 2'b00) begin
-            switched <= 0;
+            switched_out <= 0;
             if (ray_last_pixel_in) begin
                 ready_to_switch[0] <= 1;
                 if (video_last_pixel_in) begin // in case they are both true at the same time
@@ -137,12 +137,12 @@ module frame_buffer #(
                 end
             end
         end else if (ready_to_switch == 2'b10) begin
-            switched <= 0;
+            switched_out <= 0;
             if (ray_last_pixel_in) begin
                 ready_to_switch[0] <= 1;
             end
         end else if (ready_to_switch == 2'b01) begin
-            switched <= 0;
+            switched_out <= 0;
             if (video_last_pixel_in) begin
                 ready_to_switch[1] <= 1;
             end
