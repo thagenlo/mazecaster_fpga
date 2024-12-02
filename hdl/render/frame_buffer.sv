@@ -75,6 +75,10 @@ module frame_buffer #(
             // test_pixel_out2 = {red2, green2, blue2};
         end
     end
+
+    logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
+    logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
+    
     // FRAME BUFFER 1
     xilinx_single_port_ram_read_first #( // could have width be equal to PIXEL_WIDTH * height
     .RAM_WIDTH(PIXEL_WIDTH),                          // 16 bits wide (16 bit pixel representation)
@@ -102,17 +106,13 @@ module frame_buffer #(
         .addra(address2),           // address
         .dina(ray_pixel_in),            // RAM input data = pixel_in from DDA_out buffer
         .clka(pixel_clk_in),        // Clock
-        .wea(state && !ready_to_switch[0]),   // Write enabled when state == 1 AND ready_to_switch[0] != 1 (don't want to overwrite when we're done writing the ray data)
+        .wea(state && !ready_to_switch[0]),                // Write enabled when state == 1 AND ready_to_switch[0] != 1
         .ena(1),   // RAM Enable = only enabled when we have a valid address
         .rsta(rst_in),              // Output reset (does not affect memory contents)
         .regcea(1),            // Output register enabled when state == 0
         .douta(pixel_out2)           // RAM output data, width determined from RAM_WIDTH
     );
 
-
-    logic [1:0] ready_to_switch; // if == 2'b11, then we are ready to switch states
-    logic switched; // to indicate to combinational logic that we have switched states and ready_to_switch can go back to 2'b00
-    
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
             state <= 0;
@@ -122,7 +122,7 @@ module frame_buffer #(
             state <= !state;
             switched <= 1;
             ready_to_switch <= 2'b00;
-        end else begin
+        end else if (ready_to_switch == 2'b00) begin
             switched <= 0;
             if (ray_last_pixel_in) begin
                 ready_to_switch[0] <= 1;
@@ -135,10 +135,46 @@ module frame_buffer #(
                     ready_to_switch[0] <= 1;
                 end
             end
+        end else if (ready_to_switch == 2'b10) begin
+            switched <= 0;
+            if (ray_last_pixel_in) begin
+                ready_to_switch[0] <= 1;
+            end
+        end else if (ready_to_switch == 2'b01) begin
+            switched <= 0;
+            if (video_last_pixel_in) begin
+                ready_to_switch[1] <= 1;
+            end
         end
     end
+    
+    // always_ff @(posedge pixel_clk_in) begin
+    //     if (rst_in) begin
+    //         state <= 0;
+    //         switched <= 0;
+    //         ready_to_switch <= 2'b00;
+    //     end else if (ready_to_switch == 2'b11) begin
+    //         state <= !state;
+    //         switched <= 1;
+    //         ready_to_switch <= 2'b00;
+    //     end else begin
+    //         switched <= 0;
+    //         if (ray_last_pixel_in) begin
+    //             ready_to_switch[0] <= 1;
+    //             if (video_last_pixel_in) begin // in case they are both true at the same time
+    //                 ready_to_switch[1] <= 1;
+    //             end
+    //         end else if (video_last_pixel_in) begin
+    //             ready_to_switch[1] <= 1;
+    //             if (ray_last_pixel_in) begin
+    //                 ready_to_switch[0] <= 1;
+    //             end
+    //         end
+    //     end
+    // end
 
 
 endmodule
 
 `default_nettype wire
+
