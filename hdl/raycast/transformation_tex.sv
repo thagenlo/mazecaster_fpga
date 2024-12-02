@@ -40,7 +40,7 @@ t_state state;
 
 // PARAMETERS
 localparam [15:0] BACKGROUND_COLOR = 65535;
-localparam [15:0] WHITE_WALL = 0;
+localparam [15:0] BLACK_WALL = 0;
 localparam [7:0] HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 
 // FROM DDA FIFO
@@ -67,9 +67,9 @@ logic [15:0] tex_pixel;
 logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
 
-textures texture_mod (
-    .pixel_clk_in(clk_pixel),
-    .rst_in(sys_rst),
+textures texture_module (
+    .pixel_clk_in(pixel_clk_in),
+    .rst_in(rst_in),
     .valid_req_in(tex_req),
     .wallX_in(wallX_in),
     .vcount_ray_in(vcount_ray),
@@ -77,33 +77,17 @@ textures texture_mod (
     .tex_pixel_out(tex_pixel)
 );
 
-always_comb begin
-    case (state)
-        FIFO_DATA_WAIT: begin
-            transformer_tready_out = 1; // ready to receive new data
-        end
+// always_comb begin
+//     case (state)
+//         FIFO_DATA_WAIT: begin
+//             transformer_tready_out = 1; // ready to receive new data
+//         end
 
-        FLATTENING: begin
-            transformer_tready_out = 0; // not ready to receive new data
-
-            // ray pixel calculation
-            draw_start = HALF_SCREEN_HEIGHT - half_line_height;
-            draw_end = HALF_SCREEN_HEIGHT + half_line_height;
-            if ((vcount_ray >= draw_start) && (vcount_ray < draw_end)) begin
-                case (mapData_in) // based on map data
-                    0: ray_pixel_out = BACKGROUND_COLOR; ray_pixel_valid = 1;
-                    1: ray_pixel_out = WALL_COLOR;
-                    2: ray_pixel_out = 
-                endcase
-            end else begin // out of bounds
-                ray_pixel_out = BACKGROUND_COLOR;
-            end
-
-            // ray address calculation
-            ray_address_out = hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-        end
-    endcase
-end
+//         FLATTENING: begin
+//             transformer_tready_out = 0; // not ready to receive new data
+//         end
+//     endcase
+// end
 
 always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
@@ -111,9 +95,11 @@ always_ff @(posedge pixel_clk_in) begin
         state <= FIFO_DATA_WAIT;
         tex_counter <= 0;
         tex_req <= 0;
+        transformer_tready_out <= 1;
     end else begin
         case (state)
             FIFO_DATA_WAIT: begin
+                transformer_tready_out <= 0;
                 ray_last_pixel_out <= 0;
                 if (dda_fifo_tvalid_in) begin // handshake for fifo data
                     state <= FLATTENING;
@@ -131,7 +117,7 @@ always_ff @(posedge pixel_clk_in) begin
                             // method
                             case (mapData_in)
                                 0: ray_pixel_out <= BACKGROUND_COLOR;
-                                1: ray_pixel_out <= WHITE_WALL;
+                                1: ray_pixel_out <= BLACK_WALL;
                                 2: ray_pixel_out <= {hcount_ray_in >> 4, vcount_ray >> 2, hcount_ray_in >> 4 + vcount_ray >> 3};
                             endcase
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
@@ -141,6 +127,7 @@ always_ff @(posedge pixel_clk_in) begin
                                 ray_last_pixel_out <= 0;
                                 state <= FLATTENING;
                             end else begin
+                                transformer_tready_out <= 1;
                                 ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
                                 vcount_ray <= 0;
                                 state <= FIFO_DATA_WAIT;
@@ -159,7 +146,7 @@ always_ff @(posedge pixel_clk_in) begin
                                 state <= FLATTENING;
                             end else if (tex_counter == 2) begin
                                 // method
-                                ray_last_pixel_out <= tex_pixel_out;
+                                ray_last_pixel_out <= tex_pixel;
                                 ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
                                 tex_counter <= 0;
                                 // state transitions
@@ -169,6 +156,7 @@ always_ff @(posedge pixel_clk_in) begin
                                     state <= FLATTENING;
                                 end else begin
                                     ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
+                                    transformer_tready_out <= 1;
                                     vcount_ray <= 0;
                                     state <= FIFO_DATA_WAIT;
                                 end
@@ -184,6 +172,7 @@ always_ff @(posedge pixel_clk_in) begin
                         ray_last_pixel_out <= 0;
                         state <= FLATTENING;
                     end else begin
+                        transformer_tready_out <= 1;
                         ray_last_pixel_out <= (dda_fifo_tlast_in);  // we are only at the last (h,v) pixel if vcount == SCREEN_HEIGHT and on the last hcount
                         vcount_ray <= 0;
                         state <= FIFO_DATA_WAIT;
