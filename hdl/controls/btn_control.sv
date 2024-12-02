@@ -2,12 +2,18 @@ module btn_control #(
     parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000 // default = 45 degrees
     )(input wire clk_in,
     input wire rst_in,
-    input wire fwd_btn, bwd_btn, leftRot_btn, rightRot_btn,
-    output logic [15:0] posX, posY,
-    output logic [15:0] dirX, dirY,
-    output logic [15:0] dirX, dirY);
+    input wire fwd_btn, 
+    input wire bwd_btn, 
+    input wire leftRot_btn, 
+    input wire rightRot_btn,
+    output logic [15:0] posX, 
+    output logic [15:0] posY,
+    output logic [15:0] dirX, 
+    output logic [15:0] dirY,
+    output logic [15:0] planeX, 
+    output logic [15:0] planeY);
 
-    localparam COS_OF_45 = 16'b0000000010110101; //cos(10) = 0.70703125 in FP
+    // localparam COS_OF_45 = 16'b0000000010110101; //cos(10) = 0.70703125 in FP
 
     logic deb_out_fwd, deb_out_bwd, deb_out_leftRot, deb_out_rightRot;
     logic past_fwd, past_bwd, past_leftRot, past_rightRot;
@@ -65,8 +71,22 @@ module btn_control #(
 
     // logic [3:0] btn_pulses = {fwd_pulse, bwd_pulse, leftRot_pulse, rightRot_pulse};
 
-    movement_control move (
-        .pixel_clk_in(clk_in),
+    // input wire clk_in,
+    // input wire rst_in,
+    // input wire fwd_pulse, 
+    // input wire bwd_pulse, 
+    // input wire leftRot_pulse, 
+    // input wire rightRot_pulse,
+    // output logic [15:0] posX, 
+    // output logic [15:0] posY,
+    // output logic [15:0] dirX, 
+    // output logic [15:0] dirY,
+    // output logic [15:0] planeX, 
+    // output logic [15:0] planeY
+    
+    end
+    movement_control #(ROTATION_ANGLE) move (
+        .clk_in(clk_in),
         .rst_in(rst_in),
         .fwd_pulse(fwd_pulse),
         .bwd_pulse(bwd_pulse),
@@ -77,9 +97,6 @@ module btn_control #(
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
-        .planeY(planeY),
-    );
-    
-    end
+        .planeY(planeY));
 
 endmodule
