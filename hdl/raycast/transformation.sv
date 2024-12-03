@@ -140,7 +140,7 @@ always_ff @(posedge pixel_clk_in) begin
                     ray_last_pixel_out <= 0;
                     state <= FLATTENING;
                 end else begin
-                    if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
+                    if (dda_fifo_tlast_in) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
                         ray_last_pixel_out <= 1;
                         if (frame_buff_ready_in) begin
                             transformer_tready_out <= 1;
