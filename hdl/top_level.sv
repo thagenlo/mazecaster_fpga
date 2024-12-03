@@ -95,9 +95,18 @@ module top_level(
     // );
 
 
+
+
+
+    ////######////######////######////######////######////######////######////######////######
+    ///                                                                                 ######
+    ///                             BEGIN FRAME TESTS                                   ######
+    ///                                                                                 ######
+    ////######////######////######////######////######////######////######////######////######
+
     always_comb begin
         if (sys_rst) begin
-            // default or reset state (TEST 1)
+            // original black line
             posX = 16'b0000_1011_1000_0000;
             posY = 16'b0000_1011_1000_0000;
             dirX = 16'b0000_0001_0000_0000;
@@ -105,49 +114,125 @@ module top_level(
             planeX = 16'b0000_0000_0000_0000;
             planeY = 16'b0000_0000_1010_1001;
         end else begin
-            case (sw[2:1])  // use sw[2:1] to select among 4 cases
-                2'b00: begin
-                    // Test 1
-                    posX = 16'b0000_1011_1000_0000;
-                    posY = 16'b0000_1011_1000_0000;
-                    dirX = 16'b0000_0001_0000_0000;
-                    dirY = 16'b0000_0000_0000_0000;
-                    planeX = 16'b0000_0000_0000_0000;
-                    planeY = 16'b0000_0000_1010_1001;
+            case (sw[3:1])  // 8 cases
+                3'b000: begin // (0)
+                    posX = 16'b0000_1011_1000_0000; // 11.5
+                    posY = 16'b0000_1011_1000_0000; // 11.5
+                    dirX = 16'h0100; // +1
+                    dirY = 16'h0000; // 0
+                    planeX = 16'h0000; // 0
+                    planeY = 16'h00a9; // +0.66
                 end
-                2'b01: begin
-                    // Test 1 1/2 : pos X,Y (11.5, 11.5) - dir X,Y (-1,0)
-                    posX = 16'b0000_1011_1000_0000;
-                    posY = 16'b0000_1011_1000_0000;
-                    dirX = 16'b1111_1111_0000_0000; // -1
-                    dirY = 16'b0000_0000_0000_0000;
-                    planeX = 16'b0000_0000_0000_0000;
-                    planeY = 16'b0000_0000_1010_1001;
+                3'b001: begin // (1)
+                    posX = 16'b0000_1011_1000_0000; // 11.5
+                    posY = 16'b0000_1011_1000_0000; // 11.5
+                    dirX = 16'h00b5; // +0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'h0077; // +0.46484375
                 end
-                2'b10: begin
-                    // Test 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0)
-                    posX = 16'b0001_0100_1000_0000;
-                    posY = 16'b0000_1011_1000_0000;
-                    dirX = 16'b1111_1111_0000_0000; // -1
-                    dirY = 16'b0000_0000_0000_0000;
-                    planeX = 16'b0000_0000_0000_0000;
-                    planeY = 16'b0000_0000_1010_1001;
+                3'b010: begin // (2)
+                    posX = 16'b0000_1011_1000_0000; // 11.5
+                    posY = 16'b0000_1011_1000_0000; // 11.5
+                    dirX = 16'h0000; // 0
+                    dirY = 16'h0100; // +1
+                    planeX = 16'hff57; // -0.66
+                    planeY = 16'h0000; // 0
                 end
-                2'b11: begin
-                    // Test 3:pos X,Y (4.5, 11.5) - dir X,Y (0,1)
-                    posX = 16'b0000_0100_1000_0000;
-                    posY = 16'b0000_1011_1000_0000;
-                    dirX = 16'b0000_0000_0000_0000;
-                    dirY = 16'b0000_0001_0000_0000; // +1
-                    planeX = 16'b0000_0000_1010_1001;
-                    planeY = 16'b0000_0000_0000_0000;
+                3'b011: begin // (3)
+                    posX = 16'b0000_1011_1000_0000; // 11.5
+                    posY = 16'b0000_1011_1000_0000; // 11.5
+                    dirX = 16'hff4b; // -0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'hff89; // -0.46484375
+                end
+                3'b100: begin // (4)
+                    posX = 16'h1480; // 20.5
+                    posY = 16'h0480; // 4.5
+                    dirX = 16'h00b5; // +0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'h0077; // +0.46484375
+                end
+                3'b101: begin // (5)
+                    posX = 16'h0480; // 4.5
+                    posY = 16'h0480; // 4.5
+                    dirX = 16'hff4b; // -0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'hff89; // -0.46484375
+                end
+                3'b110: begin // (6)
+                    posX = 16'h0480; // 4.5
+                    posY = 16'h1480; // 20.5
+                    dirX = 16'h00b5; // +0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'h0077; // +0.46484375
+                end
+                3'b111: begin // (7)
+                    posX = 16'h1480; // 20.5
+                    posY = 16'h1480; // 20.5
+                    dirX = 16'hff4b; // -0.70703125
+                    dirY = 16'h00b5; // +0.70703125
+                    planeX = 16'hff89; // -0.46484375
+                    planeY = 16'hff89; // -0.46484375
                 end
             endcase
         end
     end
 
-    ////######////######////######////######////######////######////######////######////######
-
+    // always_comb begin
+    //     if (sys_rst) begin
+    //         // default or reset state (TEST 1)
+    //         posX = 16'b0000_1011_1000_0000;
+    //         posY = 16'b0000_1011_1000_0000;
+    //         dirX = 16'b0000_0001_0000_0000;
+    //         dirY = 16'b0000_0000_0000_0000;
+    //         planeX = 16'b0000_0000_0000_0000;
+    //         planeY = 16'b0000_0000_1010_1001;
+    //     end else begin
+    //         case (sw[2:1])  // use sw[2:1] to select among 4 cases
+    //             2'b00: begin
+    //                 // Test 1
+    //                 posX = 16'b0000_1011_1000_0000;
+    //                 posY = 16'b0000_1011_1000_0000;
+    //                 dirX = 16'b0000_0001_0000_0000;
+    //                 dirY = 16'b0000_0000_0000_0000;
+    //                 planeX = 16'b0000_0000_0000_0000;
+    //                 planeY = 16'b0000_0000_1010_1001;
+    //             end
+    //             2'b01: begin
+    //                 // Test 1 1/2 : pos X,Y (11.5, 11.5) - dir X,Y (-1,0)
+    //                 posX = 16'b0000_1011_1000_0000;
+    //                 posY = 16'b0000_1011_1000_0000;
+    //                 dirX = 16'b1111_1111_0000_0000; // -1
+    //                 dirY = 16'b0000_0000_0000_0000;
+    //                 planeX = 16'b0000_0000_0000_0000;
+    //                 planeY = 16'b0000_0000_1010_1001;
+    //             end
+    //             2'b10: begin
+    //                 // Test 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0)
+    //                 posX = 16'b0001_0100_1000_0000;
+    //                 posY = 16'b0000_1011_1000_0000;
+    //                 dirX = 16'b1111_1111_0000_0000; // -1
+    //                 dirY = 16'b0000_0000_0000_0000;
+    //                 planeX = 16'b0000_0000_0000_0000;
+    //                 planeY = 16'b0000_0000_1010_1001;
+    //             end
+    //             2'b11: begin
+    //                 // Test 3:pos X,Y (4.5, 11.5) - dir X,Y (0,1)
+    //                 posX = 16'b0000_0100_1000_0000;
+    //                 posY = 16'b0000_1011_1000_0000;
+    //                 dirX = 16'b0000_0000_0000_0000;
+    //                 dirY = 16'b0000_0001_0000_0000; // +1
+    //                 planeX = 16'b0000_0000_1010_1001;
+    //                 planeY = 16'b0000_0000_0000_0000;
+    //             end
+    //         endcase
+    //     end
+    // end
     // *** TEST 1: pos X,Y (11.5, 11.5) - dir X,Y (1?,0) ***
     // assign posX = 16'b0000_1011_1000_0000;
     // assign posY = 16'b0000_1011_1000_0000;
@@ -216,6 +301,11 @@ module top_level(
     // assign planeX = 16'b0000001000000000; 
     // assign planeY = 16'b0000001000000000; 
 
+    
+    ////######////######////######////######////######////######////######////######////######
+    ///                                                                                 ######
+    ///                               END FRAME TESTS                                   ######
+    ///                                                                                 ######
     ////######////######////######////######////######////######////######////######////######
 
     //TODO: INSERT RAY CALCULATION MODULE
@@ -375,6 +465,23 @@ module top_level(
         .ray_pixel_out(ray_pixel_out),
         .ray_last_pixel_out(ray_last_pixel_out)
     );
+
+
+    // ILA TESTING MODULE
+
+    // testing DDA -> FIFO_out -> transformation
+    ila_0 ila_module(
+        .clk(clk_pixel),
+        .probe0(dda_fsm_out_tdata[37:29]), // input [8:0] hcount_ray_in
+        .probe1(dda_fsm_out_tdata[28:21]), // input [7:0] lineHeight_in
+        .probe2(dda_fsm_out_tvalid), // input sender_axis_tvalid
+        .probe3(dda_fsm_out_tready), // input sender_axis_tready
+        .probe4(fifo_tdata_out[37:29]), // input [8:0] hcount_ray_out
+        .probe5(fifo_tdata_out[28:21]), // input [7:0] lineHeight_out
+        .probe6(fifo_tvalid_out), // input receiver_axis_tvalid
+        .probe7(transformer_tready)  // input receiver_axis_tready
+    );
+
 
     // PIXEL VALUE WRITING
     logic [23:0] rgb_out; // from the frame buffer
