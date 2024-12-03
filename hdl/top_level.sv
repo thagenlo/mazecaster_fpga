@@ -79,72 +79,72 @@ module top_level(
     logic [15:0] planeX, planeY;
     // logic valid_controller_out;
 
-    btn_control controller (
-        .clk_in(clk_pixel),
-        .rst_in(sys_rst),
-        .fwd_btn(fwd_btn),
-        .bwd_btn(bwd_btn),
-        .leftRot_btn(leftRot_btn),
-        .rightRot_btn(rightRot_btn),
-        .posX(posX),
-        .posY(posY),
-        .dirX(dirX),
-        .dirY(dirY),
-        .planeX(planeX), 
-        .planeY(planeY)
-    );
+    // btn_control controller (
+    //     .clk_in(clk_pixel),
+    //     .rst_in(sys_rst),
+    //     .fwd_btn(fwd_btn),
+    //     .bwd_btn(bwd_btn),
+    //     .leftRot_btn(leftRot_btn),
+    //     .rightRot_btn(rightRot_btn),
+    //     .posX(posX),
+    //     .posY(posY),
+    //     .dirX(dirX),
+    //     .dirY(dirY),
+    //     .planeX(planeX), 
+    //     .planeY(planeY)
+    // );
 
 
-    // always_comb begin
-    //     if (sys_rst) begin
-    //         // default or reset state (TEST 1)
-    //         posX = 16'b0000_1011_1000_0000;
-    //         posY = 16'b0000_1011_1000_0000;
-    //         dirX = 16'b0000_0001_0000_0000;
-    //         dirY = 16'b0000_0000_0000_0000;
-    //         planeX = 16'b0000_0000_0000_0000;
-    //         planeY = 16'b0000_0000_1010_1001;
-    //     end else begin
-    //         case (sw[2:1])  // use sw[2:1] to select among 4 cases
-    //             2'b00: begin
-    //                 // Test 1
-    //                 posX = 16'b0000_1011_1000_0000;
-    //                 posY = 16'b0000_1011_1000_0000;
-    //                 dirX = 16'b0000_0001_0000_0000;
-    //                 dirY = 16'b0000_0000_0000_0000;
-    //                 planeX = 16'b0000_0000_0000_0000;
-    //                 planeY = 16'b0000_0000_1010_1001;
-    //             end
-    //             2'b01: begin
-    //                 // Test 1 1/2 : pos X,Y (11.5, 11.5) - dir X,Y (-1,0)
-    //                 posX = 16'b0000_1011_1000_0000;
-    //                 posY = 16'b0000_1011_1000_0000;
-    //                 dirX = 16'b1111_1111_0000_0000; // -1
-    //                 dirY = 16'b0000_0000_0000_0000;
-    //                 planeX = 16'b0000_0000_0000_0000;
-    //                 planeY = 16'b0000_0000_1010_1001;
-    //             end
-    //             2'b10: begin
-    //                 // Test 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0)
-    //                 posX = 16'b0001_0100_1000_0000;
-    //                 posY = 16'b0000_1011_1000_0000;
-    //                 dirX = 16'b1111_1111_0000_0000; // -1
-    //                 dirY = 16'b0000_0000_0000_0000;
-    //                 planeX = 16'b0000_0000_0000_0000;
-    //                 planeY = 16'b0000_0000_1010_1001;
-    //             end
-    //             2'b11: begin
-    //                 // Test 3:pos X,Y (4.5, 11.5) - dir X,Y (0,1)
-    //                 posX = 16'b0000_0100_1000_0000;
-    //                 posY = 16'b0000_1011_1000_0000;
-    //                 dirX = 16'b0000_0000_0000_0000;
-    //                 dirY = 16'b0000_0001_0000_0000; // +1
-    //                 planeX = 16'b0000_0000_1010_1001;
-    //                 planeY = 16'b0000_0000_0000_0000;
-    //             end
-    //         endcase
-    //     end
-    // end
+    always_comb begin
+        if (sys_rst) begin
+            // default or reset state (TEST 1)
+            posX = 16'b0000_1011_1000_0000;
+            posY = 16'b0000_1011_1000_0000;
+            dirX = 16'b0000_0001_0000_0000;
+            dirY = 16'b0000_0000_0000_0000;
+            planeX = 16'b0000_0000_0000_0000;
+            planeY = 16'b0000_0000_1010_1001;
+        end else begin
+            case (sw[2:1])  // use sw[2:1] to select among 4 cases
+                2'b00: begin
+                    // Test 1
+                    posX = 16'b0000_1011_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b0000_0001_0000_0000;
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b01: begin
+                    // Test 1 1/2 : pos X,Y (11.5, 11.5) - dir X,Y (-1,0)
+                    posX = 16'b0000_1011_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b1111_1111_0000_0000; // -1
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b10: begin
+                    // Test 2: pos X,Y (20.5, 11.5) - dir X,Y (-1,0)
+                    posX = 16'b0001_0100_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b1111_1111_0000_0000; // -1
+                    dirY = 16'b0000_0000_0000_0000;
+                    planeX = 16'b0000_0000_0000_0000;
+                    planeY = 16'b0000_0000_1010_1001;
+                end
+                2'b11: begin
+                    // Test 3:pos X,Y (4.5, 11.5) - dir X,Y (0,1)
+                    posX = 16'b0000_0100_1000_0000;
+                    posY = 16'b0000_1011_1000_0000;
+                    dirX = 16'b0000_0000_0000_0000;
+                    dirY = 16'b0000_0001_0000_0000; // +1
+                    planeX = 16'b0000_0000_1010_1001;
+                    planeY = 16'b0000_0000_0000_0000;
+                end
+            endcase
+        end
+    end
 
     ////######////######////######////######////######////######////######////######////######
 
