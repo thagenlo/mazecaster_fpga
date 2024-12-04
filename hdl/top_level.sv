@@ -41,20 +41,6 @@ module top_level(
     logic new_frame; //one cycle active indicator of new frame of info!
     logic last_screen_pixel;
     logic [5:0] frame_count; //0 to 59 then rollover frame counter
-
-    //CONTROL BUTTONS
-
-    //debouncing buttons
-
-    logic leftRot_btn;
-    logic rightRot_btn;
-    logic fwd_btn;
-    logic bwd_btn;
-
-    assign leftRot_btn = btn[1];
-    assign rightRot_btn = btn[0];
-    assign fwd_btn = btn[3];
-    assign bwd_btn = btn[2];
  
 
     //TODO: PIPELINING
@@ -79,6 +65,18 @@ module top_level(
     logic [15:0] planeX, planeY;
     // logic valid_controller_out;
 
+
+    //CONTROL BUTTONS
+    logic leftRot_btn;
+    logic rightRot_btn;
+    logic fwd_btn;
+    logic bwd_btn;
+
+    assign leftRot_btn = btn[1];
+    assign rightRot_btn = btn[0];
+    assign fwd_btn = btn[3];
+    assign bwd_btn = btn[2];
+
     // btn_control controller (
     //     .clk_in(clk_pixel),
     //     .rst_in(sys_rst),
@@ -93,8 +91,6 @@ module top_level(
     //     .planeX(planeX), 
     //     .planeY(planeY)
     // );
-
-
 
 
 
@@ -182,6 +178,8 @@ module top_level(
             endcase
         end
     end
+
+    //END SWITCH FRAME TEST
 
     // always_comb begin
     //     if (sys_rst) begin
