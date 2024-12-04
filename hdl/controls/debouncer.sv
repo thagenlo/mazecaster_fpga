@@ -3,7 +3,7 @@
 
 //written in lecture!
 //debounce_2.sv is a different attempt at this done after class with a few students
-module  debouncer #(parameter CLK_PERIOD_NS = 10,
+module  debouncer #(parameter CLK_PERIOD_NS = 13.47,
                     parameter DEBOUNCE_TIME_MS = 5
                     ) (   input wire clk_in,
                           input wire rst_in,
