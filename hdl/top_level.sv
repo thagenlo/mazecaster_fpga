@@ -419,6 +419,23 @@ module top_level(
         .dda_fsm_out_tlast(dda_fsm_out_tlast)
     );
 
+
+    // ILA TESTING MODULE 1
+    // testing RAY_CALC -> FIFO_IN -> DDA
+    // ila_0 ila_module1(
+    //     .clk(clk_pixel),
+    //     .probe0(), // input [8:0] hcount_ray_in
+    //     .probe1(), // input [7:0] lineHeight_in
+    //     .probe2(), // input sender_axis_tvalid
+    //     .probe3(), // input sender_axis_tready
+    //     .probe4(), // input [8:0] hcount_ray_out
+    //     .probe5(), // input [7:0] lineHeight_out
+    //     .probe6(), // input receiver_axis_tvalid
+    //     .probe7()  // input receiver_axis_tready
+    // );
+
+
+
     //TODO: INSERT DDA-out FIFO
     // fifo-out signal to transformer
     logic fifo_tvalid_out;
@@ -466,21 +483,33 @@ module top_level(
         .ray_last_pixel_out(ray_last_pixel_out)
     );
 
-
-    // ILA TESTING MODULE
+ 
+    // ILA TESTING MODULE 2
 
     // testing DDA -> FIFO_out -> transformation
-    ila_0 ila_module(
-        .clk(clk_pixel),
-        .probe0(dda_fsm_out_tdata[37:29]), // input [8:0] hcount_ray_in
-        .probe1(dda_fsm_out_tdata[28:21]), // input [7:0] lineHeight_in
-        .probe2(dda_fsm_out_tvalid), // input sender_axis_tvalid
-        .probe3(dda_fsm_out_tready), // input sender_axis_tready
-        .probe4(fifo_tdata_out[37:29]), // input [8:0] hcount_ray_out
-        .probe5(fifo_tdata_out[28:21]), // input [7:0] lineHeight_out
-        .probe6(fifo_tvalid_out), // input receiver_axis_tvalid
-        .probe7(transformer_tready)  // input receiver_axis_tready
-    );
+    // ila_0 ila_module2(
+    //     .clk(clk_pixel),
+    //     .probe0(dda_fsm_out_tdata[37:29]), // input [8:0] hcount_ray_in
+    //     .probe1(dda_fsm_out_tdata[28:21]), // input [7:0] lineHeight_in
+    //     .probe2(dda_fsm_out_tvalid), // input sender_axis_tvalid
+    //     .probe3(dda_fsm_out_tready), // input sender_axis_tready
+    //     .probe4(fifo_tdata_out[37:29]), // input [8:0] hcount_ray_out
+    //     .probe5(fifo_tdata_out[28:21]), // input [7:0] lineHeight_out
+    //     .probe6(fifo_tvalid_out), // input receiver_axis_tvalid
+    //     .probe7(transformer_tready)  // input receiver_axis_tready
+    // );
+    //map type check
+    // ila_0 ila_module2(
+    //     .clk(clk_pixel),
+    //     .probe0(dda_fsm_out_tdata[37:29]), // input [8:0] hcount_ray_in
+    //     .probe1(dda_fsm_out_tdata[28:21]), // input [7:0] lineHeight_in
+    //     .probe2(dda_fsm_out_tvalid), // input sender_axis_tvalid
+    //     .probe3(dda_fsm_out_tready), // input sender_axis_tready
+    //     .probe4(fifo_tdata_out[37:29]), // input [8:0] hcount_ray_out
+    //     .probe5(fifo_tdata_out[28:21]), // input [7:0] lineHeight_out
+    //     .probe6(fifo_tvalid_out), // input receiver_axis_tvalid
+    //     .probe7(dda_fsm_out_tdata[20])  // input wallType_in
+    // );
 
 
     // PIXEL VALUE WRITING

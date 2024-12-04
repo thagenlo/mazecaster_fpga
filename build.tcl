@@ -87,3 +87,6 @@ report_drc -file $outputDir/post_imp_drc.rpt
 #write_verilog -force $outputDir/cpu_impl_netlist.v -mode timesim -sdf_anno true
 write_bitstream -force $outputDir/final.bit
 
+## ILA module - write_debug_probes (debugging probe file: write_debug_probes.ltx & bitstream: final.bit)
+write_debug_probes -force $outputDir/write_debug_probes.ltx
+
