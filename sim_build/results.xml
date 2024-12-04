@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1733335007" />
+    <testcase name="test_a" classname="test_fp_multiply" file="/Users/heba/Documents/GitHub/mazecaster_fpga/sim/test_fp_multiply.py" lineno="13" time="0.0014729499816894531" sim_time_ns="90.001" ratio_time="61102.550065393334" />
+  </testsuite>
+</testsuites>
