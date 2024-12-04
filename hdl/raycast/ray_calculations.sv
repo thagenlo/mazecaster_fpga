@@ -17,7 +17,6 @@ module ray_calculations (
   output logic [15:0] sideDistY,
   output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
   output logic [15:0] deltaDistY,
-  // output logic [8:0] hcount_out,
   output logic busy_ray_calc,
   output logic valid_ray_out
   );
@@ -66,6 +65,7 @@ module ray_calculations (
   logic done_rayDirX;
   logic valid_rayDirX;
   logic ready_rayDirX;
+  logic overflow_rayDirX;
   logic signed [15:0] rayDirX_recip_out;
   logic signed [31:0] tempSideDistX;
 
@@ -74,6 +74,7 @@ module ray_calculations (
   logic done_rayDirY;
   logic valid_rayDirY;
   logic ready_rayDirY;
+  logic overflow_rayDirY;
   logic signed [15:0] rayDirY_recip_out;
   logic signed [31:0] tempSideDistY;
 
@@ -174,10 +175,10 @@ module ray_calculations (
 
   //using divider module to calculate rayDir reciprocal
   divider #(.WIDTH(16), .FBITS(8)) rayDirX_recip (.clk_in(pixel_clk_in), .rst_in(rst_in), .start(start_rayDirX), .busy(busy_rayDirX), .done(done_rayDirX), 
-  .valid(valid_rayDirX), .dbz(), .ovf(), .a(16'b0000_0001_0000_0000), .b(rayDirX), .val(rayDirX_recip_out));
+  .valid(valid_rayDirX), .dbz(), .ovf(overflow_rayDirX), .a(16'b0000_0001_0000_0000), .b(rayDirX), .val(rayDirX_recip_out));
 
   divider #(.WIDTH(16), .FBITS(8)) rayDirY_recip (.clk_in(pixel_clk_in), .rst_in(rst_in), .start(start_rayDirY), .busy(busy_rayDirY), .done(done_rayDirY), 
-  .valid(valid_rayDirY), .dbz(), .ovf(), .a(16'b0000_0001_0000_0000), .b(rayDirY), .val(rayDirY_recip_out));
+  .valid(valid_rayDirY), .dbz(), .ovf(overflow_rayDirY), .a(16'b0000_0001_0000_0000), .b(rayDirY), .val(rayDirY_recip_out));
 
   always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin

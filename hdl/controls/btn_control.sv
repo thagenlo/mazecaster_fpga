@@ -56,11 +56,23 @@ module btn_control #(
             rightRot_pulse<= 1'b0;
         end else if (~past_fwd && deb_out_fwd) begin
             fwd_pulse <= 1'b1;
+            bwd_pulse<= 1'b0;
+            leftRot_pulse<= 1'b0;
+            rightRot_pulse<= 1'b0;
         end else if (~past_bwd && deb_out_bwd) begin
+            fwd_pulse<= 1'b0;
             bwd_pulse <= 1'b1;
+            leftRot_pulse<= 1'b0;
+            rightRot_pulse<= 1'b0;
         end else if (~past_leftRot && deb_out_leftRot) begin
+            fwd_pulse<= 1'b0;
+            bwd_pulse<= 1'b0;
             leftRot_pulse <= 1'b1;
+            rightRot_pulse<= 1'b0;
         end else if (~past_rightRot && deb_out_rightRot) begin
+            fwd_pulse<= 1'b0;
+            bwd_pulse<= 1'b0;
+            leftRot_pulse<= 1'b0;
             rightRot_pulse <= 1'b1;
         end else begin
             fwd_pulse<= 1'b0;
