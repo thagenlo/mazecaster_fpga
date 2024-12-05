@@ -13,15 +13,16 @@ module ray_calculations (
   output logic stepY,
   output logic signed [15:0] rayDirX, //ray direction for the current column
   output logic signed [15:0] rayDirY,
-  output logic [15:0] sideDistX,
-  output logic [15:0] sideDistY,
-  output logic [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
-  output logic [15:0] deltaDistY,
+  output logic signed [15:0] sideDistX,
+  output logic signed [15:0] sideDistY,
+  output logic signed [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
+  output logic signed [15:0] deltaDistY,
   output logic busy_ray_calc,
   output logic valid_ray_out
   );
   localparam SCREEN_WIDTH = 320;
-  localparam SCREEN_WIDTH_RECIPRICAL = 24'b0000_0000_0000_0000_0000_1101; //fixed point representation: 0.003173828125
+  localparam SCREEN_WIDTH_RECIPRICAL = 24'h00001A; //2*0.003173828125 = 0.00634765625 (24'h00001A)
+  //fixed point representation: 0.003173828125
   //1/320 = .003125 
   // pos X & Y as outputs
   // cameraX, x-coordinate on the camera plane that the current x-coordinate of the screen represents,
@@ -35,16 +36,8 @@ module ray_calculations (
   typedef enum {RESTING, START, DIVIDING, DELTA_DIST_CALC, SIDE_DIST_CALC, VALID_OUT} divider_state;
   divider_state state;
 
-  logic [23:0] fixed_pt_hcount; //Q12.12 representation of hcount
-  assign fixed_pt_hcount = {{3'b0, hcount_in}, 12'b0};
 
 
-
-  logic signed [47:0] cameraXMultiply; //is Q8.8 fixed point, TODO: try Q2.
-  logic signed [31:0] cameraX;
-  assign cameraXMultiply = ((fixed_pt_hcount * SCREEN_WIDTH_RECIPRICAL) << 1); // 2*x/w- 1 // (12.12)*(12.12)
-  assign cameraX = (cameraXMultiply[39:8]) + 32'b11111111111111110000000000000000;
-  
   //might need to pipeline this multiplication once or twice
 
   logic div_busy;
@@ -87,55 +80,30 @@ module ray_calculations (
   // logic signed [15:0] currentRayDirX;
 //   logic signed [15:0] currentRayDirY;
 
+  logic [23:0] fixed_pt_hcount; //Q12.12 representation of hcount
+  assign fixed_pt_hcount = {{3'b0, hcount_in}, 12'b0};
+
+
+  logic [47:0] cameraXMultiply; //is Q8.8 fixed point, TODO: try Q2.
+  logic signed [31:0] cameraX;
+  assign cameraXMultiply = ((fixed_pt_hcount * SCREEN_WIDTH_RECIPRICAL)); // 2*x/w- 1 // (12.12)*(12.12)
+  assign cameraX = $signed(cameraXMultiply[39:8]) + 32'shFFFF0000;
+  //CHECK CAMERA X AT 49170000
+  //+ 32'sb11111111111111110000000000000000 (IS MAKING CAMERA X NEGATIVE)
+  // camera X = 0000f0 (0.003662109375) (without -1 in sim)
+  // getting camera X = fffff080 (0.000244140625) (with -1 in sim) SHOULD BE fffff1
+  //cameraX + 32'sb11111111111111110000000000000000
+  // 000000_f08000 = .1111_0000_1101... in sim is 0.940673828125
+
+
+
   always_comb begin
     tempCameraX = $signed(cameraX[23:8]);
     tempRayDirXMultiply = ($signed(planeX)*$signed(tempCameraX));
-    rayDirX = $signed(dirX) + tempRayDirXMultiply[23:8];
+    rayDirX = $signed(dirX) + $signed(tempRayDirXMultiply[23:8]);
 
     tempRayDirYMultiply = ($signed(planeY)*$signed(tempCameraX));
-    rayDirY = $signed(dirY) + tempRayDirYMultiply[23:8];
-
-    // abs_posX = (posX[15])? (~(posX) + 16'b0000_0000_0000_0001): posX;
-    
-    // tempSideDistX = (~stepX)? ({8'b0, posX[7:0]}) * $signed(deltaDistX): (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX);
-    // tempSideDistY = (~stepY)? ({8'b0, posY[7:0]}) * $signed(deltaDistY): (({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posY) * $signed(deltaDistY);
-    // tempSideDistX = (~stepX) ? ({8'b0, posX[7:0]}) * $signed(deltaDistX) : 
-    //             (({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posX) * $signed(deltaDistX);
-    // tempSideDistY = (~stepY) ? ({8'b0, posY[7:0]}) * $signed(deltaDistY) : 
-    //             (({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - posY) * $signed(deltaDistY);
-
-    // if ($signed(rayDirX) < 0) begin
-    //     // sideDistX = (posX - mapX) * deltaDistX
-    //     tempSideDistX = ($signed(posX) - $signed({posX[15:8], 8'b0})) * $signed(deltaDistX);
-    // end else begin
-    //     // sideDistX = (mapX + 1.0 - posX) * deltaDistX
-    //     tempSideDistX = ($signed({posX[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - $signed(posX)) * $signed(deltaDistX);
-    // end
-
-    // if ($signed(rayDirY) < 0) begin
-    //     // sideDistY = (posY - mapY) * deltaDistY
-    //     tempSideDistY = ($signed(posY) - $signed({posY[15:8], 8'b0})) * $signed(deltaDistX);
-    // end else begin
-    //     // sideDistY = (mapY + 1.0 - posY) * deltaDistY
-    //     tempSideDistY = ($signed({posY[15:8], 8'b0}) + 16'b0000_0001_0000_0000 - $signed(posY)) * $signed(deltaDistY);
-    // end
-
-    // if ($signed(rayDirX) < 0) begin
-    //     // sideDistX = (posX - mapX) * deltaDistX
-    //     // Calculate difference between posX and mapX, preserving fixed-point accuracy
-    //     tempSideDistX = ($signed(fracPosX) * $signed(deltaDistX));
-    // end else begin
-    //     // sideDistX = (mapX + 1.0 - posX) * deltaDistX
-    //     tempSideDistX = ((256 - $signed(fracPosX)) * $signed(deltaDistX));
-    // end
-
-    // if ($signed(rayDirY) < 0) begin
-    //     // sideDistY = (posY - mapY) * deltaDistY
-    //     tempSideDistY = ($signed(fracPosY) * $signed(deltaDistY));
-    // end else begin
-    //     // sideDistY = (mapY + 1.0 - posY) * deltaDistY
-    //     tempSideDistY = ((256 - $signed(fracPosY)) * $signed(deltaDistY));
-    // end
+    rayDirY = $signed(dirY) + $signed(tempRayDirYMultiply[23:8]);
 
 
     if (~stepX) begin
@@ -225,12 +193,12 @@ module ray_calculations (
                   ready_rayDirX <= 1;
                   // deltaDistX <= rayDirX_recip_out;
                   deltaDistX <= (rayDirX_recip_out[15])?  ~(rayDirX_recip_out) + 16'b0000_0000_0000_0001: rayDirX_recip_out;
-                  $display("Time: %0t | deltaDistX (divider result): %d", $time, deltaDistX);
+                  // $display("Time: %0t | deltaDistX (divider result): %d", $time, deltaDistX);
                   state <= DIVIDING;
               end if (done_rayDirY) begin
                   ready_rayDirY <= 1;
                   deltaDistY <= (rayDirY_recip_out[15])?  ~(rayDirY_recip_out) + 16'b0000_0000_0000_0001: rayDirY_recip_out;
-                  $display("Time: %0t | deltaDistY (divider result): %h", $time, deltaDistY);
+                  // $display("Time: %0t | deltaDistY (divider result): %h", $time, deltaDistY);
                   state <= DIVIDING;
               end
             end
@@ -256,10 +224,10 @@ module ray_calculations (
             SIDE_DIST_CALC: begin
                 sideDistX <= tempSideDistX[23:8];  // Extracting bits 23 to 8 from tempSideDistX
                 sideDistY <= tempSideDistY[23:8];
-                $display("Time: %0t | final deltaDistX: %h", $time, deltaDistX);
-                $display("Time: %0t | final deltaDistY: %h", $time, deltaDistY);
-                $display("Time: %0t | tempSideDistX: %h", $time, tempSideDistX);
-                $display("Time: %0t | tempSideDistY: %h", $time, tempSideDistY);
+                // $display("Time: %0t | final deltaDistX: %h", $time, deltaDistX);
+                // $display("Time: %0t | final deltaDistY: %h", $time, deltaDistY);
+                // $display("Time: %0t | tempSideDistX: %h", $time, tempSideDistX);
+                // $display("Time: %0t | tempSideDistY: %h", $time, tempSideDistY);
                 // if (deltaDistX > 0 && deltaDistY > 0) begin
                 //   sideDistX <= tempSideDistX[23:8];
                 //   sideDistY <= tempSideDistY[23:8];
@@ -274,8 +242,8 @@ module ray_calculations (
                 valid_ray_out <= 1;
             end
             VALID_OUT: begin
-                $display("Time: %0t | sideDistX: %h", $time, sideDistX);
-                $display("Time: %0t | sideDistY: %h", $time, sideDistY);
+                // $display("Time: %0t | sideDistX: %h", $time, sideDistX);
+                // $display("Time: %0t | sideDistY: %h", $time, sideDistY);
 
                   if (dda_data_ready_out) begin
                     valid_ray_out <= 0;

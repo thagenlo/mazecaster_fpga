@@ -279,35 +279,63 @@ async def test_a(dut):
 
 
     #PASSED TEST 1: looking forward
-    posX_float = 22
-    posY_float = 12
-    dirX_float = -1
-    dirY_float = 0
-    planeX_float = 0
-    planeY_float = .66
+    # posX_float = 22
+    # posY_float = 12
+    # dirX_float = -1
+    # dirY_float = 0
+    # planeX_float = 0
+    # planeY_float = .66
+
+    # posX = 16'b0000_1011_1000_0000; // 11.5
+    # posY = 16'b0000_1011_1000_0000; // 11.5
+    # dirX = 16'h00b5; // +0.70703125
+    # dirY = 16'h00b5; // +0.70703125
+    # planeX = 16'hff89; // -0.46484375
+    # planeY = 16'h0077; // +0.46484375
 
 
     #TEST 2: 45 DEGREE ANGLE
-    # posX_float = 15.5
-    # posY_float = 15.5
-    # dirX_float = -0.707
-    # dirY_float = -0.707
-    # planeX_float = .466
-    # planeY_float = -.466
+    posX_float = 15.5
+    posY_float = 15.5
+    dirX_float = -0.707
+    dirY_float = -0.707
+    planeX_float = .466
+    planeY_float = -.466
 
-    posX_fp = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    posY_fp = Fxp(posY_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    dirX_fp = Fxp(dirX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    dirY_fp = Fxp(dirY_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    planeX_fp = Fxp(planeX_float, signed=True, n_word=16, n_frac=8, rounding='around')
-    planeY_fp = Fxp(planeY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # posX_fp = Fxp(posX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # posY_fp = Fxp(posY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # dirX_fp = Fxp(dirX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # dirY_fp = Fxp(dirY_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # planeX_fp = Fxp(planeX_float, signed=True, n_word=16, n_frac=8, rounding='around')
+    # planeY_fp = Fxp(planeY_float, signed=True, n_word=16, n_frac=8, rounding='around')
 
-    dut.posX.value = int(posX_fp.raw())
-    dut.posY.value = int(posY_fp.raw())
-    dut.dirX.value = int(dirX_fp.raw())
-    dut.dirY.value = int(dirY_fp.raw())
-    dut.planeX.value = int(planeX_fp.raw())
-    dut.planeY.value = int(planeY_fp.raw())
+    # dut.posX.value = int(posX_fp.raw())
+    # dut.posY.value = int(posY_fp.raw())
+    # dut.dirX.value = int(dirX_fp.raw())
+    # dut.dirY.value = int(dirY_fp.raw())
+    # dut.planeX.value = int(planeX_fp.raw())
+    # dut.planeY.value = int(planeY_fp.raw())
+    # 3'b100: begin // (4)
+    #                 posX = 16'h1480; // 20.5
+    #                 posY = 16'h0480; // 4.5
+    #                 dirX = 16'h00b5; // +0.70703125
+    #                 dirY = 16'h00b5; // +0.70703125
+    #                 planeX = 16'hff89; // -0.46484375
+    #                 planeY = 16'h0077; // +0.46484375
+    #             end
+    posX_float = 20.5
+    posY_float = 4.5
+    dirX_float = 0.707
+    dirY_float = -0.707
+    planeX_float = -.466
+    planeY_float = .466
+
+    dut.posX.value = 0x1480
+    dut.posY.value = 0x0480
+    dut.dirX.value = 0x00b5
+    dut.dirY.value = 0x00b5
+    dut.planeX.value = 0xff89
+    dut.planeY.value = 0x0077
     dut.dda_data_ready_out.value = 1
     await RisingEdge(dut.valid_ray_out)
 
