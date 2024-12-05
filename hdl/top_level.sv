@@ -55,9 +55,7 @@ module top_level(
     assign rightRot_btn = btn[0];
     assign fwd_btn = btn[3];
     assign bwd_btn = btn[2];
- 
 
-    //TODO: PIPELINING
 
     // VIDEO SIGN GEN
     video_sig_gen mvg(
@@ -72,12 +70,37 @@ module top_level(
         .very_last_pixel_out(last_screen_pixel),
         .fc_out(frame_count));
 
+    //TODO: PIPELINING
+    // PIPELINING for video sig gen
+    logic [1:0] vs_out_pipe, hs_out_pipe, ad_out_pipe;
+
+    always_ff @(posedge clk_pixel) begin
+        vs_out_pipe[0] <= vert_sync;
+        hs_out_pipe[0] <= hor_sync;
+        ad_out_pipe[0] <= active_draw;
+        vs_out_pipe[1] <= vs_out_pipe[0];
+        hs_out_pipe[1] <= hs_out_pipe[0];
+        ad_out_pipe[1] <= ad_out_pipe[0];
+    end
+
     //TODO: INSERT CONTROLLER MODULE
 
     logic [15:0] posX, posY;
     logic [15:0] dirX, dirY;
     logic [15:0] planeX, planeY;
     // logic valid_controller_out;
+
+
+    //CONTROL BUTTONS
+    logic leftRot_btn;
+    logic rightRot_btn;
+    logic fwd_btn;
+    logic bwd_btn;
+
+    assign leftRot_btn = btn[1];
+    assign rightRot_btn = btn[0];
+    assign fwd_btn = btn[3];
+    assign bwd_btn = btn[2];
 
     // btn_control controller (
     //     .clk_in(clk_pixel),
@@ -93,8 +116,6 @@ module top_level(
     //     .planeX(planeX), 
     //     .planeY(planeY)
     // );
-
-
 
 
 
@@ -182,6 +203,8 @@ module top_level(
             endcase
         end
     end
+
+    //END SWITCH FRAME TEST
 
     // always_comb begin
     //     if (sys_rst) begin
@@ -543,7 +566,7 @@ module top_level(
       .rst_in(sys_rst),
       .data_in(red_screen),
       .control_in(2'b0),
-      .ve_in(active_draw),
+      .ve_in(ad_out_pipe[1]),
       .tmds_out(tmds_10b[2]));
 
     tmds_encoder tmds_green(
@@ -551,15 +574,15 @@ module top_level(
       .rst_in(sys_rst),
       .data_in(green_screen),
       .control_in(2'b0),
-      .ve_in(active_draw),
+      .ve_in(ad_out_pipe[1]),
       .tmds_out(tmds_10b[1]));
 
     tmds_encoder tmds_blue(
       .clk_in(clk_pixel),
       .rst_in(sys_rst),
       .data_in(blue_screen),
-      .control_in({vert_sync, hor_sync}),
-      .ve_in(active_draw),
+      .control_in({vs_out_pipe[1], hs_out_pipe[1]}),
+      .ve_in(ad_out_pipe[1]),
       .tmds_out(tmds_10b[0]));
 
     // three tmds_serializers (blue, green, red):

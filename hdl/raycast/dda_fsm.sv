@@ -277,7 +277,7 @@ module dda_fsm
                     //wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
 
                     if (div_done_out) begin
-                        //$display("Time: %0t | hcount_ray_out: %0d | DIVISION DONE: quotient=%0d", $time,hcount_ray_out, div_quotient_out);
+                        // $display("Time: %0t | hcount_ray_out: %0d | DIVISION DONE: quotient=%0d", $time, hcount_ray_out, div_quotient_out);
 
                         wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
 
@@ -292,8 +292,8 @@ module dda_fsm
                 end
 
                 VALID_OUT: begin
-                    // $display("Time: %0t | VALID_OUT State | hcount_ray_out: %0d | lineHeight_out: %0d | wallType_out: %0d", 
-                    //      $time, hcount_ray_out, lineHeight_out, wallType_out);
+                    $display("Time: %0t | VALID_OUT State | hcount_ray_out: %0d | lineHeight_out: %0d | wallType_out: %0d | mapX: %0d | mapY: %0d ", 
+                         $time, hcount_ray_out, lineHeight_out, wallType_out, mapX, mapY);
 
                     if (dda_fsm_out_tready) begin// data is not sent to the FIFO unless dda_fsm_out_tready is high
                         //$display("valid_out: %0d", dda_valid_out);
