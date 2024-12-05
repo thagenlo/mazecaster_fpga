@@ -102,6 +102,7 @@ module dda
                               dda_fsm0_wallX_out};
         dda_fsm_out_tlast <= tLast_out;
         dda_fsm_out_tvalid <= 1'b1;
+        //$display("DDA 0's output");
       end else if (dda_fsm1_valid_out) begin //single cycle valid out
         dda_fsm_out_tdata <= {dda_fsm1_hcount_ray_out, 
                              dda_fsm1_lineHeight_out, 
@@ -110,6 +111,7 @@ module dda
                              dda_fsm1_wallX_out};
         dda_fsm_out_tlast <= tLast_out;
         dda_fsm_out_tvalid <= 1'b1;
+        //$display("DDA 1's output");
       end else begin //TODO VALID OUT HIGH AT SAME TIME???
         dda_fsm_out_tlast <= 1'b0;
         dda_fsm_out_tvalid <= 1'b0;

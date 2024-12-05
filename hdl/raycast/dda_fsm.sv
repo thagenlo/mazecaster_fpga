@@ -120,7 +120,6 @@ module dda_fsm
         .val(div_quotient_out)
     );
 
-  
     ////############ STEP FSM ###############
 
     enum {
@@ -189,8 +188,8 @@ module dda_fsm
                     wallType <= 1'b0; // x-wall
 
                     //map_addr = mapX + (mapY × N) - single cycle (check?)
-                    map_addra_out <= (stepX == 1'b0)? (mapX - 1'b1) + (N * (mapY)): 
-                                                      (mapX + 1'b1) + (N * (mapY));
+                    map_addra_out <= (stepX == 1'b0)? (mapX - 1'b1) + (N * mapY): 
+                                                      (mapX + 1'b1) + (N * mapY);
                     
                     //send request to BRAM for map data
                     map_request_out <= 1'b1;
@@ -220,9 +219,9 @@ module dda_fsm
 
                 CHECK_WALL: begin
                     //$display("Time: %0t | CHECK_WALL State | hcount_ray_out: %0d | mapX: %0d | mapY: %0d | sideDistX: %0d | sideDistY: %0d | map_data_in: %0d", $time, hcount_ray_out, mapX, mapY, sideDistX, sideDistY, map_data_in);
-
+                    map_request_out <= 1'b0; // clear the request signal
                     if (map_data_valid_in) begin
-                        map_request_out <= 1'b0;  // clear the request signal
+                        //map_request_out <= 1'b0;  // clear the request signal
                         mapData_store <= map_data_in; //store map data locally
                         if (map_data_in != 0) begin
                             //$display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
@@ -239,7 +238,7 @@ module dda_fsm
                             div_start_in <= 1'b1;
                             div_denominator_in <= (wallType == 1'b0)? (sideDistX - deltaDistX): 
                                                                        (sideDistY - deltaDistY);
-                            div_numerator_in <= 16'b1011_0100_0000_0000; //screen_height = 180
+                            div_numerator_in <= 16'hB400; //screen_height = 180
 
                             DDA_FSM_STATE <= WALL_CALC; // wall detected
 

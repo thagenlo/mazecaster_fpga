@@ -20,9 +20,11 @@ import random
 
 # Constants
 
+#case 0
+# ray_data_straight = 
 
 # case 4 (top left angle)
-ray_data = [
+ray_data_angle = [
     "0000000001100000001001011000000000000111110000000001101101000000100001000010001010010000000000001001000000000000000011011010000001000010000",
     "0000000011100000001001010110000000000111110000000001101101100000100001000010001010010000000000001001000000000000000011011010000001000010000",
     "0000000101100000001001010100000000000111111000000001101110000000100000100000001010010000000000001001000000000000000011011100000001000001000",
@@ -385,6 +387,111 @@ ray_data = [
     "1011001111100000000000111000000000101001101000010010010010100000000110001010001010010000000000001001000000000000100100100100000000001100010",
 ]
 
+def cast_ray(
+    mapX,
+    mapY,
+    deltaDistX,
+    deltaDistY,
+    sideDistX,
+    sideDistY,
+    stepX,
+    stepY,
+    screen_height,
+):
+    """
+    Perform DDA (Digital Differential Analyzer) to find wall collision and calculate
+    line height for rendering.
+    """
+    # Initialize variables for DDA
+    curr_mapX = mapX
+    curr_mapY = mapY
+    curr_sideDistX = sideDistX
+    curr_sideDistY = sideDistY
+    hit = 0
+    side = -1
+
+    # Perform DDA
+    while hit == 0:
+        if curr_sideDistX < curr_sideDistY:
+            curr_sideDistX += deltaDistX
+            curr_mapX += stepX
+            side = 0
+        else:
+            curr_sideDistY += deltaDistY
+            curr_mapY += stepY
+            side = 1
+
+        # Check if the ray has hit a wall (customize based on your map logic)
+        if (curr_mapX == 0) or (curr_mapY == 0) or (curr_mapX == 23) or (curr_mapY == 23):  # Placeholder condition
+            hit = 1
+
+    # Calculate perpendicular wall distance
+    if side == 0:
+        perpWallDist = curr_sideDistX - deltaDistX
+    else:
+        perpWallDist = curr_sideDistY - deltaDistY
+
+    # Calculate line height based on screen height and wall distance
+    if perpWallDist > 0:
+        lineHeight = int(screen_height / perpWallDist)
+    else:
+        lineHeight = screen_height  # Fallback for edge cases
+
+    return lineHeight, side, curr_mapX, curr_mapY
+
+
+posX_test = 20.5
+posY_test = 4.5
+dirX_test = 0.707
+dirY_test = 0.707
+planeX_test = -.466
+planeY_test = .466
+# Main loop for raycasting
+for i in range(320):
+    # Calculate the ray's position and direction
+    cameraX_test = 2 * i / 320 - 1
+    rayDirX_test = dirX_test + planeX_test* cameraX_test
+    rayDirY_test = dirY_test + planeY_test * cameraX_test
+    deltaDistX_test = 1e30 if rayDirX_test == 0 else abs(1 / rayDirX_test)
+    deltaDistY_test = 1e30 if rayDirY_test == 0 else abs(1 / rayDirY_test)
+    mapX_test = int(posX_test)
+    mapY_test = int(posY_test)
+    if dirX_test < 0:
+        stepX_test = 0  # Representing -1 as 0 in 1-bit
+        sideDistX_test = (posX_test - mapX_test) * deltaDistX_test
+    else:
+        stepX_test = 1
+        sideDistX_test = (mapX_test + 1.0 - posX_test) * deltaDistX_test
+    if dirY_test < 0:
+        stepY_test = 0  # Representing -1 as 0 in 1-bit
+        sideDistY_test = (posY_test - mapY_test) * deltaDistY_test
+    else:
+        stepY_test = 1
+        sideDistY_test = (mapY_test + 1.0 - posY_test) * deltaDistY_test
+
+    lineHeight_true, side_tru, mapX_true, mapY_true = cast_ray(
+        mapX_test,
+        mapY_test,
+        deltaDistX_test,
+        deltaDistY_test,
+        sideDistX_test,
+        sideDistY_test,
+        stepX_test,
+        stepY_test,
+        180,
+    )
+
+
+    # Log the results
+    # print(
+    #     f"i: {i}, "
+    #     f"lineHeight_true={lineHeight_true}, "
+    #     f"wallType_true={side_tru}, "
+    #     f"mapX_true={mapX_true}, "
+    #     f"mapY_true={mapY_true}"
+    # )
+
+
 
 @cocotb.test()
 async def test_a(dut):
@@ -399,7 +506,7 @@ async def test_a(dut):
     dut.rst_in.value = 0
 
     # Apply test inputs
-    for z in ray_data:
+    for z in ray_data_angle:
 
         # Pack data
         dda_input_data = z
