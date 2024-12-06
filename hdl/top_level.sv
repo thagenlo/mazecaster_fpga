@@ -102,20 +102,21 @@ module top_level(
     assign fwd_btn = btn[3];
     assign bwd_btn = btn[2];
 
-    // btn_control controller (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .fwd_btn(fwd_btn),
-    //     .bwd_btn(bwd_btn),
-    //     .leftRot_btn(leftRot_btn),
-    //     .rightRot_btn(rightRot_btn),
-    //     .posX(posX),
-    //     .posY(posY),
-    //     .dirX(dirX),
-    //     .dirY(dirY),
-    //     .planeX(planeX), 
-    //     .planeY(planeY)
-    // );
+    btn_control controller (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .fwd_btn(fwd_btn),
+        .bwd_btn(bwd_btn),
+        .leftRot_btn(leftRot_btn),
+        .rightRot_btn(rightRot_btn),
+        .frame_switch(frame_buff_ready[0]),
+        .posX(posX),
+        .posY(posY),
+        .dirX(dirX),
+        .dirY(dirY),
+        .planeX(planeX), 
+        .planeY(planeY)
+    );
 
 
 
@@ -125,84 +126,84 @@ module top_level(
     ///                                                                                 ######
     ////######////######////######////######////######////######////######////######////######
 
-    always_comb begin
-        if (sys_rst) begin
-            // original black line
-            posX = 16'b0000_1011_1000_0000;
-            posY = 16'b0000_1011_1000_0000;
-            dirX = 16'b0000_0001_0000_0000;
-            dirY = 16'b0000_0000_0000_0000;
-            planeX = 16'b0000_0000_0000_0000;
-            planeY = 16'b0000_0000_1010_1001;
-        end else begin
-            case (sw[3:1])  // 8 cases
-                3'b000: begin // (0)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h0100; // +1
-                    dirY = 16'h0000; // 0
-                    planeX = 16'h0000; // 0
-                    planeY = 16'h00a9; // +0.66
-                end
-                3'b001: begin // (1)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b010: begin // (2)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h0000; // 0
-                    dirY = 16'h0100; // +1
-                    planeX = 16'hff57; // -0.66
-                    planeY = 16'h0000; // 0
-                end
-                3'b011: begin // (3)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-                3'b100: begin // (4)
-                    posX = 16'h1480; // 20.5
-                    posY = 16'h0480; // 4.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b101: begin // (5)
-                    posX = 16'h0480; // 4.5
-                    posY = 16'h0480; // 4.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-                3'b110: begin // (6)
-                    posX = 16'h0480; // 4.5
-                    posY = 16'h1480; // 20.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b111: begin // (7)
-                    posX = 16'h1480; // 20.5
-                    posY = 16'h1480; // 20.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-            endcase
-        end
-    end
+    // always_comb begin
+    //     if (sys_rst) begin
+    //         // original black line
+    //         posX = 16'b0000_1011_1000_0000;
+    //         posY = 16'b0000_1011_1000_0000;
+    //         dirX = 16'b0000_0001_0000_0000;
+    //         dirY = 16'b0000_0000_0000_0000;
+    //         planeX = 16'b0000_0000_0000_0000;
+    //         planeY = 16'b0000_0000_1010_1001;
+    //     end else begin
+    //         case (sw[3:1])  // 8 cases
+    //             3'b000: begin // (0)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h0100; // +1
+    //                 dirY = 16'h0000; // 0
+    //                 planeX = 16'h0000; // 0
+    //                 planeY = 16'h00a9; // +0.66
+    //             end
+    //             3'b001: begin // (1)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b010: begin // (2)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h0000; // 0
+    //                 dirY = 16'h0100; // +1
+    //                 planeX = 16'hff57; // -0.66
+    //                 planeY = 16'h0000; // 0
+    //             end
+    //             3'b011: begin // (3)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //             3'b100: begin // (4)
+    //                 posX = 16'h1480; // 20.5
+    //                 posY = 16'h0480; // 4.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b101: begin // (5)
+    //                 posX = 16'h0480; // 4.5
+    //                 posY = 16'h0480; // 4.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //             3'b110: begin // (6)
+    //                 posX = 16'h0480; // 4.5
+    //                 posY = 16'h1480; // 20.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b111: begin // (7)
+    //                 posX = 16'h1480; // 20.5
+    //                 posY = 16'h1480; // 20.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //         endcase
+    //     end
+    // end
 
     //END SWITCH FRAME TEST
 

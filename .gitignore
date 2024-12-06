@@ -1,0 +1,15 @@
+
+/_history
+/obj
+/obj
+obj/post_route_timing_summary.rpt
+obj/post_route_timing.rpt
+obj/post_route_status.rpt
+obj/post_route_power.rpt
+obj/post_route.dcp
+obj/post_place_util.rpt
+obj/post_place_timing_summary.rpt
+obj/post_place_timing.rpt
+obj/post_place.dcp
+obj/post_imp_drc.rpt
+obj/clock_util.rpt
