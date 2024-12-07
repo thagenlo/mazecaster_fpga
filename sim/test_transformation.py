@@ -17,14 +17,15 @@ Inputs:
     input wire rst_in,
 
     input wire dda_fifo_tvalid_in,
-    input wire [37:0] dda_fifo_tdata_in, = 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX)
+    input wire [37:0] dda_fifo_tdata_in,
     input wire dda_fifo_tlast_in,
+    input wire [1:0] fb_ready_to_switch_in,
 
     output logic transformer_tready_out,         // tells FIFO that we're ready to receive next data (need a vcount counter)
-
+    // output logic fb_ready_out,
     output logic [15:0] ray_address_out,    // where to store the pixel value in frame buffer
     output logic [15:0] ray_pixel_out,      // the calculated pixel value of the ray
-    output logic ray_last_pixel_out,        // tells frame buffer whether we are on the last pixel or not
+    output logic ray_last_pixel_out        // tells frame buffer whether we are on the last pixel or not
         
 """
 
@@ -36,30 +37,60 @@ async def test_a(dut):
     dut.rst_in.value = 1
     await ClockCycles(dut.pixel_clk_in,1)
     dut.rst_in.value = 0
-    
-    dut.dda_fifo_tvalid_in.value = 1
-    # dut.dda_fifo_tdata_in.value = 0b11001000_10010110_1_0001_0000111100001111 # hcount = 200, line_height = 150, wall type = 1
-    dut.dda_fifo_tdata_in.value = 0b00000100_00001010_1_0001_0000111100001111 # hcount = 4, line_height = 10
-    dut.dda_fifo_tlast_in = 0
-
-    await RisingEdge(dut.transformer_tready_out) # wait until we're ready to recieve new data
+    await ClockCycles(dut.pixel_clk_in,1)
+    line_height = 40
+    wall_type = 1
+    map_data = 1
+    wallX = 20
 
     dut.dda_fifo_tvalid_in.value = 1
-    # dut.dda_fifo_tdata_in.value = 0b11001000_10010110_1_0001_0000111100001111 # hcount = 200, line_height = 150, wall type = 1
-    dut.dda_fifo_tdata_in.value = 0b00000101_00001001_1_0001_0000111100001111 # hcount = 5, line_height = 9
-    dut.dda_fifo_tlast_in = 0
-
-    await RisingEdge(dut.transformer_tready_out) # wait until we're ready to recieve new data
-
-    dut.dda_fifo_tvalid_in.value = 1
-    # dut.dda_fifo_tdata_in.value = 0b11001000_10010110_1_0001_0000111100001111 # hcount = 200, line_height = 150, wall type = 1
-    dut.dda_fifo_tdata_in.value = 0b00000110_00001000_1_0001_0000111100001111 # hcount = 6, line_height = 8
-    dut.dda_fifo_tlast_in = 0
+    dut.dda_fifo_tdata_in.value = (1 << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+    dut.dda_fifo_tlast_in.value = 0
 
     await RisingEdge(dut.transformer_tready_out)
 
-    # await ClockCycles(dut.pixel_clk_in, 40)
+    dut.dda_fifo_tvalid_in.value = 1
+    dut.dda_fifo_tdata_in.value = (2 << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+    dut.dda_fifo_tlast_in.value = 1
 
+    await ClockCycles(dut.pixel_clk_in, 100)
+    dut.fb_ready_to_switch_in.value = 3
+    await RisingEdge(dut.transformer_tready_out)
+
+    dut.dda_fifo_tvalid_in.value = 1
+    dut.dda_fifo_tdata_in.value = (1 << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+    dut.dda_fifo_tlast_in.value = 0
+    await RisingEdge(dut.transformer_tready_out)
+    
+    # # go through one round of flattening for a whole screen
+    # for h in range(320):
+    #     dut.dda_fifo_tvalid_in.value = 1
+    #     dut.dda_fifo_tdata_in.value = (h << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+    #     if (h == 319):
+    #         dut.dda_fifo_tlast_in.value = 1
+    #     else:
+    #         dut.dda_fifo_tlast_in.value = 0
+    #     await RisingEdge(dut.transformer_tready_out)
+
+    # # fifo out becomes valid
+    # await ClockCycles(dut.pixel_clk_in, 2)
+    # dut.dda_fifo_tvalid_in.value = 1
+    # dut.dda_fifo_tlast_in.value = 0
+    # dut.dda_fifo_tdata_in.value = (0 << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+
+    # # we are finally ready to switch frame buffers and start writing to the new one
+    # await ClockCycles(dut.pixel_clk_in, 20)
+    # dut.fb_ready_to_switch_in.value = 3
+    # await RisingEdge(dut.transformer_tready_out)
+
+    # for h in range(1, 320):
+    #     dut.dda_fifo_tvalid_in.value = 1
+    #     dut.dda_fifo_tdata_in.value = (h << 29) | (line_height << 21) | (wall_type << 20) | (map_data << 16) | wallX
+    #     if (h == 319):
+    #         dut.dda_fifo_tlast_in.value = 1
+    #     else:
+    #         dut.dda_fifo_tlast_in.value = 0
+    #     await RisingEdge(dut.transformer_tready_out)
 
 def is_runner():
     """Image Sprite Tester."""
@@ -67,7 +98,7 @@ def is_runner():
     sim = os.getenv("SIM", "icarus")
     proj_path = Path(__file__).resolve().parent.parent
     sys.path.append(str(proj_path / "sim" / "model"))
-    sources = [proj_path / "hdl" / "transformation.sv"]
+    sources = [proj_path / "hdl" / "raycast" / "transformation.sv"]
     sources += [proj_path / "hdl" / "xilinx_single_port_ram_read_first.v"]
     build_test_args = ["-Wall"]
     parameters = {"PIXEL_WIDTH": 16,

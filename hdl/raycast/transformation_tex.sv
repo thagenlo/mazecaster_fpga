@@ -2,11 +2,37 @@
 `default_nettype none
 
 /*
-Version 2:
-    - transformation with texture handling
+Outputs of dda module into DDA-out FIFO:
+    output logic [10:0] hcount_ray_out, //pipelined x_coord
+    output logic [15:0] lineHeight_out, // = SCREEN_HEIGHT/perpWallDist
+    output logic wallType_out, // 0 = X wall hit, 1 = Y wall hit
+    output logic [3:0] mapData_out;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
+    output logic [15:0] wallX_out; //where on wall the ray hits
+    output logic valid_out, // indicates when to store (x, lineHeight, wallType, mapData) in DDA_fifo_out
 
-QUESTIONS:
-    - repitition of state code
+Inputs of DDA-out FIFO:
+    input wire 		receiver_clk,
+    input wire 		receiver_axis_tready,
+Outputs of DDA-out FIFO:
+   output logic 	receiver_axis_tvalid,
+   output logic [41:0] receiver_axis_tdata,
+   output logic 	receiver_axis_tlast,
+
+Inputs into frame_buffer module:
+    input wire [15:0] ray_address_in, // from transformating / flattening module (not in order and ranges from 0 to 320*180)
+    input wire [15:0] ray_pixel_in,
+    input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
+*/
+
+/*
+data from DDA-out FIFO
+- 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+
+Version 1:
+- no textures, no shading, just black and white
+The Approach:
+- everything can be combinational ()
+>= draw start and < draw end
 */
 
 module transformation_tex  #(
@@ -23,7 +49,7 @@ module transformation_tex  #(
                         input wire dda_fifo_tvalid_in,
                         input wire [37:0] dda_fifo_tdata_in,
                         input wire dda_fifo_tlast_in,
-                        input wire frame_buff_ready_in,
+                        input wire [1:0] fb_ready_to_switch_in,
 
                         output logic transformer_tready_out,         // tells FIFO that we're ready to receive next data (need a vcount counter)
 
@@ -33,8 +59,9 @@ module transformation_tex  #(
                         );
 // STATE MACHINE
 typedef enum {
-	    FIFO_DATA_WAIT,     // wait for valid vertical line data from the FIFO
-        FLATTENING          // iterating through all vcounts for hcount, and transmitting corresponding (v,h) pixel value
+	    FIFO_DATA_WAIT,             // wait for valid vertical line data from the FIFO
+        FIFO_DATA_WAIT_NEW_PACKET,  // wait for start of new packet of data from FIFO
+        FLATTENING                  // iterating through all vcounts for hcount, and transmitting corresponding (v,h) pixel value
 	} t_state;
 
 t_state state;
@@ -42,6 +69,7 @@ t_state state;
 // PARAMETERS
 localparam [15:0] BACKGROUND_COLOR = 65535;
 localparam [15:0] BLACK_WALL = 0;
+localparam [15:0] GREEN_WALL = 30320;
 localparam [7:0] HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 
 // FROM DDA FIFO
@@ -51,7 +79,7 @@ logic wallType_in; // 0 = X wall hit, 1 = Y wall hit
 logic [3:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
 logic [15:0] wallX_in; //where on wall the ray hits
 
-logic [37:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+logic [38:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
 logic fifo_tlast_store;
 
 assign hcount_ray_in = fifo_data_store[37:29];
@@ -64,9 +92,9 @@ assign draw_start = HALF_SCREEN_HEIGHT - half_line_height;
 assign draw_end = HALF_SCREEN_HEIGHT + half_line_height;
 
 // TO USE IN MODULE
-logic [7:0] vcount_ray;
-logic [7:0] draw_start;
-logic [7:0] draw_end;
+logic [9:0] vcount_ray;
+logic [9:0] draw_start;
+logic [9:0] draw_end;
 
 logic [15:0] tex_pixel;
 logic [1:0] tex_counter; // counts from 0 to 2
@@ -84,130 +112,108 @@ textures texture_module (
     .valid_tex_out(valid_tex_out)
 );
 
-// always_comb begin
-//     case (state)
-//         FIFO_DATA_WAIT: begin
-//             transformer_tready_out = 1; // ready to receive new data
-//         end
-
-//         FLATTENING: begin
-//             transformer_tready_out = 0; // not ready to receive new data
-//         end
-//     endcase
-// end
-
 always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
         vcount_ray <= 0;
         state <= FIFO_DATA_WAIT;
-        tex_req <= 0;
         transformer_tready_out <= 1;
-
+        tex_req <= 0;
     end else begin
         case (state)
             FIFO_DATA_WAIT: begin
-                ray_last_pixel_out <= 0;
-                if (dda_fifo_tvalid_in) begin // handshake for fifo data
-                    transformer_tready_out <= 0; // only set ready back to 0 when we have a valid handshake
+                if (dda_fifo_tvalid_in) begin
+                    transformer_tready_out <= 0;
+                    state <= FLATTENING;
                     fifo_data_store <= dda_fifo_tdata_in; // store fifo data in a register
                     fifo_tlast_store <= dda_fifo_tlast_in;
-                    state <= FLATTENING;
                 end else begin
                     state <= FIFO_DATA_WAIT;
                 end
             end
 
+            FIFO_DATA_WAIT_NEW_PACKET: begin
+                ray_last_pixel_out <= 0;
+                if (dda_fifo_tvalid_in && (fb_ready_to_switch_in == 3)) begin // 3-way handshake --> only receive data when the fifo data is valid, the transformer is ready, and the fb is ready
+                    transformer_tready_out <= 0;
+                    state <= FLATTENING;
+                    fifo_data_store <= dda_fifo_tdata_in; // store fifo data in a register
+                    fifo_tlast_store <= dda_fifo_tlast_in;
+                end else begin
+                    state <= FIFO_DATA_WAIT_NEW_PACKET;
+                end
+            end
+
             FLATTENING: begin
-                if ((vcount_ray >= draw_start) && (vcount_ray < draw_end)) begin // if we've hit a wall
-                    case (mapData_in) // based on map data
-                        // easy 1 cycle cases
-                        0, 1, 2: begin
-                            // method
+                // ray pixel calculation
+                // create a state where 
+                case (mapData_in)
+                    0, 1, 2: begin
+                        // ray_pixel + address calculation
+                        if ((vcount_ray >= draw_start) && (vcount_ray < draw_end)) begin
                             case (mapData_in)
                                 0: ray_pixel_out <= BACKGROUND_COLOR;
                                 1: ray_pixel_out <= BLACK_WALL;
-                                2: ray_pixel_out <= {hcount_ray_in >> 4, vcount_ray >> 2, hcount_ray_in >> 4 + vcount_ray >> 3};
+                                2: ray_pixel_out <= GREEN_WALL;
                             endcase
+                        end else begin
+                            ray_pixel_out = BACKGROUND_COLOR;
+                        end
+                        ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
+
+                        // vcount updating + state transitions on same cycle
+                        if (vcount_ray < SCREEN_HEIGHT-1) begin
+                            vcount_ray <= vcount_ray + 1;
+                            ray_last_pixel_out <= 0;
+                            state <= FLATTENING;
+                        end else begin
+                            if (fifo_tlast_store) begin     // if we're at the end of the packet
+                                ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
+                                vcount_ray <= 0;            // reset vcount still
+                                transformer_tready_out <= 1; // indicate transformer's readiness to receive new data
+                                state <= FIFO_DATA_WAIT_NEW_PACKET;
+                            end else begin                  // if we're not at the end of the packet
+                                ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
+                                transformer_tready_out <= 1;
+                                vcount_ray <= 0;
+                                state <= FIFO_DATA_WAIT;
+                            end
+                        end
+
+                    end
+
+                    3, 4, 5: begin
+                        if (valid_tex_out) begin
+                            tex_req <= 0;               // make tex_req = 0 once we've serviced the request
+                            // ray_pixel + address calculation
+                            ray_pixel_out <= tex_pixel;
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-                            // state transitions
+
+                            // vcount updating + state transitions on same cycle
                             if (vcount_ray < SCREEN_HEIGHT-1) begin
                                 vcount_ray <= vcount_ray + 1;
                                 ray_last_pixel_out <= 0;
                                 state <= FLATTENING;
                             end else begin
-                                if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
-                                    ray_last_pixel_out <= 1;
-                                    if (frame_buff_ready_in) begin
-                                        transformer_tready_out <= 1;
-                                        vcount_ray <= 0;
-                                        state <= FIFO_DATA_WAIT;
-                                    end
-                                end else begin
+                                if (fifo_tlast_store) begin     // if we're at the end of the packet
+                                    ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
+                                    vcount_ray <= 0;            // reset vcount still
+                                    transformer_tready_out <= 1; // indicate transformer's readiness to receive new data
+                                    state <= FIFO_DATA_WAIT_NEW_PACKET;
+                                end else begin                  // if we're not at the end of the packet
+                                    ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
                                     transformer_tready_out <= 1;
                                     vcount_ray <= 0;
-                                    ray_last_pixel_out <= 0;
                                     state <= FIFO_DATA_WAIT;
                                 end
                             end
-                        end
-
-                        // accessing texture modules
-                        3, 4, 5: begin
-                            if (valid_tex_out) begin // handshake with texture data
-                                tex_req <= 0;
-                                // method
-                                ray_pixel_out <= tex_pixel;
-                                ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-                                // state transitions
-                                if (vcount_ray < SCREEN_HEIGHT-1) begin
-                                    vcount_ray <= vcount_ray + 1;
-                                    ray_last_pixel_out <= 0;
-                                    state <= FLATTENING;
-                                end else begin
-                                    if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
-                                        ray_last_pixel_out <= 1;
-                                        if (frame_buff_ready_in) begin
-                                            transformer_tready_out <= 1;
-                                            vcount_ray <= 0;
-                                            state <= FIFO_DATA_WAIT;
-                                        end
-                                    end else begin
-                                        transformer_tready_out <= 1;
-                                        vcount_ray <= 0;
-                                        ray_last_pixel_out <= 0;
-                                        state <= FIFO_DATA_WAIT;
-                                    end
-                                end
-                            end else begin
-                                tex_req <= 1;
-                            end
-                        end
-                    endcase
-                end else begin // out of bounds
-                    ray_pixel_out <= BACKGROUND_COLOR;
-                    ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-                    // state transitions
-                    if (vcount_ray < SCREEN_HEIGHT-1) begin
-                        vcount_ray <= vcount_ray + 1;
-                        ray_last_pixel_out <= 0;
-                        state <= FLATTENING;
-                    end else begin
-                        if (fifo_tlast_store) begin // when we've received the last packet of data, only be ready to receive next piece when fb is also ready
-                            ray_last_pixel_out <= 1;
-                            if (frame_buff_ready_in) begin
-                                transformer_tready_out <= 1;
-                                vcount_ray <= 0;
-                                state <= FIFO_DATA_WAIT;
-                            end
                         end else begin
-                            transformer_tready_out <= 1;
-                            vcount_ray <= 0;
-                            ray_last_pixel_out <= 0;
-                            state <= FIFO_DATA_WAIT;
+                            tex_req <= 1;
                         end
                     end
-                end
+                endcase
+
             end
+            // default : vcount_ray <= 0;
         endcase
     end
 end
