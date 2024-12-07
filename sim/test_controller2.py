@@ -27,6 +27,7 @@ async def test_a(dut):
     # dut.rotDir.value = 0
     await ClockCycles(dut.clk_in, 2)
     dut.rst_in.value = 0
+    dut.frame_switch.value = 0
     await RisingEdge(dut.clk_in)
 
     dut.fwd_btn.value = 0
@@ -40,28 +41,17 @@ async def test_a(dut):
     #base case: looking forward
 
     # testing forward movement
-    # dut.moveDir.value = MOVE_FWD
-    dut.fwd_btn.value = 1 #0c80
-    dut.bwd_btn.value = 0
-    dut.leftRot_btn.value = 0
-    dut.rightRot_btn.value = 0
+    dut.fwd_btn.value = 1 # POS Y SHOULD BECOME #0a80
     await RisingEdge(dut.clk_in)
     dut.fwd_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
 
-    dut.fwd_btn.value = 1 #0d80
-    dut.bwd_btn.value = 0
-    dut.leftRot_btn.value = 0
-    dut.rightRot_btn.value = 0
+    dut.fwd_btn.value = 1 # POS Y SHOULD BECOME #0980
     await RisingEdge(dut.clk_in)
     dut.fwd_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
 
-
-    dut.fwd_btn.value = 1
-    dut.bwd_btn.value = 1 #0c80
-    dut.leftRot_btn.value = 0
-    dut.rightRot_btn.value = 0
+    dut.bwd_btn.value = 1 # POS Y SHOULD BECOME #0a80
     await RisingEdge(dut.clk_in)
     dut.bwd_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
@@ -70,20 +60,36 @@ async def test_a(dut):
     await RisingEdge(dut.clk_in)
     dut.frame_switch.value = 0
 
-    #rotating left 
-    dut.fwd_btn.value = 0
-    dut.bwd_btn.value = 0
-    dut.leftRot_btn.value = 1 
-    dut.rightRot_btn.value = 0
     await RisingEdge(dut.clk_in)
+    dut.leftRot_btn.value = 1 # DIR X SHOULD BECOME 0xFFA5, DIR X SHOULD BECOME 0xFFA5,
+    await RisingEdge(dut.clk_in)
+    dut.leftRot_btn.value = 0
+    await ClockCycles(dut.clk_in, 2)
+
+    dut.frame_switch.value = 1
+    await RisingEdge(dut.clk_in)
+    dut.frame_switch.value = 0
+    await RisingEdge(dut.clk_in)
+
+    dut.leftRot_btn.value = 1
+    await ClockCycles(dut.clk_in, 2)
+    dut.leftRot_btn.value = 0
+    await ClockCycles(dut.clk_in, 10)
+
+    #rotating left 
+    dut.leftRot_btn.value = 1 
+    await RisingEdge(dut.clk_in, 2)
     # dut.is_pulse.value = 0
     dut.leftRot_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
 
+    dut.frame_switch.value = 1
+    await RisingEdge(dut.clk_in)
+    dut.frame_switch.value = 0
+
+    await RisingEdge(dut.clk_in)
+
     #rotating right (original position)
-    dut.fwd_btn.value = 0
-    dut.bwd_btn.value = 0
-    dut.leftRot_btn.value = 0
     dut.rightRot_btn.value = 1
     await RisingEdge(dut.clk_in)
     dut.rightRot_btn.value = 0

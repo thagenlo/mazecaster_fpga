@@ -101,6 +101,7 @@ module top_level(
     assign rightRot_btn = btn[0];
     assign fwd_btn = btn[3];
     assign bwd_btn = btn[2];
+    logic start_raycaster;
 
     btn_control controller (
         .clk_in(clk_pixel),
@@ -353,7 +354,7 @@ module top_level(
             hcount_ray_in <= 0;
         end else begin
             if (valid_ray_out && dda_data_ready_out) begin
-                if (hcount_ray_in == 319) begin
+                if ((hcount_ray_in == 319)) begin
                     hcount_ray_in <= 0;
                 end else begin 
                     hcount_ray_in <= hcount_ray_in + 1;

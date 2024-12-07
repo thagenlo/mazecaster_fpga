@@ -61,7 +61,6 @@ module btn_control #(
     
 
     always_ff @(posedge clk_in)begin
-    //enabling signal if old input equals new input
         past_fwd <= deb_out_fwd;
         past_bwd <= deb_out_bwd;
         past_leftRot <= deb_out_leftRot;
@@ -71,6 +70,7 @@ module btn_control #(
             bwd_pulse<= 1'b0;
             leftRot_pulse<= 1'b0;
             rightRot_pulse<= 1'b0;
+            is_pulse <= 1'b0;
         end else begin
             if (~past_fwd && deb_out_fwd) begin
                 fwd_pulse <= 1'b1;
@@ -98,7 +98,8 @@ module btn_control #(
                 dirY <= dirY_pipe_1;
                 planeX <= planeX_pipe_1;
                 planeY <= planeY_pipe_1;
-        end
+                // start_raycaster <= 1; 
+            end
         end
     end
 
@@ -118,18 +119,3 @@ module btn_control #(
         .planeY(planeY_pipe_0));
     
 endmodule
-
-    // logic [3:0] btn_pulses = {fwd_pulse, bwd_pulse, leftRot_pulse, rightRot_pulse};
-
-    // input wire clk_in,
-    // input wire rst_in,
-    // input wire fwd_pulse, 
-    // input wire bwd_pulse, 
-    // input wire leftRot_pulse, 
-    // input wire rightRot_pulse,
-    // output logic [15:0] posX, 
-    // output logic [15:0] posY,
-    // output logic [15:0] dirX, 
-    // output logic [15:0] dirY,
-    // output logic [15:0] planeX, 
-    // output logic [15:0] planeY

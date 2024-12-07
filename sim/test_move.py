@@ -10,11 +10,6 @@ from cocotb.triggers import Timer, ClockCycles, RisingEdge, FallingEdge, ReadOnl
 from cocotb.utils import get_sim_time as gst
 from cocotb.runner import get_runner
 
-# MOVE_FWD = 0b10  # Forward movement
-# MOVE_BACK = 0b01  # Backward movement
-# ROT_LEFT = 0b10  # Rotate left
-# ROT_RIGHT = 0b01  # Rotate right
-
 @cocotb.test()
 async def test_a(dut):
     """cocotb test for controller"""
@@ -23,13 +18,11 @@ async def test_a(dut):
     dut._log.info("Holding reset...")
     # reseting
     dut.rst_in.value = 1
-    # dut.moveDir.value = 0
-    # dut.rotDir.value = 0
     await ClockCycles(dut.clk_in, 2)
     dut.rst_in.value = 0
     await RisingEdge(dut.clk_in)
 
-    dut.fwd_pulse.value = 0
+    dut.fwd_pulse.value = 0 # POSY = 0b80 (init)
     dut.bwd_pulse.value = 0
     dut.leftRot_pulse.value = 0
     dut.rightRot_pulse.value = 0
@@ -38,107 +31,62 @@ async def test_a(dut):
     dut.is_pulse.value = 0
     await RisingEdge(dut.clk_in)
 
-    # testing forward movement
+    # testing forward movement (moving in negative Y)
     dut.is_pulse.value = 1
-    dut.fwd_pulse.value = 1 #0b80
-    dut.bwd_pulse.value = 0
-    dut.leftRot_pulse.value = 0
-    dut.rightRot_pulse.value = 0
+    dut.fwd_pulse.value = 1 
     await RisingEdge(dut.clk_in) #0a80 for posY
     dut.fwd_pulse.value = 0
     dut.is_pulse.value = 0
     await ClockCycles(dut.clk_in, 10)
 
-    # dut.fwd_pulse.value = 0
-    # dut.bwd_pulse.value = 0
-    # dut.leftRot_pulse.value = 0
-    # dut.rightRot_pulse.value = 0
-    # await RisingEdge(dut.clk_in)
-
+    # testing forward movement (moving in negative Y)
     dut.is_pulse.value = 1
-    dut.fwd_pulse.value = 1 #0a80
-    dut.bwd_pulse.value = 0
-    dut.leftRot_pulse.value = 0
-    dut.rightRot_pulse.value = 0
+    dut.fwd_pulse.value = 1 #0980
     await RisingEdge(dut.clk_in)
     dut.fwd_pulse.value = 0
     dut.is_pulse.value = 0
     await ClockCycles(dut.clk_in, 10)
 
+    # testing bwd movement (moving in positive Y)
     dut.is_pulse.value = 1
-    dut.fwd_pulse.value = 0
-    dut.bwd_pulse.value = 1 #0b80
-    dut.leftRot_pulse.value = 0
-    dut.rightRot_pulse.value = 0
+    dut.bwd_pulse.value = 1 #0a80
     await RisingEdge(dut.clk_in)
     dut.is_pulse.value = 0
     dut.bwd_pulse.value = 0
     await ClockCycles(dut.clk_in, 10)
+
+    #LEFT ROT: 
+    # double oldDirX = dirX;
+    # dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
+    # dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
+    # double oldPlaneX = planeX;
+    # planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
+    # planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
+    # [dirX, dirY, planeX, planeY] = [00B5, FF4B, 0077, 0077] (expected values)
 
     await RisingEdge(dut.clk_in)
     dut.is_pulse.value = 1 
-    dut.fwd_pulse.value = 0 
-    dut.bwd_pulse.value = 0
-    dut.leftRot_pulse.value = 1
-    dut.rightRot_pulse.value = 0
-    await RisingEdge(dut.clk_in)
+    dut.leftRot_pulse.value = 1 
+    await RisingEdge(dut.clk_in) 
     dut.leftRot_pulse.value = 0
     dut.is_pulse.value = 0
     await ClockCycles(dut.clk_in, 10)
 
-    dut.fwd_pulse.value = 0
-    dut.bwd_pulse.value = 0
-    dut.leftRot_pulse.value = 0
+    # RIGHT ROT:
+    # double oldDirX = dirX;
+    # dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
+    # dirY = oldDirX * sin(-rotSpeed) + dirY * cos(-rotSpeed);
+    # double oldPlaneX = planeX;
+    # planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
+    # planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
+    # [dirX, dirY, planeX, planeY] = [0000, FF00, 0a90, 0000] (expected values)
+    await RisingEdge(dut.clk_in)
+    dut.is_pulse.value = 1
     dut.rightRot_pulse.value = 1 
     await RisingEdge(dut.clk_in)
+    dut.is_pulse.value = 0
     dut.rightRot_pulse.value = 0
     await ClockCycles(dut.clk_in, 10)
-
-    # dut.rotLeft.value = 0
-    # dut.rotRight.value = 0
-    # dut.moveFwd.value = 0
-    # dut.moveBack.value = 0
-    # await RisingEdge(dut.clk_in)
-
-    # dut.moveFwd.value = 0
-    # dut.moveBack.value = 0
-    # dut.rotLeft.value = 0
-    # dut.rotRight.value = 1
-    # await ClockCycles(dut.clk_in, 10)
-
-
-
-
-    # await ClockCycles(dut.clk_in, 100)
-
-
-    # await RisingEdge(dut.clk_in)
-    # await RisingEdge(dut.clk_in)
-    # # dut.moveDir.value = 0
-    # await RisingEdge(dut.clk_in)
-
-    # # testing bwd movement
-    # # dut.moveDir.value = MOVE_BACK
-    # await RisingEdge(dut.clk_in)
-    # await RisingEdge(dut.clk_in)
-    # dut.moveDir.value = 0 
-    # await RisingEdge(dut.clk_in)
-
-    # # left rotation
-    # dut.rotDir.value = ROT_LEFT
-    # await RisingEdge(dut.clk_in)
-    # await RisingEdge(dut.clk_in)
-    # dut.rotDir.value = 0
-    # await RisingEdge(dut.clk_in)
-
-    # # right rotation
-    # dut.rotDir.value = ROT_RIGHT
-    # await RisingEdge(dut.clk_in)
-    # await RisingEdge(dut.clk_in)
-    # dut.rotDir.value = 0
-    # await RisingEdge(dut.clk_in)
-    # await ClockCycles(dut.clk_in, 100)
-
 
 
 
