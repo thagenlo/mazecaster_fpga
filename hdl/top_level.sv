@@ -423,6 +423,9 @@ module top_level(
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
     logic [37:0] dda_fsm_out_tdata;
 
+    logic map_select;
+    assign map_select = sw[4]; //CHANGE TO MORE OPTIONS
+
     // DDA MODULE
     dda #(
         .SCREEN_WIDTH(320),
@@ -431,6 +434,8 @@ module top_level(
     ) dda_module (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
+
+        .map_select(map_select),
         
         // DDA-in FIFO receiver
         .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
