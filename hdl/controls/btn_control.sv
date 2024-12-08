@@ -34,6 +34,13 @@ module btn_control #(
     logic signed [15:0] dirY_pipe_1;
     logic signed [15:0] planeX_pipe_1;
     logic signed [15:0] planeY_pipe_1;
+
+    // logic signed [15:0] posX_pipe_2;
+    // logic signed [15:0] posY_pipe_2;
+    // logic signed [15:0] dirX_pipe_2;
+    // logic signed [15:0] dirY_pipe_2;
+    // logic signed [15:0] planeX_pipe_2;
+    // logic signed [15:0] planeY_pipe_2;
     
     debouncer deb_fwd_btn (
         .clk_in(clk_in),
@@ -84,13 +91,19 @@ module btn_control #(
             end else if (~past_rightRot && deb_out_rightRot) begin
                 rightRot_pulse <= 1'b1;
                 is_pulse <= 1'b1;
+            end else begin
+                fwd_pulse<= 1'b0;
+                bwd_pulse<= 1'b0;
+                leftRot_pulse<= 1'b0;
+                rightRot_pulse<= 1'b0;
+                is_pulse <= 1'b0;
             end
-            posX_pipe_1 <= posX_pipe_0;
-            posY_pipe_1 <= posY_pipe_0;
-            dirX_pipe_1 <= dirX_pipe_0;
-            dirY_pipe_1 <= dirY_pipe_0;
-            planeX_pipe_1 <= planeX_pipe_0;
-            planeY_pipe_1 <= planeY_pipe_0;
+            // posX_pipe_1 <= posX_pipe_0;
+            // posY_pipe_1 <= posY_pipe_0;
+            // dirX_pipe_1 <= dirX_pipe_0;
+            // dirY_pipe_1 <= dirY_pipe_0;
+            // planeX_pipe_1 <= planeX_pipe_0;
+            // planeY_pipe_1 <= planeY_pipe_0;
             if (frame_switch) begin
                 posX <= posX_pipe_1;
                 posY <= posY_pipe_1;
@@ -111,11 +124,11 @@ module btn_control #(
         .leftRot_pulse(leftRot_pulse),
         .rightRot_pulse(rightRot_pulse),
         .is_pulse(is_pulse),
-        .posX(posX_pipe_0),
-        .posY(posY_pipe_0),
-        .dirX(dirX_pipe_0),
-        .dirY(dirY_pipe_0),
-        .planeX(planeX_pipe_0), 
-        .planeY(planeY_pipe_0));
+        .posX(posX_pipe_1),
+        .posY(posY_pipe_1),
+        .dirX(dirX_pipe_1),
+        .dirY(dirY_pipe_1),
+        .planeX(planeX_pipe_1), 
+        .planeY(planeY_pipe_1));
     
 endmodule
