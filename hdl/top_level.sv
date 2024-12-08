@@ -497,7 +497,7 @@ module top_level(
     logic [1:0] frame_buff_ready;
     // logic fb_ready_out;
 
-    transformation flattening_module (
+    transformation_tex flattening_module (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
