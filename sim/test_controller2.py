@@ -78,7 +78,7 @@ async def test_a(dut):
 
     #rotating left 
     dut.leftRot_btn.value = 1 
-    await RisingEdge(dut.clk_in, 2)
+    await ClockCycles(dut.clk_in, 2)
     # dut.is_pulse.value = 0
     dut.leftRot_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
@@ -91,7 +91,7 @@ async def test_a(dut):
 
     #rotating right (original position)
     dut.rightRot_btn.value = 1
-    await RisingEdge(dut.clk_in)
+    await ClockCycles(dut.clk_in, 2)
     dut.rightRot_btn.value = 0
     await ClockCycles(dut.clk_in, 10)
 

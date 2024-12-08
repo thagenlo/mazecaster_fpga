@@ -15,12 +15,12 @@ module movement_control #(
     output logic signed [15:0] planeY
     );//
 
-    localparam COS_OF_45 = 16'sb0000000010110101; //cos(45) = 0.7071 in FP
-    localparam SIN_OF_45 = 16'sb0000000010110101; //sin(45) = 0.7071 in FP
-    localparam NEG_COS_OF_45 = 16'sb1111111101001011;
-    localparam NEG_SIN_OF_45 = 16'sb1111111101001011;
+    localparam COS_OF_45 = 32'sh000000B5; //cos(45) = 0.7071 in FP
+    localparam SIN_OF_45 = 32'sh000000B5; //sin(45) = 0.7071 in FP
+    localparam NEG_COS_OF_45 = 32'shFFFFFF4B;
+    localparam NEG_SIN_OF_45 = 32'shFFFFFF4B;
 
-    localparam MOVE_SPEED = 16'sb0000_0001_0000_0000;
+    localparam MOVE_SPEED = 32'sh00000100;
     // localparam NEG_MOVE_SPEED = 16'sb1111_1111_0000_0000;
     
     logic signed [31:0] tempDirX, tempDirY;
@@ -48,6 +48,12 @@ module movement_control #(
             oldDirY <= 16'shFF00; // -1
             oldPlaneX <= 16'sh00A9; // 0.66
             oldPlaneY <= 16'sh0000; // O
+            tempPosX <= $signed({8'b0, 16'sh0b80, 8'b0});
+            tempPosY <= $signed({8'b0, oldPosY, 8'b0});
+            tempDirX <= $signed({8'b0, oldDirX, 8'b0});
+            tempDirY <= $signed({8'b0, oldDirY, 8'b0});
+            tempPlaneX <= $signed({8'b0, oldPlaneX, 8'b0});
+            tempPlaneY <= $signed({8'b0, oldPlaneY, 8'b0});
             // LOOKING INTO LOWER RIGHT CORNER
             // oldPosX <= 16'h0480; //4.5
             // oldPosY <= 16'h0c80; //12.5
@@ -86,20 +92,20 @@ module movement_control #(
                 else if (rightRot_pulse) begin
                     tempPosX <= $signed({8'b0, oldPosX, 8'b0});
                     tempPosY <= $signed({8'b0, oldPosY, 8'b0});
-                    tempDirX <= $signed(oldDirX) * $signed(NEG_COS_OF_45) - $signed(oldDirY) * $signed(NEG_SIN_OF_45);
-                    tempDirY <= $signed(oldDirX) * $signed(NEG_SIN_OF_45) + $signed(oldDirY) * $signed(NEG_COS_OF_45);
-                    tempPlaneX <= $signed(oldPlaneX) * $signed(NEG_COS_OF_45) - $signed(oldPlaneY) * $signed(NEG_SIN_OF_45);
-                    tempPlaneY <= $signed(oldPlaneX) * $signed(NEG_SIN_OF_45) + $signed(oldPlaneY) * $signed(NEG_COS_OF_45);
+                    tempDirX <= $signed(oldDirX) * $signed(NEG_COS_OF_45[15:0]) - $signed(oldDirY[15:0]) * $signed(NEG_SIN_OF_45[15:0]);
+                    tempDirY <= $signed(oldDirX) * $signed(NEG_SIN_OF_45[15:0]) + $signed(oldDirY[15:0]) * $signed(NEG_COS_OF_45[15:0]);
+                    tempPlaneX <= $signed(oldPlaneX) * $signed(NEG_COS_OF_45[15:0]) - $signed(oldPlaneY[15:0]) * $signed(NEG_SIN_OF_45[15:0]);
+                    tempPlaneY <= $signed(oldPlaneX) * $signed(NEG_SIN_OF_45[15:0]) + $signed(oldPlaneY[15:0]) * $signed(NEG_COS_OF_45[15:0]);
                 end
             end
             else if (second_stage) begin
                 second_stage <= 0;
-                oldPosX <= tempPosX>>>8;
-                oldPosY <= tempPosY>>>8;
-                oldDirX <= tempDirX>>>8;
-                oldDirY <= tempDirY>>>8;
-                oldPlaneX <= tempPlaneX>>>8;
-                oldPlaneY <= tempPlaneY>>>8;
+                oldPosX <= tempPosX[23:8];
+                oldPosY <= tempPosY[23:8];
+                oldDirX <= tempDirX[23:8];
+                oldDirY <= tempDirY[23:8];
+                oldPlaneX <= tempPlaneX[23:8];
+                oldPlaneY <= tempPlaneY[23:8];
             end
         end
     end
