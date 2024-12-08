@@ -50,7 +50,7 @@ module dda_fsm
     assign stepX = dda_data_in[129]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
     assign stepY = dda_data_in[128]; // 1'b0 = -1, 1'b1 = 1 - (1-bit uint)
 
-    logic [15:0] rayDirX, rayDirY; // x & y componentions of ray vector (used to calculate wallX_out)
+    logic signed [15:0] rayDirX, rayDirY; // x & y componentions of ray vector (used to calculate wallX_out)
     assign rayDirX = dda_data_in[127:112]; //TODO TEMP VAL (UNTIL TEXTURES NEEDED)
     assign rayDirY = dda_data_in[111:96]; //TODO TEMP VAL (UNTIL TEXTURES NEEDED)
     // always_comb begin
@@ -86,17 +86,15 @@ module dda_fsm
     // ---- SINGLE STORE FOR OUTPUT ----
 
     logic [7:0] mapData_store; // value 0 -> 16 at map[mapX][mapY] from BROM
-    logic [15:0] perpWallDist;
+    //logic [15:0] perpWallDist;
 
     // ---- PIPELINES ----
 
     //CHECK_WALL
-    logic [15:0] rayDir_X_or_Y; //signed 8.8 signed fixed point 
+    logic signed [15:0] rayDir_X_or_Y; //signed 8.8 signed fixed point 
     logic [15:0] pos_X_or_Y; // 8.8 fixed point 
 
-    //WALL_CALC
-    logic [31:0] wallX_out_intermediate;
-
+    //DIVISION
     logic div_start_in; // start division
     logic div_done_out;
     //logic div_busy_out, div_valid_out;
@@ -119,6 +117,10 @@ module dda_fsm
         .b(div_denominator_in),
         .val(div_quotient_out)
     );
+
+    //WALL_CALC
+    logic signed [31:0] wallX_mult_result; // intermediate multiplication result (16.16 fixed-point)
+    assign wallX_mult_result = $signed(div_denominator_in) * $signed(rayDir_X_or_Y);
 
     ////############ STEP FSM ###############
 
@@ -225,18 +227,17 @@ module dda_fsm
                         mapData_store <= map_data_in; //store map data locally
                         if (map_data_in != 0) begin
                             //$display("Time: %0t | Wall detected! Transitioning to WALL_CALC", $time);
-                            
-                            //TODO WHEN TEXTURES NEEDED
-                            // perpWallDist <= (wallType == 1'b0)? sideDistX - deltaDistX: // 0 => x-wall
-                            //                                     sideDistY - deltaDistY; // 1 => y-wall
 
                             // set as X or Y for wall_calc
-                            pos_X_or_Y <= (wallType == 1'b0)? posX : posY;
-                            rayDir_X_or_Y <= (wallType == 1'b0)? rayDirX : rayDirY; 
+                            pos_X_or_Y <= (wallType == 1'b0)? posY : posX;
+                        //     $display("Time: %0t | pos_X_or_Y: %0d | posX: %0d | posY: %0d", 
+                        //  $time, pos_X_or_Y, posX, posY);
+
+                            rayDir_X_or_Y <= (wallType == 1'b0)? rayDirY : rayDirX; 
 
                             //start division (screenHeight / perpWallDist)
                             div_start_in <= 1'b1;
-                            div_denominator_in <= (wallType == 1'b0)? (sideDistX - deltaDistX): 
+                            div_denominator_in <= (wallType == 1'b0)? (sideDistX - deltaDistX): //perpWallDist
                                                                        (sideDistY - deltaDistY);
                             div_numerator_in <= 16'hB400; //screen_height = 180
 
@@ -257,31 +258,20 @@ module dda_fsm
                     wallType_out <= wallType; // 0 => x-wall, 1 => y-wall
                     mapData_out <= mapData_store; // value from 0->7 at map[mapX][mapY] from BRAM
 
-
                     //$display("Time: %0t | DIVISION: numerator=%0d, denominator=%0d", $time, div_numerator_in, div_denominator_in);
 
-                    // ~16 cycles?
-                    // possible efficiency considerations?
-                    // perpWallDist 0 -> N * sqrt(2), lineHeight_out 0 -> SCREEN_HEIGHT
-                            // full screen -> if perpWallDist[15:8] == 0, lineHeight_out <= SCREEN_HEIGHT
-                            // 1 pixel -> if perpWallDist[15:8] > SCREEN_HEIGHT, lineHeight_out <= 1; (will never be 0 pixels b/c 240*sqrt(2) = 339)
-                    //lineHeight_out <= screenHeight / perpWallDist;
-                    div_start_in <= 1'b0;
+                    div_start_in <= 1'b0; //lineHeight_out <= screenHeight / perpWallDist;
 
-                    // ~6 cycles?
-                    //where exactly the wall was hit ( fractional part [7:0] -> wallX -= floor((wallX)) ) 
                     // wallX_out <= (wallType == 1'b0)? (posX + (perpWallDist * rayDirX))[7:0]: // 0 => x-wall
                     //                                  (posY + (perpWallDist * rayDirY))[7:0]; // 1 => y-wall
-                    
-                    //wallX_out_intermediate <= perpWallDist * rayDir_X_or_Y; //TODO check later for textures ray direction is absolute val (check)
 
                     if (div_done_out) begin
                         // $display("Time: %0t | hcount_ray_out: %0d | DIVISION DONE: quotient=%0d", $time, hcount_ray_out, div_quotient_out);
 
-                        wallX_out <= 16'b1111_1111_1111_1111; //(pos_X_or_Y + {8'b0, wallX_out_intermediate[7:0]})[8:0]; //TODO check later for textures
-
-                        //TODO div_quotient_out is zero when player is super close to wall
-                        //lineHeight_out <= (div_quotient_out == 0)? SCREEN_HEIGHT : div_quotient_out[15:8];
+                        // $display("Time: %0t | VALID_OUT State | hcount_ray_out: %0d | pos_X_or_Y: %0d | wallX_mult_result: %0d", 
+                        //  $time, hcount_ray_out, pos_X_or_Y, wallX_mult_result);
+                        wallX_out <= (pos_X_or_Y + wallX_mult_result[23:8]) & 16'h00FF ; //use fractional part [7:0] -> wallX -= floor((wallX))
+    
                         lineHeight_out <=  (div_quotient_out[15:8] >= SCREEN_HEIGHT)? SCREEN_HEIGHT:
                                                                                 div_quotient_out[15:8];
 
@@ -291,8 +281,8 @@ module dda_fsm
                 end
 
                 VALID_OUT: begin
-                    $display("Time: %0t | VALID_OUT State | hcount_ray_out: %0d | lineHeight_out: %0d | wallType_out: %0d | mapX: %0d | mapY: %0d ", 
-                         $time, hcount_ray_out, lineHeight_out, wallType_out, mapX, mapY);
+                    // $display("Time: %0t | VALID_OUT State | hcount_ray_out: %0d | wallX_out: %0d | lineHeight_out: %0d | wallType_out: %0d | mapX: %0d | mapY: %0d ", 
+                    //      $time, hcount_ray_out, wallX_out, lineHeight_out, wallType_out, mapX, mapY);
 
                     if (dda_fsm_out_tready) begin// data is not sent to the FIFO unless dda_fsm_out_tready is high
                         //$display("valid_out: %0d", dda_valid_out);

@@ -387,6 +387,7 @@ ray_data_angle = [
     "1011001111100000000000111000000000101001101000010010010010100000000110001010001010010000000000001001000000000000100100100100000000001100010",
 ]
 
+
 def cast_ray(
     mapX,
     mapY,
@@ -437,7 +438,14 @@ def cast_ray(
     else:
         lineHeight = screen_height  # Fallback for edge cases
 
-    return lineHeight, side, curr_mapX, curr_mapY
+    if side == 0:
+        wallX = posY_test + perpWallDist * rayDirY_test
+    else:
+        wallX = posX_test + perpWallDist * rayDirX_test
+    wallX -= int(wallX)
+    
+
+    return lineHeight, side, curr_mapX, curr_mapY, wallX
 
 
 posX_test = 20.5
@@ -469,7 +477,7 @@ for i in range(320):
         stepY_test = 1
         sideDistY_test = (mapY_test + 1.0 - posY_test) * deltaDistY_test
 
-    lineHeight_true, side_tru, mapX_true, mapY_true = cast_ray(
+    lineHeight_true, side_tru, mapX_true, mapY_true, wallX_true = cast_ray(
         mapX_test,
         mapY_test,
         deltaDistX_test,
@@ -482,13 +490,14 @@ for i in range(320):
     )
 
 
-    # Log the results
+    #Log the results
     # print(
     #     f"i: {i}, "
     #     f"lineHeight_true={lineHeight_true}, "
     #     f"wallType_true={side_tru}, "
     #     f"mapX_true={mapX_true}, "
-    #     f"mapY_true={mapY_true}"
+    #     f"mapY_true={mapY_true}, "
+    #     f"wallX_true={wallX_true}"
     # )
 
 
