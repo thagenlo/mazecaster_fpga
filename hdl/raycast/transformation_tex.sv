@@ -173,7 +173,7 @@ always_ff @(posedge pixel_clk_in) begin
                             if (fifo_tlast_store) begin     // if we're at the end of the packet
                                 ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
                                 vcount_ray <= 0;            // reset vcount still
-                                transformer_tready_out <= 1; // indicate transformer's readiness to receive new data
+                                transformer_tready_out <= 0; // indicate transformer's readiness to receive new data
                                 state <= FIFO_DATA_WAIT_NEW_PACKET;
                             end else begin                  // if we're not at the end of the packet
                                 ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
@@ -226,7 +226,7 @@ always_ff @(posedge pixel_clk_in) begin
                                 if (fifo_tlast_store) begin     // if we're at the end of the packet
                                     ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
                                     vcount_ray <= 0;            // reset vcount still
-                                    transformer_tready_out <= 1; // indicate transformer's readiness to receive new data
+                                    transformer_tready_out <= 0; // indicate transformer's readiness to receive new data
                                     state <= FIFO_DATA_WAIT_NEW_PACKET;
                                 end else begin                  // if we're not at the end of the packet
                                     ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
