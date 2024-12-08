@@ -1,8 +1,8 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.1 (lin64) Build 5076996 Wed May 22 18:36:09 MDT 2024
-| Date             : Tue Dec  3 21:42:38 2024
-| Host             : eecs-digital-33 running 64-bit Ubuntu 24.04.1 LTS
+| Date             : Sun Dec  8 18:26:21 2024
+| Host             : eecs-digital-25 running 64-bit Ubuntu 24.04.1 LTS
 | Command          : report_power -file obj/post_route_power.rpt
 | Design           : top_level
 | Device           : xc7s50csga324-1
@@ -30,14 +30,14 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.449        |
+| Total On-Chip Power (W)  | 0.469        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.373        |
+| Dynamic (W)              | 0.394        |
 | Device Static (W)        | 0.076        |
 | Effective TJA (C/W)      | 4.9          |
-| Max Ambient (C)          | 82.8         |
-| Junction Temperature (C) | 27.2         |
+| Max Ambient (C)          | 82.7         |
+| Junction Temperature (C) | 27.3         |
 | Confidence Level         | Low          |
 | Setting File             | ---          |
 | Simulation Activity File | ---          |
@@ -49,24 +49,25 @@ Table of Contents
 1.1 On-Chip Components
 ----------------------
 
-+----------------+-----------+----------+-----------+-----------------+
-| On-Chip        | Power (W) | Used     | Available | Utilization (%) |
-+----------------+-----------+----------+-----------+-----------------+
-| Clocks         |     0.007 |        6 |       --- |             --- |
-| Slice Logic    |     0.006 |     3317 |       --- |             --- |
-|   LUT as Logic |     0.005 |     1294 |     32600 |            3.97 |
-|   CARRY4       |    <0.001 |      142 |      8150 |            1.74 |
-|   Register     |    <0.001 |     1285 |     65200 |            1.97 |
-|   BUFG         |    <0.001 |        1 |        32 |            3.13 |
-|   Others       |     0.000 |      111 |       --- |             --- |
-| Signals        |     0.007 |     2759 |       --- |             --- |
-| Block RAM      |     0.102 |     68.5 |        75 |           91.33 |
-| MMCM           |     0.105 |        1 |         5 |           20.00 |
-| DSPs           |     0.005 |       10 |       120 |            8.33 |
-| I/O            |     0.141 |       35 |       210 |           16.67 |
-| Static Power   |     0.076 |          |           |                 |
-| Total          |     0.449 |          |           |                 |
-+----------------+-----------+----------+-----------+-----------------+
++--------------------------+-----------+----------+-----------+-----------------+
+| On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
++--------------------------+-----------+----------+-----------+-----------------+
+| Clocks                   |     0.009 |        6 |       --- |             --- |
+| Slice Logic              |     0.006 |     4436 |       --- |             --- |
+|   LUT as Logic           |     0.006 |     1659 |     32600 |            5.09 |
+|   CARRY4                 |    <0.001 |      176 |      8150 |            2.16 |
+|   Register               |    <0.001 |     1821 |     65200 |            2.79 |
+|   BUFG                   |    <0.001 |        1 |        32 |            3.13 |
+|   Others                 |     0.000 |      140 |       --- |             --- |
+|   LUT as Distributed RAM |     0.000 |       31 |      9600 |            0.32 |
+| Signals                  |     0.010 |     3905 |       --- |             --- |
+| Block RAM                |     0.084 |     67.5 |        75 |           90.00 |
+| MMCM                     |     0.105 |        1 |         5 |           20.00 |
+| DSPs                     |     0.014 |       22 |       120 |           18.33 |
+| I/O                      |     0.166 |       58 |       210 |           27.62 |
+| Static Power             |     0.076 |          |           |                 |
+| Total                    |     0.469 |          |           |                 |
++--------------------------+-----------+----------+-----------+-----------------+
 
 
 1.2 Power Supply Summary
@@ -75,16 +76,16 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.134 |       0.122 |      0.012 |       NA    | Unspecified | NA         |
-| Vccaux    |       1.800 |     0.071 |       0.058 |      0.013 |       NA    | Unspecified | NA         |
-| Vcco33    |       3.300 |     0.043 |       0.042 |      0.001 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.130 |       0.119 |      0.012 |       NA    | Unspecified | NA         |
+| Vccaux    |       1.800 |     0.072 |       0.059 |      0.013 |       NA    | Unspecified | NA         |
+| Vcco33    |       3.300 |     0.050 |       0.049 |      0.001 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco18    |       1.800 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco15    |       1.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco135   |       1.350 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco12    |       1.200 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vccaux_io |       1.800 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
-| Vccbram   |       1.000 |     0.010 |       0.008 |      0.002 |       NA    | Unspecified | NA         |
+| Vccbram   |       1.000 |     0.008 |       0.007 |      0.002 |       NA    | Unspecified | NA         |
 | Vccadc    |       1.800 |     0.020 |       0.000 |      0.020 |       NA    | Unspecified | NA         |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 
@@ -145,22 +146,23 @@ Table of Contents
 +--------------------------+-----------+
 | Name                     | Power (W) |
 +--------------------------+-----------+
-| top_level                |     0.373 |
+| top_level                |     0.394 |
 |   calculating_ray        |     0.007 |
-|     rayDirX_recip        |     0.001 |
-|     rayDirY_recip        |     0.001 |
-|   dda_fifo_in            |     0.008 |
-|     xpm_fifo_axis_inst   |     0.008 |
-|       xpm_fifo_base_inst |     0.008 |
-|   dda_fifo_out           |     0.004 |
-|     xpm_fifo_axis_inst   |     0.004 |
-|       xpm_fifo_base_inst |     0.004 |
-|   dda_module             |     0.008 |
-|     dda_fsm0             |     0.003 |
+|   controller             |     0.012 |
+|     move                 |     0.009 |
+|   dda_fifo_in            |     0.006 |
+|     xpm_fifo_axis_inst   |     0.006 |
+|       xpm_fifo_base_inst |     0.006 |
+|   dda_fifo_out           |     0.003 |
+|     xpm_fifo_axis_inst   |     0.003 |
+|       xpm_fifo_base_inst |     0.003 |
+|   dda_module             |     0.009 |
+|     dda_fsm0             |     0.004 |
 |     dda_fsm1             |     0.003 |
-|   frame_buffer_module    |     0.095 |
-|     framebuffer_1        |     0.047 |
-|     framebuffer_2        |     0.048 |
+|   flattening_module      |     0.002 |
+|   frame_buffer_module    |     0.080 |
+|     framebuffer_1        |     0.039 |
+|     framebuffer_2        |     0.040 |
 |   mhdmicw                |     0.105 |
 +--------------------------+-----------+
 
