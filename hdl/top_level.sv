@@ -505,7 +505,6 @@ module top_level(
         .dda_fifo_tlast_in(fifo_tlast_out),
         .fb_ready_to_switch_in(frame_buff_ready),
         .transformer_tready_out(transformer_tready),
-        // .fb_ready_out(fb_ready_out),
         .ray_address_out(ray_address_out),
         .ray_pixel_out(ray_pixel_out),
         .ray_last_pixel_out(ray_last_pixel_out)
