@@ -101,6 +101,7 @@ module top_level(
     assign rightRot_btn = btn[0];
     assign fwd_btn = btn[3];
     assign bwd_btn = btn[2];
+    logic start_raycaster;
 
     btn_control controller (
         .clk_in(clk_pixel),
@@ -353,7 +354,7 @@ module top_level(
             hcount_ray_in <= 0;
         end else begin
             if (valid_ray_out && dda_data_ready_out) begin
-                if (hcount_ray_in == 319) begin
+                if ((hcount_ray_in == 319)) begin
                     hcount_ray_in <= 0;
                 end else begin 
                     hcount_ray_in <= hcount_ray_in + 1;
@@ -483,6 +484,7 @@ module top_level(
         .sender_axis_prog_full(),
         .receiver_clk(clk_pixel),
         .receiver_axis_tvalid(fifo_tvalid_out),
+        // .receiver_axis_tready(transformer_tready && fb_ready_out),
         .receiver_axis_tready(transformer_tready),
         .receiver_axis_tdata(fifo_tdata_out),
         .receiver_axis_tlast(fifo_tlast_out),
@@ -493,6 +495,7 @@ module top_level(
     logic [15:0] ray_pixel_out;
     logic ray_last_pixel_out;
     logic [1:0] frame_buff_ready;
+    // logic fb_ready_out;
 
     transformation flattening_module (
         .pixel_clk_in(clk_pixel),
@@ -502,6 +505,7 @@ module top_level(
         .dda_fifo_tlast_in(fifo_tlast_out),
         .fb_ready_to_switch_in(frame_buff_ready),
         .transformer_tready_out(transformer_tready),
+        // .fb_ready_out(fb_ready_out),
         .ray_address_out(ray_address_out),
         .ray_pixel_out(ray_pixel_out),
         .ray_last_pixel_out(ray_last_pixel_out)
