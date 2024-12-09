@@ -17,7 +17,7 @@ module ray_calculations (
   output logic signed [15:0] sideDistY,
   output logic signed [15:0] deltaDistX, //distance to travel to reach the next x- or y-boundary
   output logic signed [15:0] deltaDistY,
-  output logic busy_ray_calc,
+  output logic ray_calc_busy,
   output logic valid_ray_out
   );
   localparam SCREEN_WIDTH = 320;
@@ -33,7 +33,7 @@ module ray_calculations (
   //TODO can I change the position for me to be posX and posY in fixed point for accuracy
   //and change mapX and mapY where player is integer wise in map
 
-  typedef enum {RESTING, START, DIVIDING, DELTA_DIST_CALC, SIDE_DIST_CALC, VALID_OUT} divider_state;
+  typedef enum {RESTING, START, RAY_DIR_CALC, DIVIDING, DELTA_DIST_CALC, SIDE_DIST_CALC, VALID_OUT} divider_state;
   divider_state state;
 
 
@@ -98,12 +98,12 @@ module ray_calculations (
 
 
   always_comb begin
-    tempCameraX = $signed(cameraX[23:8]);
-    tempRayDirXMultiply = ($signed(planeX)*$signed(tempCameraX));
-    rayDirX = $signed(dirX) + $signed(tempRayDirXMultiply[23:8]);
+    // tempCameraX = $signed(cameraX[23:8]);
+    // tempRayDirXMultiply = ($signed(planeX)*$signed(tempCameraX));
+    // rayDirX = $signed(dirX) + $signed(tempRayDirXMultiply[23:8]);
 
-    tempRayDirYMultiply = ($signed(planeY)*$signed(tempCameraX));
-    rayDirY = $signed(dirY) + $signed(tempRayDirYMultiply[23:8]);
+    // tempRayDirYMultiply = ($signed(planeY)*$signed(tempCameraX));
+    // rayDirY = $signed(dirY) + $signed(tempRayDirYMultiply[23:8]);
 
 
     if (~stepX) begin
@@ -135,7 +135,7 @@ module ray_calculations (
     // $display("Time: %0t | tempRayDirXMultiply: %h, tempRayDirYMultiply: %h", $time, tempRayDirXMultiply, tempRayDirYMultiply);
     // $display("Time: %0t | tempSideDistX: %h, tempSideDistY: %h", $time, tempSideDistX, tempSideDistY);
 
-    busy_ray_calc = div_busy;
+    // busy_ray_calc = div_busy;
   end
 
 
@@ -153,6 +153,7 @@ module ray_calculations (
       stepX <= 0;
       sideDistX <= 0;
       deltaDistX <= 0;
+      rayDirX <=0;
 
       start_rayDirX <= 0;
       ready_rayDirX <= 0;
@@ -160,19 +161,36 @@ module ray_calculations (
       stepY <= 0;
       sideDistY <= 0;
       deltaDistY <= 0;
+      rayDirY <=0;
 
       start_rayDirY <= 0;
       ready_rayDirY <= 0;
 
       div_busy <= 0;      
       valid_ray_calculated <= 0;
+      ray_calc_busy <= 0;
       state <= RESTING;
       valid_ray_out <= 0;
+
+      tempRayDirXMultiply<=0;
+      tempRayDirYMultiply<=0;
 
 
     end else begin
           case(state)
             RESTING: begin
+              if (~ray_calc_busy) begin
+                // start_rayDirX <= 1;
+                // start_rayDirY <= 1;
+                tempRayDirXMultiply <= ($signed(planeX)*$signed(cameraX[23:8]));
+                tempRayDirYMultiply <= ($signed(planeY)*$signed(cameraX[23:8]));
+                ray_calc_busy <= 1;
+                state <= RAY_DIR_CALC;
+              end
+            end
+            RAY_DIR_CALC: begin
+              rayDirX <= $signed(dirX) + $signed(tempRayDirXMultiply[23:8]);
+              rayDirY <= $signed(dirY) + $signed(tempRayDirYMultiply[23:8]);
               if (~div_busy) begin
                 start_rayDirX <= 1;
                 start_rayDirY <= 1;
@@ -248,7 +266,9 @@ module ray_calculations (
                   if (dda_data_ready_out) begin
                     valid_ray_out <= 0;
                     div_busy <= 1'b0;
+                    ray_calc_busy <= 0;
                     state <= RESTING;
+
                   end
                 end
           endcase
