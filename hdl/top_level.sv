@@ -1,4 +1,6 @@
 `default_nettype none // prevents system from inferring an undeclared logic (good practice)
+
+`define FPATH(X) `"../data/X`" //`"../../data/X`"
  
 module top_level(
     input wire clk_100mhz,                  //crystal reference clock
@@ -15,6 +17,8 @@ module top_level(
     output logic [2:0] hdmi_tx_n,           //hdmi output signals (negatives) (blue, green, red)
     output logic hdmi_clk_p, hdmi_clk_n     //differential hdmi clock
     );
+
+    localparam N = 24;
 
     // shut up those RGBs
     assign rgb0 = 0;
@@ -433,6 +437,47 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
+
+    //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
+    // MAP 1 UNTEXTURED
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) worldMap1 (
+        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(clk_pixel),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(sys_rst),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
+    );
+
+    // MAP 2 TEXTURED
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) worldMap2 (
+        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(clk_pixel),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(sys_rst),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
+    );
+
+    //map BRAM data
+    logic [2:0] map_data1_top_level, map_data2_top_level;
+    logic [$clog2(N*N)-1:0] map_addra_top_level;
+
+
     // dda-out fifo senders
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
     logic [37:0] dda_fsm_out_tdata;
@@ -450,6 +495,11 @@ module top_level(
         .rst_in(sys_rst),
 
         .map_select(map_select),
+
+        //handle maps
+        .map_data1_top_level(map_data1_top_level),
+        .map_data2_top_level(map_data2_top_level),
+        .map_addra_top_level(map_addra_top_level),
         
         // DDA-in FIFO receiver
         .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
