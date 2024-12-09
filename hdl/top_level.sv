@@ -620,7 +620,7 @@ module top_level(
         .ray_pixel_in(ray_pixel_out),
         .ray_last_pixel_in(ray_last_pixel_out),
         .video_last_pixel_in(last_screen_pixel),
-        .ready_to_switch(frame_buff_ready),
+        .fb_ready_to_switch_out(frame_buff_ready),
         .rgb_out(rgb_out) // should I create a valid signal so that 
     );
 

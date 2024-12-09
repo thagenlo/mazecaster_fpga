@@ -35,7 +35,7 @@ The Approach:
 >= draw start and < draw end
 */
 
-module transformation_tex_new  #(
+module transformation_tex  #(
                         parameter [4:0] PIXEL_WIDTH = 16,
                         parameter [10:0] FULL_SCREEN_WIDTH = 1280,
                         parameter [9:0] FULL_SCREEN_HEIGHT = 720,
@@ -113,6 +113,10 @@ logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
 logic valid_tex_out;
 
+logic [7:0] ray_pixel;
+
+assign ray_pixel_out = (!wallType_in) ? ray_pixel : ray_pixel >> 1;
+
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),
     .rst_in(rst_in),
@@ -189,12 +193,12 @@ always_ff @(posedge pixel_clk_in) begin
                 case (region)
                     CEILING, FLOOR, PLAIN_WALL: begin
                         if (region == CEILING || region == FLOOR) begin
-                            ray_pixel_out <= (region == CEILING) ? SKY : GROUND;
+                            ray_pixel <= (region == CEILING) ? SKY : GROUND;
                         end else begin
                             case (mapData_in)
-                                0: ray_pixel_out <= SKY;
-                                1: ray_pixel_out <= BLACK_WALL;
-                                2: ray_pixel_out <= GREEN_WALL;
+                                0: ray_pixel <= SKY;
+                                1: ray_pixel <= BLACK_WALL;
+                                2: ray_pixel <= GREEN_WALL;
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
@@ -222,7 +226,7 @@ always_ff @(posedge pixel_clk_in) begin
                         if (valid_tex_out) begin
                             tex_req <= 0;               // make tex_req = 0 once we've serviced the request
                             // ray_pixel + address calculation
-                            ray_pixel_out <= tex_pixel;
+                            ray_pixel <= tex_pixel;
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
 
                             // vcount updating + state transitions on same cycle
@@ -249,7 +253,7 @@ always_ff @(posedge pixel_clk_in) begin
                     end
 
                     TOPDOWN: begin
-                        ray_pixel_out <= 8'h0a;
+                        ray_pixel <= 8'h0a;
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
                         // vcount updating + state transitions on same cycle
                         if (vcount_ray < SCREEN_HEIGHT-1) begin
