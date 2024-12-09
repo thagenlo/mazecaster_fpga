@@ -1,4 +1,6 @@
 `default_nettype none // prevents system from inferring an undeclared logic (good practice)
+
+`define FPATH(X) `"../data/X`" //`"../../data/X`"
  
 module top_level(
     input wire clk_100mhz,                  //crystal reference clock
@@ -7,10 +9,16 @@ module top_level(
     output logic [2:0]  rgb0,               // rgbs : need to drive them even if not using
     output logic [2:0]  rgb1,
     output logic [15:0] led,                //16 green output LEDs (located right above switches)
+    output logic [3:0] ss0_an,//anode control for upper four digits of seven-seg display
+    output logic [3:0] ss1_an,//anode control for lower four digits of seven-seg display
+    output logic [6:0] ss0_c, //cathode controls for the segments of upper four digits
+    output logic [6:0] ss1_c, //cathode controls for the segments of lower four digits
     output logic [2:0] hdmi_tx_p,           //hdmi output signals (positives) (blue, green, red)
     output logic [2:0] hdmi_tx_n,           //hdmi output signals (negatives) (blue, green, red)
     output logic hdmi_clk_p, hdmi_clk_n     //differential hdmi clock
     );
+
+    localparam N = 24;
 
     // shut up those RGBs
     assign rgb0 = 0;
@@ -46,15 +54,15 @@ module top_level(
 
     //debouncing buttons
 
-    logic leftRot_btn;
-    logic rightRot_btn;
-    logic fwd_btn;
-    logic bwd_btn;
+    // logic leftRot_btn;
+    // logic rightRot_btn;
+    // logic fwd_btn;
+    // logic bwd_btn;
 
-    assign leftRot_btn = btn[1];
-    assign rightRot_btn = btn[0];
-    assign fwd_btn = btn[3];
-    assign bwd_btn = btn[2];
+    // assign leftRot_btn = btn[1];
+    // assign rightRot_btn = btn[0];
+    // assign fwd_btn = btn[3];
+    // assign bwd_btn = btn[2];
 
 
     // VIDEO SIGN GEN
@@ -92,32 +100,42 @@ module top_level(
 
 
     //CONTROL BUTTONS
-    // logic leftRot_btn;
-    // logic rightRot_btn;
-    // logic fwd_btn;
-    // logic bwd_btn;
+    logic leftRot_btn;
+    logic rightRot_btn;
+    logic fwd_btn;
+    logic bwd_btn;
 
-    // assign leftRot_btn = btn[1];
-    // assign rightRot_btn = btn[0];
-    // assign fwd_btn = btn[3];
-    // assign bwd_btn = btn[2];
+    assign leftRot_btn = btn[1];
+    assign rightRot_btn = btn[0];
+    assign fwd_btn = btn[3];
+    assign bwd_btn = btn[2];
     // logic start_raycaster;
 
-    // btn_control controller (
-    //     .clk_in(clk_pixel),
-    //     .rst_in(sys_rst),
-    //     .fwd_btn(fwd_btn),
-    //     .bwd_btn(bwd_btn),
-    //     .leftRot_btn(leftRot_btn),
-    //     .rightRot_btn(rightRot_btn),
-    //     .frame_switch(frame_buff_ready[0]),
-    //     .posX(posX),
-    //     .posY(posY),
-    //     .dirX(dirX),
-    //     .dirY(dirY),
-    //     .planeX(planeX), 
-    //     .planeY(planeY)
-    // );
+    btn_control controller (
+        .clk_in(clk_pixel),
+        .rst_in(sys_rst),
+        .fwd_btn(fwd_btn),
+        .bwd_btn(bwd_btn),
+        .leftRot_btn(leftRot_btn),
+        .rightRot_btn(rightRot_btn),
+        .frame_switch(frame_buff_ready[0]),
+        .posX(posX),
+        .posY(posY),
+        .dirX(dirX),
+        .dirY(dirY),
+        .planeX(planeX), 
+        .planeY(planeY)
+    );
+
+    logic [6:0] ss_c;
+    assign ss0_c = ss_c; //control upper four digit's cathodes!
+    assign ss1_c = ss_c;
+
+    seven_segment_controller mssc(.clk_in(clk_pixel),
+                               .rst_in(sys_rst),
+                               .val_in({posX,posY}),
+                               .cat_out(ss_c),
+                               .an_out({ss0_an, ss1_an}));
 
 
 
@@ -127,84 +145,84 @@ module top_level(
     ///                                                                                 ######
     ////######////######////######////######////######////######////######////######////######
 
-    always_comb begin
-        if (sys_rst) begin
-            // original black line
-            posX = 16'b0000_1011_1000_0000;
-            posY = 16'b0000_1011_1000_0000;
-            dirX = 16'b0000_0001_0000_0000;
-            dirY = 16'b0000_0000_0000_0000;
-            planeX = 16'b0000_0000_0000_0000;
-            planeY = 16'b0000_0000_1010_1001;
-        end else begin
-            case (sw[3:1])  // 8 cases
-                3'b000: begin // (0)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h0100; // +1
-                    dirY = 16'h0000; // 0
-                    planeX = 16'h0000; // 0
-                    planeY = 16'h00a9; // +0.66
-                end
-                3'b001: begin // (1)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b010: begin // (2)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'h0000; // 0
-                    dirY = 16'h0100; // +1
-                    planeX = 16'hff57; // -0.66
-                    planeY = 16'h0000; // 0
-                end
-                3'b011: begin // (3)
-                    posX = 16'b0000_1011_1000_0000; // 11.5
-                    posY = 16'b0000_1011_1000_0000; // 11.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-                3'b100: begin // (4)
-                    posX = 16'h1480; // 20.5
-                    posY = 16'h0480; // 4.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b101: begin // (5)
-                    posX = 16'h0480; // 4.5
-                    posY = 16'h0480; // 4.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-                3'b110: begin // (6)
-                    posX = 16'h0480; // 4.5
-                    posY = 16'h1480; // 20.5
-                    dirX = 16'h00b5; // +0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'h0077; // +0.46484375
-                end
-                3'b111: begin // (7)
-                    posX = 16'h1480; // 20.5
-                    posY = 16'h1480; // 20.5
-                    dirX = 16'hff4b; // -0.70703125
-                    dirY = 16'h00b5; // +0.70703125
-                    planeX = 16'hff89; // -0.46484375
-                    planeY = 16'hff89; // -0.46484375
-                end
-            endcase
-        end
-    end
+    // always_comb begin
+    //     if (sys_rst) begin
+    //         // original black line
+    //         posX = 16'b0000_1011_1000_0000;
+    //         posY = 16'b0000_1011_1000_0000;
+    //         dirX = 16'b0000_0001_0000_0000;
+    //         dirY = 16'b0000_0000_0000_0000;
+    //         planeX = 16'b0000_0000_0000_0000;
+    //         planeY = 16'b0000_0000_1010_1001;
+    //     end else begin
+    //         case (sw[3:1])  // 8 cases
+    //             3'b000: begin // (0)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h0100; // +1
+    //                 dirY = 16'h0000; // 0
+    //                 planeX = 16'h0000; // 0
+    //                 planeY = 16'h00a9; // +0.66
+    //             end
+    //             3'b001: begin // (1)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b010: begin // (2)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'h0000; // 0
+    //                 dirY = 16'h0100; // +1
+    //                 planeX = 16'hff57; // -0.66
+    //                 planeY = 16'h0000; // 0
+    //             end
+    //             3'b011: begin // (3)
+    //                 posX = 16'b0000_1011_1000_0000; // 11.5
+    //                 posY = 16'b0000_1011_1000_0000; // 11.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //             3'b100: begin // (4)
+    //                 posX = 16'h1480; // 20.5
+    //                 posY = 16'h0480; // 4.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b101: begin // (5)
+    //                 posX = 16'h0480; // 4.5
+    //                 posY = 16'h0480; // 4.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //             3'b110: begin // (6)
+    //                 posX = 16'h0480; // 4.5
+    //                 posY = 16'h1480; // 20.5
+    //                 dirX = 16'h00b5; // +0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'h0077; // +0.46484375
+    //             end
+    //             3'b111: begin // (7)
+    //                 posX = 16'h1480; // 20.5
+    //                 posY = 16'h1480; // 20.5
+    //                 dirX = 16'hff4b; // -0.70703125
+    //                 dirY = 16'h00b5; // +0.70703125
+    //                 planeX = 16'hff89; // -0.46484375
+    //                 planeY = 16'hff89; // -0.46484375
+    //             end
+    //         endcase
+    //     end
+    // end
 
     //END SWITCH FRAME TEST
 
@@ -419,9 +437,53 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
+
+    //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
+    // MAP 1 UNTEXTURED
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) worldMap1 (
+        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(clk_pixel),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(sys_rst),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
+    );
+
+    // MAP 2 TEXTURED
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) worldMap2 (
+        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(clk_pixel),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(sys_rst),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
+    );
+
+    //map BRAM data
+    logic [2:0] map_data1_top_level, map_data2_top_level;
+    logic [$clog2(N*N)-1:0] map_addra_top_level;
+
+
     // dda-out fifo senders
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
     logic [37:0] dda_fsm_out_tdata;
+
+    logic map_select;
+    assign map_select = sw[4]; //CHANGE TO MORE OPTIONS
 
     // DDA MODULE
     dda #(
@@ -431,6 +493,13 @@ module top_level(
     ) dda_module (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
+
+        .map_select(map_select),
+
+        //handle maps
+        .map_data1_top_level(map_data1_top_level),
+        .map_data2_top_level(map_data2_top_level),
+        .map_addra_top_level(map_addra_top_level),
         
         // DDA-in FIFO receiver
         .dda_fsm_in_tvalid(dda_fsm_in_tvalid),

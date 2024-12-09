@@ -1,11 +1,11 @@
 //`timescale 1ns / 1ps
 `default_nettype none
 
-`ifdef SYNTHESIS
-`define FPATH(X) `"X`"
-`else /* ! SYNTHESIS */
-`define FPATH(X) `"../../data/X`"
-`endif  /* ! SYNTHESIS */
+// `ifdef SYNTHESIS
+// `define FPATH(X) `"X`"
+// `else /* ! SYNTHESIS */
+// `define FPATH(X) `"../../data/X`"
+// `endif  /* ! SYNTHESIS */
 
 module dda
 #(
@@ -16,6 +16,14 @@ module dda
 (
   input wire pixel_clk_in,
   input wire rst_in,
+
+  input wire map_select,
+
+  //handle maps
+  input wire [2:0] map_data1_top_level,
+  input wire [2:0] map_data2_top_level,
+  output wire [$clog2(N*N)-1:0] map_addra_top_level,
+
 
   // dda_in FIFO receiver
   input wire dda_fsm_in_tvalid,
@@ -215,7 +223,13 @@ module dda
 
   //general I/O from BRAM
   logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [2:0] map_data;
+  logic [2:0] map_data1, map_data2;
+
+  //handle maps in top level
+  assign map_addra_top_level = map_addra;
+  assign map_data1 = map_data1_top_level;
+  assign map_data2 = map_data2_top_level;
+
 
   enum {
     IDLE, GRANT_FSM0, GRANT_FSM1, HOLD_CYCLE, ASSIGN
@@ -266,10 +280,12 @@ module dda
         ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
           if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
             dda_fsm0_map_data_valid_in <= 1'b1;
-            dda_fsm0_map_data_in <= map_data;
+            dda_fsm0_map_data_in <= (map_select == 1'b0)? map_data1:
+                                                        map_data2;
           end else begin
             dda_fsm1_map_data_valid_in <= 1'b1;
-            dda_fsm1_map_data_in <= map_data;
+            dda_fsm1_map_data_in <= (map_select == 1'b0)? map_data1:
+                                                        map_data2;
           end
           MAP_ARBITER_STATE <= IDLE;
         end
@@ -279,23 +295,40 @@ module dda
   end
 
 
-  //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
-  xilinx_single_port_ram_read_first #(
-    .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-    .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-  ) worldMap (
-    .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
-    .dina(0),       // RAM input data, width determined from RAM_WIDTH
-    .clka(pixel_clk_in),       // Clock
-    .wea(0),         // Write enable
-    .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-    .rsta(rst_in),       // Output reset (does not affect memory contents)
-    .regcea(1),   // Output register enable
-    .douta(map_data)      // RAM output data, width determined from RAM_WIDTH
-  );
+  // //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
+  // // MAP 1 UNTEXTURED
+  // xilinx_single_port_ram_read_first #(
+  //   .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+  //   .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+  //   .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+  //   .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+  // ) worldMap1 (
+  //   .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
+  //   .dina(0),       // RAM input data, width determined from RAM_WIDTH
+  //   .clka(pixel_clk_in),       // Clock
+  //   .wea(0),         // Write enable
+  //   .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+  //   .rsta(rst_in),       // Output reset (does not affect memory contents)
+  //   .regcea(1),   // Output register enable
+  //   .douta(map_data1)      // RAM output data, width determined from RAM_WIDTH
+  // );
 
+  // // MAP 2 TEXTURED
+  // xilinx_single_port_ram_read_first #(
+  //   .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+  //   .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+  //   .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+  //   .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+  // ) worldMap2 (
+  //   .addra(map_addra),     // Address bus, width determined from RAM_DEPTH
+  //   .dina(0),       // RAM input data, width determined from RAM_WIDTH
+  //   .clka(pixel_clk_in),       // Clock
+  //   .wea(0),         // Write enable
+  //   .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+  //   .rsta(rst_in),       // Output reset (does not affect memory contents)
+  //   .regcea(1),   // Output register enable
+  //   .douta(map_data2)      // RAM output data, width determined from RAM_WIDTH
+  // );
 
 
 endmodule
