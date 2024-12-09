@@ -6,6 +6,7 @@ module top_level(
     input wire clk_100mhz,                  //crystal reference clock
     input wire [3:0] btn,                   // buttons for move control and rotation
     input wire [15:0] sw,                   // switches
+    input wire [3:0] pmodb,
     output logic [2:0]  rgb0,               // rgbs : need to drive them even if not using
     output logic [2:0]  rgb1,
     output logic [15:0] led,                //16 green output LEDs (located right above switches)
@@ -17,7 +18,6 @@ module top_level(
     output logic [2:0] hdmi_tx_n,           //hdmi output signals (negatives) (blue, green, red)
     output logic hdmi_clk_p, hdmi_clk_n     //differential hdmi clock
     );
-
     localparam N = 24;
 
     // shut up those RGBs
@@ -112,6 +112,12 @@ module top_level(
     assign rightRot_btn = btn[0];
     assign fwd_btn = btn[3];
     assign bwd_btn = btn[2];
+    // // logic start_raycaster;
+
+    // assign leftRot_btn = pmodb[1];
+    // assign rightRot_btn = pmodb[0];
+    // assign fwd_btn = pmodb[3];
+    // assign bwd_btn = pmodb[2];
     // logic start_raycaster;
 
     btn_control controller (
@@ -410,7 +416,7 @@ module top_level(
         .deltaDistY(deltaDistY),
         // .hcount_out(hcount_ray),
         .dda_data_ready_out(dda_data_ready_out),
-        .busy_ray_calc(busy_ray_calc),
+        .ray_calc_busy(busy_ray_calc),
         .valid_ray_out(valid_ray_out)
     );
 

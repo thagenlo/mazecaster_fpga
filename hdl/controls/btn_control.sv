@@ -66,6 +66,7 @@ module btn_control #(
         .dirty_in(rightRot_btn),
         .clean_out(deb_out_rightRot));
     
+    logic [31:0] move_counter;
 
     always_ff @(posedge clk_in)begin
         past_fwd <= deb_out_fwd;
@@ -78,32 +79,40 @@ module btn_control #(
             leftRot_pulse<= 1'b0;
             rightRot_pulse<= 1'b0;
             is_pulse <= 1'b0;
+            move_counter <= 1'b0;
         end else begin
-            if (~past_fwd && deb_out_fwd) begin
-                fwd_pulse <= 1'b1;
-                is_pulse <= 1'b1;
-            end else if (~past_bwd && deb_out_bwd) begin
-                bwd_pulse <= 1'b1;
-                is_pulse <= 1'b1;
-            end else if (~past_leftRot && deb_out_leftRot) begin
-                leftRot_pulse <= 1'b1;
-                is_pulse <= 1'b1;
-            end else if (~past_rightRot && deb_out_rightRot) begin
-                rightRot_pulse <= 1'b1;
-                is_pulse <= 1'b1;
-            end else begin
-                fwd_pulse<= 1'b0;
-                bwd_pulse<= 1'b0;
-                leftRot_pulse<= 1'b0;
-                rightRot_pulse<= 1'b0;
-                is_pulse <= 1'b0;
-            end
+            if (move_counter == 10_000_000) begin
+                move_counter<=0;
+                if (deb_out_fwd) begin
+                    fwd_pulse <= 1'b1;
+                    is_pulse <= 1'b1;
+                end else if (deb_out_bwd) begin
+                    bwd_pulse <= 1'b1;
+                    is_pulse <= 1'b1;
+                end else if (deb_out_leftRot) begin
+                    leftRot_pulse <= 1'b1;
+                    is_pulse <= 1'b1;
+                end else if (deb_out_rightRot) begin
+                    rightRot_pulse <= 1'b1;
+                    is_pulse <= 1'b1;
+                end else begin
+        
+                end
             // posX_pipe_1 <= posX_pipe_0;
             // posY_pipe_1 <= posY_pipe_0;
             // dirX_pipe_1 <= dirX_pipe_0;
             // dirY_pipe_1 <= dirY_pipe_0;
             // planeX_pipe_1 <= planeX_pipe_0;
             // planeY_pipe_1 <= planeY_pipe_0;
+            end 
+            else begin
+                move_counter<=move_counter+1;
+                fwd_pulse<= 1'b0;
+                bwd_pulse<= 1'b0;
+                leftRot_pulse<= 1'b0;
+                rightRot_pulse<= 1'b0;
+                is_pulse <= 1'b0;
+            end
             if (frame_switch) begin
                 posX <= posX_pipe_1;
                 posY <= posY_pipe_1;
