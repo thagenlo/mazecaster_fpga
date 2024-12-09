@@ -19,15 +19,13 @@ module textures (
     output logic valid_tex_out
 );
 
-localparam [4:0] PIXEL_WIDTH = 16;
-localparam [8:0] TEX_WIDTH = 320;
-localparam [8:0] TEX_HEIGHT = 320;
-localparam [7:0] SCREEN_HEIGHT = 180;
-localparam [17:0] CONSTANT = TEX_WIDTH*TEX_HEIGHT/SCREEN_HEIGHT; // used in calc of texture address
-localparam [$clog2(CONSTANT)-1:0] C = CONSTANT; // 10 bits
+localparam PIXEL_WIDTH = 8;
+localparam TEX_WIDTH = 128;
+localparam TEX_HEIGHT = 128;
+localparam SCREEN_HEIGHT = 180;
 
 logic [18:0] address;
-logic [16:0] first_part;
+logic [25:0] first_part;
 logic [17:0] second_part;
 
 logic [15:0] tex1_out;
@@ -42,14 +40,13 @@ always_comb begin
         3: tex_pixel_out = tex1_out;
         4: tex_pixel_out = tex2_out;
         5: tex_pixel_out = tex3_out;
+        default : tex_pixel_out = 0;
     endcase
     
     // calculating address (calculate address when division is done)
-    if (div_done) begin
-        first_part = (wallX_in[7:0]*TEX_WIDTH)>>8; // hcount
-        second_part = TEX_WIDTH*vcount_tex;
-        address = first_part + second_part;
-    end   
+    first_part = (wallX_in[7:0]*TEX_WIDTH)>>8; // hcount
+    second_part = TEX_WIDTH*vcount_tex;
+    address = first_part + second_part;
 end
 
 // pipelining  to signal 2 cycle wait for texture bram valid output
@@ -99,7 +96,7 @@ xilinx_single_port_ram_read_first #(
     .RAM_WIDTH(PIXEL_WIDTH),       
     .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
-    .INIT_FILE(`FPATH(red_brick.mem))                           
+    .INIT_FILE(`FPATH(redbrick.mem))                           
 ) texture_1 (
         .addra(address),            // address
         .dina(),                    // RAM input data = pixel_in from DDA_out buffer
@@ -115,7 +112,7 @@ xilinx_single_port_ram_read_first #(
     .RAM_WIDTH(PIXEL_WIDTH),          
     .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
-    .INIT_FILE(`FPATH(stone_brick.mem))                        
+    .INIT_FILE(`FPATH(hay.mem))                        
 ) texture_2 (
         .addra(address),            // address
         .dina(),                    // RAM input data = pixel_in from DDA_out buffer
@@ -131,7 +128,7 @@ xilinx_single_port_ram_read_first #(
     .RAM_WIDTH(PIXEL_WIDTH),               
     .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
-    .INIT_FILE(`FPATH(choc_cookies.mem))                        
+    .INIT_FILE(`FPATH(wood.mem))                        
 ) texture_3 (
         .addra(address),            // address
         .dina(),                    // RAM input data = pixel_in from DDA_out buffer
