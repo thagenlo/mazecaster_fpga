@@ -59,7 +59,7 @@ module transformation_tex  #(
                         output logic transformer_tready_out,         // tells FIFO that we're ready to receive next data (need a vcount counter)
 
                         output logic [15:0] ray_address_out,    // where to store the pixel value in frame buffer
-                        output logic [7:0] ray_pixel_out,      // the calculated pixel value of the ray
+                        output logic [8:0] ray_pixel_out,      // the calculated pixel value of the ray
                         output logic ray_last_pixel_out        // tells frame buffer whether we are on the last pixel or not
                         );
 // STATE MACHINE
@@ -115,7 +115,15 @@ logic valid_tex_out;
 
 logic [7:0] ray_pixel;
 
-assign ray_pixel_out = (!wallType_in) ? ray_pixel : ray_pixel >> 1;
+// assign ray_pixel_out = (!wallType_in) ? ray_pixel : ray_pixel >> 1;
+always_comb begin
+    if (region == PLAIN_WALL || region == TEX_WALL) begin
+        ray_pixel_out = (wallType_in) ? {1'b1, ray_pixel} : {1'b0, ray_pixel}; // 1 in MSbit represents that we need to shade it
+    end else begin
+        ray_pixel_out = {1'b0, ray_pixel};
+    end
+end
+// assign ray_pixel_out = ray_pixel;
 
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),

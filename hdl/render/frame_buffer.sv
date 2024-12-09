@@ -9,7 +9,7 @@
 
 
 module frame_buffer #(
-                        parameter [3:0] PIXEL_WIDTH = 8,
+                        parameter [3:0] PIXEL_WIDTH = 9,
                         parameter [10:0] FULL_SCREEN_WIDTH = 1280,
                         parameter [9:0] FULL_SCREEN_HEIGHT = 720,
                         parameter [8:0] SCREEN_WIDTH = 320,
@@ -77,8 +77,14 @@ module frame_buffer #(
         .douta(pixel_out2)           // RAM output data, width determined from RAM_WIDTH
     );
 
+    logic shade; // 0 = don't shade, 1 = shade
     logic [7:0] palette_addr;
-    assign palette_addr = (state) ? pixel_out1 : pixel_out2;
+    logic [23:0] rgb;
+
+    assign palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
+    assign shade = (state) ? pixel_out1[8] : pixel_out2[8];
+    assign rgb_out = (!shade) ? rgb : rgb >> 1;
+
     
     // PALETTE
     xilinx_single_port_ram_read_first #(
@@ -94,7 +100,7 @@ module frame_buffer #(
         .ena(1), 
         .rsta(rst_in),  
         .regcea(1), 
-        .douta(rgb_out)
+        .douta(rgb)
     );
 
     always_ff @(posedge pixel_clk_in) begin
