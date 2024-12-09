@@ -1,6 +1,6 @@
 module cocotb_iverilog_dump();
 initial begin
-    $dumpfile("/Users/heba/Documents/GitHub/mazecaster_fpga/sim/sim_build/ray_calculations.fst");
-    $dumpvars(0, ray_calculations);
+    $dumpfile("/Users/cathyhu/Documents/GitHub/mazecaster_fpga/sim/sim_build/transformation_tex.fst");
+    $dumpvars(0, transformation_tex);
 end
 endmodule

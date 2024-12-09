@@ -15,7 +15,7 @@ module textures (
     input wire [9:0] drawstart_in,
     input wire [7:0] vcount_ray_in,
     input wire [3:0] texture_in, // which texture (map_data)
-    output logic [15:0] tex_pixel_out,
+    output logic [7:0] tex_pixel_out,
     output logic valid_tex_out
 );
 
@@ -28,9 +28,7 @@ logic [18:0] address;
 logic [25:0] first_part;
 logic [17:0] second_part;
 
-logic [15:0] tex1_out;
-logic [15:0] tex2_out;
-logic [15:0] tex3_out;
+logic [7:0] tex1_out, tex2_out, tex3_out, tex4_out;
 logic [1:0] valid_out_pipe;
 
 assign valid_tex_out = valid_out_pipe[1];
@@ -40,6 +38,7 @@ always_comb begin
         3: tex_pixel_out = tex1_out;
         4: tex_pixel_out = tex2_out;
         5: tex_pixel_out = tex3_out;
+        6: tex_pixel_out = tex4_out;
         default : tex_pixel_out = 0;
     endcase
     
@@ -138,6 +137,22 @@ xilinx_single_port_ram_read_first #(
         .rsta(rst_in),              // Output reset
         .regcea(1),                 // Output register enable
         .douta(tex3_out)            // RAM output data
+    );
+
+xilinx_single_port_ram_read_first #(
+    .RAM_WIDTH(PIXEL_WIDTH),               
+    .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
+    .INIT_FILE(`FPATH(pig.mem))                        
+) texture_4 (
+        .addra(address),            // address
+        .dina(),                    // RAM input data = pixel_in from DDA_out buffer
+        .clka(pixel_clk_in),        // Clock
+        .wea(0),                    // ROM
+        .ena(1),                    // RAM Enable
+        .rsta(rst_in),              // Output reset
+        .regcea(1),                 // Output register enable
+        .douta(tex4_out)            // RAM output data
     );
 
 endmodule

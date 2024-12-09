@@ -47,9 +47,13 @@ module transformation_tex  #(
                         input wire rst_in,
 
                         // TODO: GRID STUFF
-                        // input wire [2:0] grid_type,
-                        // input wire valid_grid_in,
-                        // output logic grid_req_out,
+                        input wire [15:0] PosX,
+                        input wire [15:0] PosY,
+                        input wire [1:0] map_select,
+                        input wire grid_valid_in,
+                        input wire [3:0] grid_data,
+                        output logic grid_req_out,
+                        output logic [9:0] grid_address_out,
 
                         input wire dda_fifo_tvalid_in,
                         input wire [37:0] dda_fifo_tdata_in,
@@ -71,8 +75,25 @@ typedef enum {
 
 t_state state;
 
+logic shade_bit;
+assign shade_bit = ray_pixel_out[8];
+
 // PARAMETERS
 // colors
+// always_comb begin
+//     case (map_select)
+//         0, 1: begin
+//             localparam SKY = 8'h2a; // SKY BLUE
+//             localparam GROUND = 8'hdc; // BROWN FLOOR
+//             localparam BLACK_WALL = 8'hFF;
+//             localparam GREEN_WALL = 8'h97;
+//         end
+//         3: begin
+//         end
+//         4: begin
+//         end
+//     endcase
+// end
 localparam SKY = 8'h2a; // SKY BLUE
 localparam GROUND = 8'hdc; // BROWN FLOOR
 localparam BLACK_WALL = 8'hFF;
@@ -80,7 +101,7 @@ localparam GREEN_WALL = 8'h97;
 localparam  HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 // region bounds
 localparam GRID_SIDE = 24;
-localparam TOP_DOWN_BOUND = GRID_SIDE;
+localparam TOP_DOWN_BOUND = GRID_SIDE << 1;
 
 // FROM DDA FIFO
 logic [8:0] hcount_ray_in; //pipelined x_coord
@@ -108,22 +129,21 @@ logic [7:0] vcount_ray;
 logic [7:0] draw_start;
 logic [7:0] draw_end;
 
-logic [15:0] tex_pixel;
+logic [7:0] tex_pixel;
 logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
 logic valid_tex_out;
 
-logic [7:0] ray_pixel;
+// logic [7:0] ray_pixel;
 
-// assign ray_pixel_out = (!wallType_in) ? ray_pixel : ray_pixel >> 1;
-always_comb begin
-    if (region == PLAIN_WALL || region == TEX_WALL) begin
-        ray_pixel_out = (wallType_in) ? {1'b1, ray_pixel} : {1'b0, ray_pixel}; // 1 in MSbit represents that we need to shade it
-    end else begin
-        ray_pixel_out = {1'b0, ray_pixel};
-    end
-end
-// assign ray_pixel_out = ray_pixel;
+// adds one more pipeline stage
+// always_ff @(posedge pixel_clk_in) begin
+//     if (region == PLAIN_WALL || region == TEX_WALL) begin
+//         ray_pixel_out <= (wallType_in) ? {1'b1, ray_pixel} : {1'b0, ray_pixel}; // 1 in MSbit represents that we need to shade it
+//     end else begin
+//         ray_pixel_out <= {1'b0, ray_pixel};
+//     end
+// end
 
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),
@@ -165,6 +185,7 @@ always_comb begin
     end
 end
 
+
 always_ff @(posedge pixel_clk_in) begin
     if (rst_in) begin
         vcount_ray <= 0;
@@ -201,12 +222,21 @@ always_ff @(posedge pixel_clk_in) begin
                 case (region)
                     CEILING, FLOOR, PLAIN_WALL: begin
                         if (region == CEILING || region == FLOOR) begin
-                            ray_pixel <= (region == CEILING) ? SKY : GROUND;
+                            case (region)
+                                CEILING: ray_pixel_out <= {1'b0, SKY};
+                                FLOOR: ray_pixel_out <= {1'b0, GROUND};
+                            endcase
+                            // ray_pixel <= (region == CEILING) ? SKY : GROUND;
                         end else begin
+                            // case (mapData_in)
+                            //     0: ray_pixel <= SKY;
+                            //     1: ray_pixel <= BLACK_WALL;
+                            //     2: ray_pixel <= GREEN_WALL;
+                            // endcase
                             case (mapData_in)
-                                0: ray_pixel <= SKY;
-                                1: ray_pixel <= BLACK_WALL;
-                                2: ray_pixel <= GREEN_WALL;
+                                0: ray_pixel_out <= {1'b0, SKY};
+                                1: ray_pixel_out <= (wallType_in) ? {1'b1, BLACK_WALL} : {1'b0, BLACK_WALL};
+                                2: ray_pixel_out <= (wallType_in) ? {1'b1, GREEN_WALL} : {1'b0, GREEN_WALL};
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
@@ -234,7 +264,8 @@ always_ff @(posedge pixel_clk_in) begin
                         if (valid_tex_out) begin
                             tex_req <= 0;               // make tex_req = 0 once we've serviced the request
                             // ray_pixel + address calculation
-                            ray_pixel <= tex_pixel;
+                            // ray_pixel <= tex_pixel;
+                            ray_pixel_out <= (wallType_in) ? {1'b1, tex_pixel} : {1'b0, tex_pixel};
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
 
                             // vcount updating + state transitions on same cycle
@@ -261,43 +292,78 @@ always_ff @(posedge pixel_clk_in) begin
                     end
 
                     TOPDOWN: begin
-                        ray_pixel <= 8'h0a;
-                        ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
-                        // vcount updating + state transitions on same cycle
-                        if (vcount_ray < SCREEN_HEIGHT-1) begin
-                            vcount_ray <= vcount_ray + 1;
-                            ray_last_pixel_out <= 0;
-                            state <= FLATTENING;
-                        end else begin
-                            if (fifo_tlast_store) begin     // if we're at the end of the packet
-                                ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
-                                vcount_ray <= 0;            // reset vcount still
-                                transformer_tready_out <= 0; // indicate transformer's readiness to receive new data
-                                state <= FIFO_DATA_WAIT_NEW_PACKET;
-                            end else begin                  // if we're not at the end of the packet
-                                ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
-                                transformer_tready_out <= 1;
-                                vcount_ray <= 0;
-                                state <= FIFO_DATA_WAIT;
+                        if (((hcount_ray_in >> 1) == (PosX >> 8)) && ((vcount_ray >> 1) == (PosY >> 8))) begin
+                            // ray_pixel <= 8'd98;
+                            ray_pixel_out <= {1'b0, 8'd98};
+                            if (vcount_ray < SCREEN_HEIGHT-1) begin
+                                vcount_ray <= vcount_ray + 1;
+                                ray_last_pixel_out <= 0;
+                                state <= FLATTENING;
+                            end else begin
+                                if (fifo_tlast_store) begin     // if we're at the end of the packet
+                                    ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
+                                    vcount_ray <= 0;            // reset vcount still
+                                    transformer_tready_out <= 0; // indicate transformer's readiness to receive new data
+                                    state <= FIFO_DATA_WAIT_NEW_PACKET;
+                                end else begin                  // if we're not at the end of the packet
+                                    ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
+                                    transformer_tready_out <= 1;
+                                    vcount_ray <= 0;
+                                    state <= FIFO_DATA_WAIT;
+                                end
                             end
+                        end else if (grid_valid_in) begin
+                            // ray_pixel + address calc
+                            grid_req_out <= 0;
+                            if (grid_data > 0) begin
+                                ray_pixel_out <= {1'b0, 8'hFF};
+                            end else begin
+                                ray_pixel_out <= 9'b0;
+                            end
+                            // ray_pixel <= (grid_data > 0) ? 8'hFF : 8'h0;
+                            
+                            ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
+                            // vcount + state transition
+                            if (vcount_ray < SCREEN_HEIGHT-1) begin
+                                vcount_ray <= vcount_ray + 1;
+                                ray_last_pixel_out <= 0;
+                                state <= FLATTENING;
+                            end else begin
+                                if (fifo_tlast_store) begin     // if we're at the end of the packet
+                                    ray_last_pixel_out <= 1;    // signal that we hit the last pixel of the packet
+                                    vcount_ray <= 0;            // reset vcount still
+                                    transformer_tready_out <= 0; // indicate transformer's readiness to receive new data
+                                    state <= FIFO_DATA_WAIT_NEW_PACKET;
+                                end else begin                  // if we're not at the end of the packet
+                                    ray_last_pixel_out <= 0;    // reset things like normal and indicate transformer is ready to receive new data
+                                    transformer_tready_out <= 1;
+                                    vcount_ray <= 0;
+                                    state <= FIFO_DATA_WAIT;
+                                end
+                            end
+                        end else begin
+                            grid_req_out <= 1;
+                            grid_address_out <= (hcount_ray_in >> 1) + (vcount_ray >> 1)*GRID_SIDE;
                         end
                     end
-                    // TOPDOWN: begin
-                    //     // need to access grid bram
-                    //     if (valid_grid_in) begin
-                    //         grid_req_out <= 0;
-
-                    //     end else begin
-                    //         grid_req_out <= 1;
-                    //         grid_address_out <= ()
-                    //     end
-
-                    // end
                 endcase
             end
         endcase
     end
 end
+
+// pipelining  to signal 2 cycle wait for texture bram valid output
+// always_ff @(posedge pixel_clk_in) begin
+//     if (rst_in) begin
+//         grid_valid_pipe <= 2'b0;
+//         past_valid_req <= 0;
+//     end else begin
+//         grid_valid_pipe[0] <= grid_req_out;
+//         grid_valid_pipe[1] <= grid_valid_pipe[0];
+
+//         past_valid_req <= valid_req_in;
+//     end
+// end
 
 
 endmodule

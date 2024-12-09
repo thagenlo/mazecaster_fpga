@@ -80,15 +80,18 @@ module top_level(
 
     //TODO: PIPELINING
     // PIPELINING for video sig gen
-    logic [1:0] vs_out_pipe, hs_out_pipe, ad_out_pipe;
+    localparam VIDEO_PIPE_STAGES = 4;
+    logic [VIDEO_PIPE_STAGES-1:0] vs_out_pipe, hs_out_pipe, ad_out_pipe;
 
     always_ff @(posedge clk_pixel) begin
         vs_out_pipe[0] <= vert_sync;
         hs_out_pipe[0] <= hor_sync;
         ad_out_pipe[0] <= active_draw;
-        vs_out_pipe[1] <= vs_out_pipe[0];
-        hs_out_pipe[1] <= hs_out_pipe[0];
-        ad_out_pipe[1] <= ad_out_pipe[0];
+        for (int i = 1; i < VIDEO_PIPE_STAGES; i=i+1) begin
+            vs_out_pipe[i] <= vs_out_pipe[i-1];
+            hs_out_pipe[i] <= hs_out_pipe[i-1];
+            ad_out_pipe[i] <= ad_out_pipe[i-1];
+        end
     end
 
     //TODO: INSERT CONTROLLER MODULE
@@ -473,6 +476,28 @@ module top_level(
         .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
     );
 
+    logic trans_grid_req;
+    logic [9:0] trans_address;
+    logic trans_grid_valid;
+    logic [3:0] grid_data;
+
+
+    grid_map grid_arbiter (
+        .pixel_clk_in(clk_pixel),
+        .rst_in(sys_rst),
+
+        .map_select(map_select), // 0, 1, 2, 3 (4 maps)
+        .dda_req_in(),
+        .trans_req_in(trans_grid_req),
+        .dda_address_in(),
+        .trans_address_in(trans_address),
+
+        .dda_valid_out(),
+        .trans_valid_out(trans_grid_valid),
+
+        .grid_data(grid_data)
+    );
+
     //map BRAM data
     logic [2:0] map_data1_top_level, map_data2_top_level;
     logic [$clog2(N*N)-1:0] map_addra_top_level;
@@ -561,7 +586,7 @@ module top_level(
 
     //TODO: INSERT TRANSFORMATION MODULE
     logic [15:0] ray_address_out;
-    logic [15:0] ray_pixel_out;
+    logic [8:0] ray_pixel_out;
     logic ray_last_pixel_out;
     logic [1:0] frame_buff_ready;
     // logic fb_ready_out;
@@ -569,6 +594,13 @@ module top_level(
     transformation_tex flattening_module (
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
+        .PosX(posX),
+        .PosY(posY),
+        .map_select(map_select),
+        .grid_valid_in(trans_grid_valid),
+        .grid_data(grid_data),
+        .grid_req_out(trans_grid_req),
+        .grid_address_out(trans_address),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
         .dda_fifo_tdata_in(fifo_tdata_out[37:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
@@ -578,7 +610,6 @@ module top_level(
         .ray_pixel_out(ray_pixel_out),
         .ray_last_pixel_out(ray_last_pixel_out)
     );
-
  
     // ILA TESTING MODULE 2
 
@@ -639,7 +670,7 @@ module top_level(
       .rst_in(sys_rst),
       .data_in(red_screen),
       .control_in(2'b0),
-      .ve_in(ad_out_pipe[1]),
+      .ve_in(ad_out_pipe[VIDEO_PIPE_STAGES-1]),
       .tmds_out(tmds_10b[2]));
 
     tmds_encoder tmds_green(
@@ -647,15 +678,15 @@ module top_level(
       .rst_in(sys_rst),
       .data_in(green_screen),
       .control_in(2'b0),
-      .ve_in(ad_out_pipe[1]),
+      .ve_in(ad_out_pipe[VIDEO_PIPE_STAGES-1]),
       .tmds_out(tmds_10b[1]));
 
     tmds_encoder tmds_blue(
       .clk_in(clk_pixel),
       .rst_in(sys_rst),
       .data_in(blue_screen),
-      .control_in({vs_out_pipe[1], hs_out_pipe[1]}),
-      .ve_in(ad_out_pipe[1]),
+      .control_in({vs_out_pipe[VIDEO_PIPE_STAGES-1], hs_out_pipe[VIDEO_PIPE_STAGES-1]}),
+      .ve_in(ad_out_pipe[VIDEO_PIPE_STAGES-1]),
       .tmds_out(tmds_10b[0]));
 
     // three tmds_serializers (blue, green, red):

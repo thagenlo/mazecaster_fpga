@@ -22,7 +22,7 @@ module frame_buffer #(
                     input wire [9:0] vcount_in,
                     // input ray_valid_in, // DO I NEED TO HAVE A RAY VALID IN SIGNAL?
                     input wire [15:0] ray_address_in, // from transformating / flattening module (not in order and ranges from 0 to 320*180)
-                    input wire [7:0] ray_pixel_in,
+                    input wire [8:0] ray_pixel_in,
                     input wire ray_last_pixel_in, // indicates the last computed pixel in the ray sweep
                     input wire video_last_pixel_in, // indicates the last 
                     output logic [1:0] fb_ready_to_switch_out,
@@ -40,7 +40,7 @@ module frame_buffer #(
     assign address2 = (state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
     assign good_address = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
 
-    logic [7:0] pixel_out1, pixel_out2;
+    logic [8:0] pixel_out1, pixel_out2;
     logic switched; // to indicate to combinational logic that we have switched states and fb_ready_to_switch_out can go back to 2'b00
     
     // FRAME BUFFER 1
@@ -81,10 +81,32 @@ module frame_buffer #(
     logic [7:0] palette_addr;
     logic [23:0] rgb;
 
-    assign palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
-    assign shade = (state) ? pixel_out1[8] : pixel_out2[8];
-    assign rgb_out = (!shade) ? rgb : rgb >> 1;
+    // assign palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
+    // assign shade = (state) ? pixel_out1[8] : pixel_out2[8];
+    // assign rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
 
+    always_comb begin
+        palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
+        shade = (state) ? pixel_out1[8] : pixel_out2[8];
+        rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
+        // if ((hcount_in == 640) || (vcount_in == 360)) begin
+        //     rgb_out = 24'h92ff14;
+        // end else begin
+        //     rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
+        // end
+    end
+
+    // Pipeline for shade to rgb out
+    logic [1:0] shade_pipe;
+    always_ff @(posedge pixel_clk_in) begin
+        if (rst_in) begin
+            shade_pipe <= 2'b0;
+        end else begin
+            shade_pipe[0] <= shade;
+            shade_pipe[1] <= shade_pipe[0];
+        end
+        // rgb_out <= (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
+    end
     
     // PALETTE
     xilinx_single_port_ram_read_first #(

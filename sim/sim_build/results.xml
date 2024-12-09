@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1733782797" />
+    <testcase name="test_a" classname="test_transformation_tex" file="/Users/cathyhu/Documents/GitHub/mazecaster_fpga/sim/test_transformation_tex.py" lineno="25" time="3.746831178665161" sim_time_ns="57921.001" ratio_time="15458.663131076757" />
+  </testsuite>
+</testsuites>
