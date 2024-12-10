@@ -514,7 +514,7 @@ module top_level(
     logic [37:0] dda_fsm_out_tdata;
 
     logic map_select;
-    assign map_select = sw[4]; //CHANGE TO MORE OPTIONS
+    assign map_select = sw[5:4]; //CHANGE TO MORE OPTIONS
 
     // DDA MODULE
     dda #(

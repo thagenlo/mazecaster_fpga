@@ -6,7 +6,8 @@
  
  // MAP 1 UNTEXTURED
 module grid_map #(
-    parameter N = 24
+    parameter N = 24,
+    parameter MAP_DATA_WIDTH = 4
     )(
     input wire pixel_clk_in,
     input wire rst_in,
@@ -20,7 +21,7 @@ module grid_map #(
     output logic dda_valid_out,
     output logic trans_valid_out,
 
-    output logic [2:0] grid_data
+    output logic [3:0] grid_data
 );
 
     logic [1:0] dda_valid_pipe, trans_valid_pipe;
@@ -52,7 +53,7 @@ module grid_map #(
     assign trans_valid_out = trans_valid_pipe[1];
 
     logic [15:0] address;
-    logic [2:0] map_data1, map_data2, map_data3, map_data4;
+    logic [3:0] map_data1, map_data2, map_data3, map_data4;
     always_comb begin
         if (trans_req_in && dda_req_in) begin
             address = trans_address_in;
@@ -73,7 +74,7 @@ module grid_map #(
     end
     
     xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(3),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_WIDTH(MAP_DATA_WIDTH),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
         .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
@@ -90,7 +91,7 @@ module grid_map #(
 
     // MAP 2 TEXTURED: 3 little pigs
     xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(3),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_WIDTH(MAP_DATA_WIDTH),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
         .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
@@ -105,21 +106,21 @@ module grid_map #(
         .douta(map_data2)      // RAM output data, width determined from RAM_WIDTH
     );
 
-    // // MAP 3 TEXTURED: mushrooms and frogs and trees + green grass
-    // xilinx_single_port_ram_read_first #(
-    //     .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-    //     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-    //     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    //     .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-    // ) worldMap3 (
-    //     .addra(address),     // Address bus, width determined from RAM_DEPTH
-    //     .dina(0),       // RAM input data, width determined from RAM_WIDTH
-    //     .clka(pixel_clk_in),       // Clock
-    //     .wea(0),         // Write enable
-    //     .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-    //     .rsta(rst_in),       // Output reset (does not affect memory contents)
-    //     .regcea(1),   // Output register enable
-    //     .douta(map_data3)      // RAM output data, width determined from RAM_WIDTH
-    // );
+    // MAP 3 TEXTURED: mushrooms and frogs and trees + green grass
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(MAP_DATA_WIDTH),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(mystical_find_dino_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) grid3 (
+        .addra(address),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(pixel_clk_in),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(rst_in),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data3)      // RAM output data, width determined from RAM_WIDTH
+    );
 
 endmodule
