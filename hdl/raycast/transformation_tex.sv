@@ -107,6 +107,8 @@ always_comb begin
             GROUND = 55;
             SOLID_WALL = 81;
         end
+        3: begin
+        end
     endcase
 end
 localparam SKY = 8'h2a; // SKY BLUE
