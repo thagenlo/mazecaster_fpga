@@ -111,10 +111,10 @@ always_comb begin
         end
     endcase
 end
-localparam SKY = 8'h2a; // SKY BLUE
-localparam GROUND = 8'hdc; // BROWN FLOOR
-localparam BLACK_WALL = 8'hFF;
-localparam GREEN_WALL = 8'h97;
+// localparam SKY = 8'h2a; // SKY BLUE
+// localparam GROUND = 8'hdc; // BROWN FLOOR
+// localparam BLACK_WALL = 8'hFF;
+// localparam GREEN_WALL = 8'h97;
 localparam  HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 // region bounds
 localparam GRID_SIDE = 24;
