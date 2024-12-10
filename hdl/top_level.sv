@@ -449,38 +449,38 @@ module top_level(
 
     //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
     // MAP 1 UNTEXTURED
-    xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-    ) worldMap1 (
-        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
-        .dina(0),       // RAM input data, width determined from RAM_WIDTH
-        .clka(clk_pixel),       // Clock
-        .wea(0),         // Write enable
-        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-        .rsta(sys_rst),       // Output reset (does not affect memory contents)
-        .regcea(1),   // Output register enable
-        .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
-    );
+    // xilinx_single_port_ram_read_first #(
+    //     .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+    //     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+    //     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    //     .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    // ) worldMap1 (
+    //     .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+    //     .dina(0),       // RAM input data, width determined from RAM_WIDTH
+    //     .clka(clk_pixel),       // Clock
+    //     .wea(0),         // Write enable
+    //     .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+    //     .rsta(sys_rst),       // Output reset (does not affect memory contents)
+    //     .regcea(1),   // Output register enable
+    //     .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
+    // );
 
-    // MAP 2 TEXTURED
-    xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-    ) worldMap2 (
-        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
-        .dina(0),       // RAM input data, width determined from RAM_WIDTH
-        .clka(clk_pixel),       // Clock
-        .wea(0),         // Write enable
-        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-        .rsta(sys_rst),       // Output reset (does not affect memory contents)
-        .regcea(1),   // Output register enable
-        .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
-    );
+    // // MAP 2 TEXTURED
+    // xilinx_single_port_ram_read_first #(
+    //     .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+    //     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+    //     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    //     .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    // ) worldMap2 (
+    //     .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+    //     .dina(0),       // RAM input data, width determined from RAM_WIDTH
+    //     .clka(clk_pixel),       // Clock
+    //     .wea(0),         // Write enable
+    //     .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+    //     .rsta(sys_rst),       // Output reset (does not affect memory contents)
+    //     .regcea(1),   // Output register enable
+    //     .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
+    // );
 
     logic trans_grid_req;
     logic [9:0] trans_address;
@@ -493,20 +493,23 @@ module top_level(
         .rst_in(sys_rst),
 
         .map_select(map_select), // 0, 1, 2, 3 (4 maps)
-        .dda_req_in(),
+        .dda_req_in(map_data_dda_req_out), // DDA request in
         .trans_req_in(trans_grid_req),
-        .dda_address_in(),
+        .dda_address_in(map_addra_top_level), // DDA address in
         .trans_address_in(trans_address),
 
-        .dda_valid_out(),
+        .dda_valid_out(map_data_dda_valid_out), // DDA valid out
         .trans_valid_out(trans_grid_valid),
 
         .grid_data(grid_data)
     );
 
     //map BRAM data
-    logic [2:0] map_data1_top_level, map_data2_top_level;
+    //logic [2:0] map_data1_top_level, map_data2_top_level;
+    logic [3:0] map_data_top_level;
+    assign map_data_top_level = grid_data;
     logic [$clog2(N*N)-1:0] map_addra_top_level;
+    logic map_data_dda_valid_out, map_data_dda_req_out;
 
 
     // dda-out fifo senders
@@ -525,12 +528,12 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
 
-        .map_select(map_select),
-
         //handle maps
-        .map_data1_top_level(map_data1_top_level),
-        .map_data2_top_level(map_data2_top_level),
+        .map_data_top_level(map_data_top_level),
         .map_addra_top_level(map_addra_top_level),
+
+        .map_data_dda_valid_out(map_data_dda_valid_out),
+        .map_data_dda_req_out(map_data_dda_req_out),
         
         // DDA-in FIFO receiver
         .dda_fsm_in_tvalid(dda_fsm_in_tvalid),
