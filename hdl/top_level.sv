@@ -1,6 +1,6 @@
 `default_nettype none // prevents system from inferring an undeclared logic (good practice)
 
-`define FPATH(X) `"../data/X`" //`"../../data/X`"
+//`define FPATH(X) `"../data/X`" //`"../../data/X`"
  
 module top_level(
     input wire clk_100mhz,                  //crystal reference clock

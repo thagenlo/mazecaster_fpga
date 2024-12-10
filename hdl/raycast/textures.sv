@@ -107,7 +107,7 @@ xilinx_single_port_ram_read_first #(
         .ena(1),                    // RAM Enable
         .rsta(rst_in),              // Output reset
         .regcea(1),                 // Output register enable
-        .douta(tex1_out)            // RAM output data
+        .douta(tex0_out)            // RAM output data
     );
 
 xilinx_single_port_ram_read_first #(

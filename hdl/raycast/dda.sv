@@ -278,6 +278,7 @@ module dda
             dda_fsm0_map_data_valid_in <= 1'b1;
             dda_fsm0_map_data_in <= map_data;
             MAP_ARBITER_STATE <= IDLE;
+            map_data_dda_req_out <= 1'b0;
           end
           last_granted_fsm <= 1'b1;
         end
@@ -288,6 +289,7 @@ module dda
             dda_fsm1_map_data_valid_in <= 1'b1;
             dda_fsm1_map_data_in <= map_data; 
             MAP_ARBITER_STATE <= IDLE;
+            map_data_dda_req_out <= 1'b0;
           end
           last_granted_fsm <= 1'b0;
         end
