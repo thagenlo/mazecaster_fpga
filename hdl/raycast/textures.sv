@@ -28,7 +28,7 @@ logic [18:0] address;
 logic [25:0] first_part;
 logic [17:0] second_part;
 
-logic [7:0] tex1_out, tex2_out, tex3_out, tex4_out, tex5_out, tex6_out, tex7_out;
+logic [7:0] tex0_out, tex1_out, tex2_out, tex3_out, tex4_out, tex5_out, tex6_out, tex7_out;
 logic [1:0] valid_out_pipe;
 
 assign valid_tex_out = valid_out_pipe[1];
