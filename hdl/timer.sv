@@ -1,11 +1,11 @@
-module timer (
-    input wire clk_100mhz_in,
-    input wire rst_in,
+// module timer (
+//     input wire clk_100mhz_in,
+//     input wire rst_in,
 
-    input wire [9:0] max_sec_in,
+//     input wire [9:0] max_sec_in,
 
-    output logic [9:0] time_out
-)
+//     output logic [9:0] time_out
+// )
 
 /*
 input wire          clk_in,
