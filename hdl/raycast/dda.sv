@@ -17,13 +17,14 @@ module dda
   input wire pixel_clk_in,
   input wire rst_in,
 
-  input wire map_select,
+  //input wire map_select,
 
   //handle maps
-  input wire [2:0] map_data1_top_level,
-  input wire [2:0] map_data2_top_level,
-  output wire [$clog2(N*N)-1:0] map_addra_top_level,
+  input wire [3:0] map_data_top_level,
+  output logic [$clog2(N*N)-1:0] map_addra_top_level,
 
+  input wire map_data_dda_valid_out,
+  output logic map_data_dda_req_out,
 
   // dda_in FIFO receiver
   input wire dda_fsm_in_tvalid,
@@ -223,16 +224,15 @@ module dda
 
   //general I/O from BRAM
   logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [2:0] map_data1, map_data2;
+  logic [3:0] map_data;
 
   //handle maps in top level
   assign map_addra_top_level = map_addra;
-  assign map_data1 = map_data1_top_level;
-  assign map_data2 = map_data2_top_level;
+  assign map_data = map_data_top_level;
 
 
   enum {
-    IDLE, GRANT_FSM0, GRANT_FSM1, HOLD_CYCLE, ASSIGN
+    IDLE, GRANT_FSM0, GRANT_FSM1 //, HOLD_CYCLE, ASSIGN
   } MAP_ARBITER_STATE;
 
   // arbiter logic
@@ -244,6 +244,9 @@ module dda
       dda_fsm0_map_data_valid_in <= 1'b0;
       dda_fsm1_map_data_valid_in <= 1'b0;
       last_granted_fsm <= 1'b0; // Initialize to a default FSM
+
+      map_data_dda_req_out <= 1'b0;
+
     end else begin
       case (MAP_ARBITER_STATE)
         IDLE: begin
@@ -254,41 +257,55 @@ module dda
             // alternate granting based on last_granted_fsm
             map_addra <= (last_granted_fsm) ? dda_fsm0_map_addra_out : dda_fsm1_map_addra_out;
             MAP_ARBITER_STATE <= (last_granted_fsm) ? GRANT_FSM0 : GRANT_FSM1;
+            map_data_dda_req_out <= 1'b1;
           end else if (dda_fsm0_map_request_out) begin
             map_addra <= dda_fsm0_map_addra_out;
             MAP_ARBITER_STATE <= GRANT_FSM0;
+            map_data_dda_req_out <= 1'b1;
           end else if (dda_fsm1_map_request_out) begin
             map_addra <= dda_fsm1_map_addra_out;
             MAP_ARBITER_STATE <= GRANT_FSM1;
+            map_data_dda_req_out <= 1'b1;
           end
         end
+
+        //input wire map_data_dda_valid_out,
+        //output logic map_data_dda_req_out,
         
         GRANT_FSM0: begin //cycle 1
-          MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
+          // MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
+          if (map_data_dda_valid_out) begin
+            dda_fsm0_map_data_valid_in <= 1'b1;
+            dda_fsm0_map_data_in <= map_data;
+            MAP_ARBITER_STATE <= IDLE;
+          end
           last_granted_fsm <= 1'b1;
         end
 
         GRANT_FSM1: begin //cycle 1
-          MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
+          // MAP_ARBITER_STATE <= HOLD_CYCLE;//ASSIGN;
+          if (map_data_dda_valid_out) begin
+            dda_fsm1_map_data_valid_in <= 1'b1;
+            dda_fsm1_map_data_in <= map_data; 
+            MAP_ARBITER_STATE <= IDLE;
+          end
           last_granted_fsm <= 1'b0;
         end
 
-        HOLD_CYCLE:begin
-          MAP_ARBITER_STATE <= ASSIGN;
-        end
+        // HOLD_CYCLE:begin
+        //   MAP_ARBITER_STATE <= ASSIGN;
+        // end
 
-        ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
-          if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
-            dda_fsm0_map_data_valid_in <= 1'b1;
-            dda_fsm0_map_data_in <= (map_select == 1'b0)? map_data1:
-                                                        map_data2;
-          end else begin
-            dda_fsm1_map_data_valid_in <= 1'b1;
-            dda_fsm1_map_data_in <= (map_select == 1'b0)? map_data1:
-                                                        map_data2;
-          end
-          MAP_ARBITER_STATE <= IDLE;
-        end
+        // ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
+        //   if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
+        //     dda_fsm0_map_data_valid_in <= 1'b1;
+        //     dda_fsm0_map_data_in <= map_data; //(map_select == 1'b0)? map_data1: map_data2;
+        //   end else begin
+        //     dda_fsm1_map_data_valid_in <= 1'b1;
+        //     dda_fsm1_map_data_in <= map_data; //(map_select == 1'b0)? map_data1: map_data2;
+        //   end
+        //   MAP_ARBITER_STATE <= IDLE;
+        // end
 
       endcase
     end
