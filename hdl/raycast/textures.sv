@@ -28,17 +28,20 @@ logic [18:0] address;
 logic [25:0] first_part;
 logic [17:0] second_part;
 
-logic [7:0] tex1_out, tex2_out, tex3_out, tex4_out;
+logic [7:0] tex1_out, tex2_out, tex3_out, tex4_out, tex5_out, tex6_out;
 logic [1:0] valid_out_pipe;
 
 assign valid_tex_out = valid_out_pipe[1];
 
 always_comb begin
     case (texture_in) 
+        2: tex_pixel_out = tex0_out;
         3: tex_pixel_out = tex1_out;
         4: tex_pixel_out = tex2_out;
         5: tex_pixel_out = tex3_out;
         6: tex_pixel_out = tex4_out;
+        7: tex_pixel_out = tex5_out;
+        8: tex_pixel_out = tex6_out;
         default : tex_pixel_out = 0;
     endcase
     
@@ -89,8 +92,23 @@ divu #(
         .val(vcount_tex)
     );
 
-
 //TODO: insert texture files
+xilinx_single_port_ram_read_first #(
+    .RAM_WIDTH(PIXEL_WIDTH),       
+    .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
+    .INIT_FILE(`FPATH(frog.mem))                           
+) texture_0 (
+        .addra(address),            // address
+        .dina(),                    // RAM input data = pixel_in from DDA_out buffer
+        .clka(pixel_clk_in),        // Clock
+        .wea(0),                    // ROM
+        .ena(1),                    // RAM Enable
+        .rsta(rst_in),              // Output reset
+        .regcea(1),                 // Output register enable
+        .douta(tex1_out)            // RAM output data
+    );
+
 xilinx_single_port_ram_read_first #(
     .RAM_WIDTH(PIXEL_WIDTH),       
     .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
@@ -153,6 +171,38 @@ xilinx_single_port_ram_read_first #(
         .rsta(rst_in),              // Output reset
         .regcea(1),                 // Output register enable
         .douta(tex4_out)            // RAM output data
+    );
+
+xilinx_single_port_ram_read_first #(
+    .RAM_WIDTH(PIXEL_WIDTH),               
+    .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
+    .INIT_FILE(`FPATH(sheep.mem))                        
+) texture_5 (
+        .addra(address),            // address
+        .dina(),                    // RAM input data = pixel_in from DDA_out buffer
+        .clka(pixel_clk_in),        // Clock
+        .wea(0),                    // ROM
+        .ena(1),                    // RAM Enable
+        .rsta(rst_in),              // Output reset
+        .regcea(1),                 // Output register enable
+        .douta(tex5_out)            // RAM output data
+    );
+
+xilinx_single_port_ram_read_first #(
+    .RAM_WIDTH(PIXEL_WIDTH),               
+    .RAM_DEPTH(TEX_WIDTH*TEX_HEIGHT),               
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), 
+    .INIT_FILE(`FPATH(dino.mem))                        
+) texture_6 (
+        .addra(address),            // address
+        .dina(),                    // RAM input data = pixel_in from DDA_out buffer
+        .clka(pixel_clk_in),        // Clock
+        .wea(0),                    // ROM
+        .ena(1),                    // RAM Enable
+        .rsta(rst_in),              // Output reset
+        .regcea(1),                 // Output register enable
+        .douta(tex6_out)            // RAM output data
     );
 
 endmodule

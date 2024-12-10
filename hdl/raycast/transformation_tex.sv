@@ -94,6 +94,21 @@ assign shade_bit = ray_pixel_out[8];
 //         end
 //     endcase
 // end
+logic [7:0] SKY, GROUND, SOLID_WALL;
+always_comb begin
+    case (map_select)
+        0, 1: begin
+            SKY = 8'h2a;
+            GROUND = 81;
+            SOLID_WALL = 90;
+        end
+        2: begin
+            SKY = 24;
+            GROUND = 55;
+            SOLID_WALL = 81;
+        end
+    endcase
+end
 localparam SKY = 8'h2a; // SKY BLUE
 localparam GROUND = 8'hdc; // BROWN FLOOR
 localparam BLACK_WALL = 8'hFF;
@@ -177,7 +192,7 @@ always_comb begin
     end else if (vcount_ray >= draw_end) begin
         region = FLOOR;
     end else begin
-        if (mapData_in < 3) begin
+        if (mapData_in < 2) begin
             region = PLAIN_WALL;
         end else begin
             region = TEX_WALL;
@@ -235,8 +250,7 @@ always_ff @(posedge pixel_clk_in) begin
                             // endcase
                             case (mapData_in)
                                 0: ray_pixel_out <= {1'b0, SKY};
-                                1: ray_pixel_out <= (wallType_in) ? {1'b1, BLACK_WALL} : {1'b0, BLACK_WALL};
-                                2: ray_pixel_out <= (wallType_in) ? {1'b1, GREEN_WALL} : {1'b0, GREEN_WALL};
+                                1: ray_pixel_out <= (wallType_in) ? {1'b1, SOLID_WALL} : {1'b0, SOLID_WALL};
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
@@ -315,12 +329,12 @@ always_ff @(posedge pixel_clk_in) begin
                         end else if (grid_valid_in) begin
                             // ray_pixel + address calc
                             grid_req_out <= 0;
-                            if (grid_data > 0) begin
-                                ray_pixel_out <= {1'b0, 8'hFF};
-                            end else begin
-                                ray_pixel_out <= 9'b0;
-                            end
-                            // ray_pixel <= (grid_data > 0) ? 8'hFF : 8'h0;
+                            ray_pixel_out <= (grid_data > 0) ? {1'b0, 8'hFF} : {1'b0, 8'd18};
+                            // if (grid_data > 0) begin
+                            //     ray_pixel_out <= {1'b0, 8'hFF};
+                            // end else begin
+                            //     ray_pixel_out <= {1'b0, 8'd18};
+                            // end
                             
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
                             // vcount + state transition
