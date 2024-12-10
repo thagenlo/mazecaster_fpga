@@ -101,7 +101,7 @@ localparam GREEN_WALL = 8'h97;
 localparam  HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 // region bounds
 localparam GRID_SIDE = 24;
-localparam TOP_DOWN_BOUND = GRID_SIDE << 1;
+localparam TOP_DOWN_BOUND = GRID_SIDE;
 
 // FROM DDA FIFO
 logic [8:0] hcount_ray_in; //pipelined x_coord
@@ -292,7 +292,8 @@ always_ff @(posedge pixel_clk_in) begin
                     end
 
                     TOPDOWN: begin
-                        if (((hcount_ray_in >> 1) == (PosX >> 8)) && ((vcount_ray >> 1) == (PosY >> 8))) begin
+                        if (((hcount_ray_in) == (PosX >> 8)) && (((vcount_ray-1)) == (PosY >> 8))) begin
+                            //||(((hcount_ray_in+1) >> 1) == (PosX >> 8)) && (((vcount_ray+1) >> 1) == (PosY >> 8))
                             // ray_pixel <= 8'd98;
                             ray_pixel_out <= {1'b0, 8'd98};
                             if (vcount_ray < SCREEN_HEIGHT-1) begin
@@ -321,7 +322,6 @@ always_ff @(posedge pixel_clk_in) begin
                                 ray_pixel_out <= 9'b0;
                             end
                             // ray_pixel <= (grid_data > 0) ? 8'hFF : 8'h0;
-                            
                             ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
                             // vcount + state transition
                             if (vcount_ray < SCREEN_HEIGHT-1) begin
@@ -343,7 +343,7 @@ always_ff @(posedge pixel_clk_in) begin
                             end
                         end else begin
                             grid_req_out <= 1;
-                            grid_address_out <= (hcount_ray_in >> 1) + (vcount_ray >> 1)*GRID_SIDE;
+                            grid_address_out <= (hcount_ray_in) + (vcount_ray)*GRID_SIDE;
                         end
                     end
                 endcase

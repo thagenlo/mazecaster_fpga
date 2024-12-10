@@ -8,176 +8,182 @@
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
 :vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2009.vpi";
-S_0x15a704200 .scope package, "$unit" "$unit" 2 1;
+S_0x159e06010 .scope package, "$unit" "$unit" 2 1;
  .timescale 0 0;
-S_0x15a704370 .scope module, "btn_control" "btn_control" 3 1;
+S_0x159e06180 .scope module, "top_level" "top_level" 3 5;
  .timescale 0 0;
-    .port_info 0 /INPUT 1 "clk_in";
-    .port_info 1 /INPUT 1 "rst_in";
-    .port_info 2 /INPUT 1 "fwd_btn";
-    .port_info 3 /INPUT 1 "bwd_btn";
-    .port_info 4 /INPUT 1 "leftRot_btn";
-    .port_info 5 /INPUT 1 "rightRot_btn";
-    .port_info 6 /INPUT 1 "frame_switch";
-    .port_info 7 /OUTPUT 16 "posX";
-    .port_info 8 /OUTPUT 16 "posY";
-    .port_info 9 /OUTPUT 16 "dirX";
-    .port_info 10 /OUTPUT 16 "dirY";
-    .port_info 11 /OUTPUT 16 "planeX";
-    .port_info 12 /OUTPUT 16 "planeY";
-P_0x600000188080 .param/l "ROTATION_ANGLE" 0 3 2, C4<0010110100000000>;
-o0x140008010 .functor BUFZ 1, C4<z>; HiZ drive
-v0x600002684000_0 .net "bwd_btn", 0 0, o0x140008010;  0 drivers
-v0x600002684090_0 .var "bwd_pulse", 0 0;
-o0x140008070 .functor BUFZ 1, C4<z>; HiZ drive
-v0x600002684120_0 .net "clk_in", 0 0, o0x140008070;  0 drivers
-v0x6000026841b0_0 .var "deb_out_bwd", 0 0;
-v0x600002684240_0 .var "deb_out_fwd", 0 0;
-v0x6000026842d0_0 .var "deb_out_leftRot", 0 0;
-v0x600002684360_0 .var "deb_out_rightRot", 0 0;
-v0x6000026843f0_0 .var "dirX", 15 0;
-v0x600002684480_0 .var/s "dirX_pipe_1", 15 0;
-v0x600002684510_0 .var "dirY", 15 0;
-v0x6000026845a0_0 .var/s "dirY_pipe_1", 15 0;
-o0x140008220 .functor BUFZ 1, C4<z>; HiZ drive
-v0x600002684630_0 .net "frame_switch", 0 0, o0x140008220;  0 drivers
-o0x140008250 .functor BUFZ 1, C4<z>; HiZ drive
-v0x6000026846c0_0 .net "fwd_btn", 0 0, o0x140008250;  0 drivers
-v0x600002684750_0 .var "fwd_pulse", 0 0;
-v0x6000026847e0_0 .var "is_pulse", 0 0;
-o0x1400082e0 .functor BUFZ 1, C4<z>; HiZ drive
-v0x600002684870_0 .net "leftRot_btn", 0 0, o0x1400082e0;  0 drivers
-v0x600002684900_0 .var "leftRot_pulse", 0 0;
-v0x600002684990_0 .var "move_counter", 19 0;
-v0x600002684a20_0 .var "past_bwd", 0 0;
-v0x600002684ab0_0 .var "past_fwd", 0 0;
-v0x600002684b40_0 .var "past_leftRot", 0 0;
-v0x600002684bd0_0 .var "past_rightRot", 0 0;
-v0x600002684c60_0 .var "planeX", 15 0;
-v0x600002684cf0_0 .var/s "planeX_pipe_1", 15 0;
-v0x600002684d80_0 .var "planeY", 15 0;
-v0x600002684e10_0 .var/s "planeY_pipe_1", 15 0;
-v0x600002684ea0_0 .var "posX", 15 0;
-v0x600002684f30_0 .var/s "posX_pipe_1", 15 0;
-v0x600002684fc0_0 .var "posY", 15 0;
-v0x600002685050_0 .var/s "posY_pipe_1", 15 0;
-o0x1400085b0 .functor BUFZ 1, C4<z>; HiZ drive
-v0x6000026850e0_0 .net "rightRot_btn", 0 0, o0x1400085b0;  0 drivers
-v0x600002685170_0 .var "rightRot_pulse", 0 0;
-o0x140008610 .functor BUFZ 1, C4<z>; HiZ drive
-v0x600002685200_0 .net "rst_in", 0 0, o0x140008610;  0 drivers
-E_0x600000188100 .event posedge, v0x600002684120_0;
-    .scope S_0x15a704370;
+    .port_info 0 /INPUT 1 "clk_100mhz";
+    .port_info 1 /INPUT 4 "btn";
+    .port_info 2 /INPUT 16 "sw";
+    .port_info 3 /INPUT 4 "pmodb";
+    .port_info 4 /OUTPUT 3 "rgb0";
+    .port_info 5 /OUTPUT 3 "rgb1";
+    .port_info 6 /OUTPUT 16 "led";
+    .port_info 7 /OUTPUT 4 "ss0_an";
+    .port_info 8 /OUTPUT 4 "ss1_an";
+    .port_info 9 /OUTPUT 7 "ss0_c";
+    .port_info 10 /OUTPUT 7 "ss1_c";
+    .port_info 11 /OUTPUT 3 "hdmi_tx_p";
+    .port_info 12 /OUTPUT 3 "hdmi_tx_n";
+    .port_info 13 /OUTPUT 1 "hdmi_clk_p";
+    .port_info 14 /OUTPUT 1 "hdmi_clk_n";
+P_0x6000022e8100 .param/l "N" 1 3 21, +C4<00000000000000000000000000011000>;
+P_0x6000022e8140 .param/l "VIDEO_PIPE_STAGES" 1 3 83, +C4<00000000000000000000000000000100>;
+L_0x6000027e8af0 .functor BUFZ 7, v0x600003ee99e0_0, C4<0000000>, C4<0000000>, C4<0000000>;
+L_0x6000027e8b60 .functor BUFZ 7, v0x600003ee99e0_0, C4<0000000>, C4<0000000>, C4<0000000>;
+v0x600003ee8900_0 .var "active_draw", 0 0;
+v0x600003ee8990_0 .var "ad_out_pipe", 3 0;
+v0x600003ee8a20_0 .net "blue_screen", 7 0, L_0x600003dec500;  1 drivers
+o0x1300080d0 .functor BUFZ 4, C4<zzzz>; HiZ drive
+v0x600003ee8ab0_0 .net "btn", 3 0, o0x1300080d0;  0 drivers
+v0x600003ee8b40_0 .net "bwd_btn", 0 0, L_0x600003dec280;  1 drivers
+o0x130008130 .functor BUFZ 1, C4<z>; HiZ drive
+v0x600003ee8bd0_0 .net "clk_100mhz", 0 0, o0x130008130;  0 drivers
+v0x600003ee8c60_0 .var "clk_pixel", 0 0;
+v0x600003ee8cf0_0 .var "dda_data_ready_out", 0 0;
+v0x600003ee8d80_0 .net "fwd_btn", 0 0, L_0x600003dec1e0;  1 drivers
+v0x600003ee8e10_0 .net "green_screen", 7 0, L_0x600003dec460;  1 drivers
+v0x600003ee8ea0_0 .var "hcount_ray_in", 8 0;
+v0x600003ee8f30_0 .var "hdmi_clk_n", 0 0;
+v0x600003ee8fc0_0 .var "hdmi_clk_p", 0 0;
+v0x600003ee9050_0 .var "hdmi_tx_n", 2 0;
+v0x600003ee90e0_0 .var "hdmi_tx_p", 2 0;
+v0x600003ee9170_0 .var "hor_sync", 0 0;
+v0x600003ee9200_0 .var "hs_out_pipe", 3 0;
+v0x600003ee9290_0 .var "led", 15 0;
+v0x600003ee9320_0 .net "leftRot_btn", 0 0, L_0x600003dec0a0;  1 drivers
+v0x600003ee93b0_0 .net "map_select", 0 0, L_0x600003dec320;  1 drivers
+o0x130008400 .functor BUFZ 4, C4<zzzz>; HiZ drive
+v0x600003ee9440_0 .net "pmodb", 3 0, o0x130008400;  0 drivers
+v0x600003ee94d0_0 .net "red_screen", 7 0, L_0x600003dec3c0;  1 drivers
+L_0x130040010 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0x600003ee9560_0 .net "rgb0", 2 0, L_0x130040010;  1 drivers
+L_0x130040058 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0x600003ee95f0_0 .net "rgb1", 2 0, L_0x130040058;  1 drivers
+v0x600003ee9680_0 .var "rgb_out", 23 0;
+v0x600003ee9710_0 .net "rightRot_btn", 0 0, L_0x600003dec140;  1 drivers
+v0x600003ee97a0_0 .var "ss0_an", 3 0;
+v0x600003ee9830_0 .net "ss0_c", 6 0, L_0x6000027e8af0;  1 drivers
+v0x600003ee98c0_0 .var "ss1_an", 3 0;
+v0x600003ee9950_0 .net "ss1_c", 6 0, L_0x6000027e8b60;  1 drivers
+v0x600003ee99e0_0 .var "ss_c", 6 0;
+o0x130008610 .functor BUFZ 16, C4<zzzzzzzzzzzzzzzz>; HiZ drive
+v0x600003ee9a70_0 .net "sw", 15 0, o0x130008610;  0 drivers
+v0x600003ee9b00_0 .net "sys_rst", 0 0, L_0x600003dec000;  1 drivers
+v0x600003ee9b90_0 .var "valid_ray_out", 0 0;
+v0x600003ee9c20_0 .var "vert_sync", 0 0;
+v0x600003ee9cb0_0 .var "vs_out_pipe", 3 0;
+E_0x6000019e8a00 .event posedge, v0x600003ee8c60_0;
+L_0x600003dec000 .part o0x130008610, 0, 1;
+L_0x600003dec0a0 .part o0x130008400, 1, 1;
+L_0x600003dec140 .part o0x130008400, 0, 1;
+L_0x600003dec1e0 .part o0x130008400, 3, 1;
+L_0x600003dec280 .part o0x130008400, 2, 1;
+L_0x600003dec320 .part o0x130008610, 4, 1;
+L_0x600003dec3c0 .part v0x600003ee9680_0, 16, 8;
+L_0x600003dec460 .part v0x600003ee9680_0, 8, 8;
+L_0x600003dec500 .part v0x600003ee9680_0, 0, 8;
+S_0x159e06460 .scope begin, "$ivl_for_loop0" "$ivl_for_loop0" 3 90, 3 90 0, S_0x159e06180;
+ .timescale 0 0;
+v0x600003ee8870_0 .var/2s "i", 31 0;
+    .scope S_0x159e06180;
 T_0 ;
-    %wait E_0x600000188100;
-    %load/vec4 v0x600002684240_0;
-    %assign/vec4 v0x600002684ab0_0, 0;
-    %load/vec4 v0x6000026841b0_0;
-    %assign/vec4 v0x600002684a20_0, 0;
-    %load/vec4 v0x6000026842d0_0;
-    %assign/vec4 v0x600002684b40_0, 0;
-    %load/vec4 v0x600002684360_0;
-    %assign/vec4 v0x600002684bd0_0, 0;
-    %load/vec4 v0x600002685200_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.0, 8;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684750_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684090_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684900_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002685170_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-    %pushi/vec4 0, 0, 20;
-    %assign/vec4 v0x600002684990_0, 0;
-    %jmp T_0.1;
+    %wait E_0x6000019e8a00;
+    %load/vec4 v0x600003ee9c20_0;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x600003ee9cb0_0, 4, 5;
+    %load/vec4 v0x600003ee9170_0;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x600003ee9200_0, 4, 5;
+    %load/vec4 v0x600003ee8900_0;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x600003ee8990_0, 4, 5;
+    %fork t_1, S_0x159e06460;
+    %jmp t_0;
+    .scope S_0x159e06460;
+t_1 ;
+    %pushi/vec4 1, 0, 32;
+    %store/vec4 v0x600003ee8870_0, 0, 32;
 T_0.0 ;
-    %load/vec4 v0x600002684990_0;
-    %cmpi/e 500288, 0, 20;
-    %jmp/0xz  T_0.2, 4;
-    %pushi/vec4 0, 0, 20;
-    %assign/vec4 v0x600002684990_0, 0;
-    %load/vec4 v0x600002684240_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.4, 8;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x600002684750_0, 0;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-    %jmp T_0.5;
-T_0.4 ;
-    %load/vec4 v0x6000026841b0_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.6, 8;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x600002684090_0, 0;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-    %jmp T_0.7;
-T_0.6 ;
-    %load/vec4 v0x6000026842d0_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.8, 8;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x600002684900_0, 0;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-    %jmp T_0.9;
-T_0.8 ;
-    %load/vec4 v0x600002684360_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.10, 8;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x600002685170_0, 0;
-    %pushi/vec4 1, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-    %jmp T_0.11;
-T_0.10 ;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684750_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684090_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002684900_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x600002685170_0, 0;
-    %pushi/vec4 0, 0, 1;
-    %assign/vec4 v0x6000026847e0_0, 0;
-T_0.11 ;
-T_0.9 ;
-T_0.7 ;
-T_0.5 ;
-    %jmp T_0.3;
-T_0.2 ;
-    %load/vec4 v0x600002684990_0;
-    %addi 1, 0, 20;
-    %assign/vec4 v0x600002684990_0, 0;
-T_0.3 ;
-    %load/vec4 v0x600002684630_0;
-    %flag_set/vec4 8;
-    %jmp/0xz  T_0.12, 8;
-    %load/vec4 v0x600002684f30_0;
-    %assign/vec4 v0x600002684ea0_0, 0;
-    %load/vec4 v0x600002685050_0;
-    %assign/vec4 v0x600002684fc0_0, 0;
-    %load/vec4 v0x600002684480_0;
-    %assign/vec4 v0x6000026843f0_0, 0;
-    %load/vec4 v0x6000026845a0_0;
-    %assign/vec4 v0x600002684510_0, 0;
-    %load/vec4 v0x600002684cf0_0;
-    %assign/vec4 v0x600002684c60_0, 0;
-    %load/vec4 v0x600002684e10_0;
-    %assign/vec4 v0x600002684d80_0, 0;
-T_0.12 ;
+    %load/vec4 v0x600003ee8870_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_0.1, 5;
+    %load/vec4 v0x600003ee9cb0_0;
+    %load/vec4 v0x600003ee8870_0;
+    %subi 1, 0, 32;
+    %part/s 1;
+    %ix/load 5, 0, 0;
+    %ix/getv/s 4, v0x600003ee8870_0;
+    %assign/vec4/off/d v0x600003ee9cb0_0, 4, 5;
+    %load/vec4 v0x600003ee9200_0;
+    %load/vec4 v0x600003ee8870_0;
+    %subi 1, 0, 32;
+    %part/s 1;
+    %ix/load 5, 0, 0;
+    %ix/getv/s 4, v0x600003ee8870_0;
+    %assign/vec4/off/d v0x600003ee9200_0, 4, 5;
+    %load/vec4 v0x600003ee8990_0;
+    %load/vec4 v0x600003ee8870_0;
+    %subi 1, 0, 32;
+    %part/s 1;
+    %ix/load 5, 0, 0;
+    %ix/getv/s 4, v0x600003ee8870_0;
+    %assign/vec4/off/d v0x600003ee8990_0, 4, 5;
+    %load/vec4 v0x600003ee8870_0;
+    %addi 1, 0, 32;
+    %cast2;
+    %store/vec4 v0x600003ee8870_0, 0, 32;
+    %jmp T_0.0;
 T_0.1 ;
+    %end;
+    .scope S_0x159e06180;
+t_0 %join;
     %jmp T_0;
     .thread T_0;
+    .scope S_0x159e06180;
+T_1 ;
+    %wait E_0x6000019e8a00;
+    %load/vec4 v0x600003ee9b00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 9;
+    %assign/vec4 v0x600003ee8ea0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x600003ee9b90_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_1.4, 9;
+    %load/vec4 v0x600003ee8cf0_0;
+    %and;
+T_1.4;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x600003ee8ea0_0;
+    %pad/u 32;
+    %cmpi/e 319, 0, 32;
+    %jmp/0xz  T_1.5, 4;
+    %pushi/vec4 0, 0, 9;
+    %assign/vec4 v0x600003ee8ea0_0, 0;
+    %jmp T_1.6;
+T_1.5 ;
+    %load/vec4 v0x600003ee8ea0_0;
+    %addi 1, 0, 9;
+    %assign/vec4 v0x600003ee8ea0_0, 0;
+T_1.6 ;
+T_1.2 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
 # The file index is used to find the file name in the following table.
 :file_names 4;
     "N/A";
     "<interactive>";
     "-";
-    "hdl/controls/btn_control.sv";
+    "hdl/top_level.sv";
