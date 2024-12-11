@@ -44,7 +44,10 @@ async def test_a(dut):
     dut.posX.value = 3
     dut.posY.value = 4
 
-    await ClockCycles(dut.clk_in, 10)
+    await ClockCycles(dut.clk_in, 5)
+
+    await ClockCycles(dut.clk_in, 5)
+
     dut.posX.value = 5
     dut.posY.value = 6
 

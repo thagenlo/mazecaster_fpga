@@ -24,12 +24,12 @@ module game_fsm #(
     logic [15:0] goal_posY2;
     logic [15:0] goal_posX3;
     logic [15:0] goal_posY3;
-    logic [15:0] goal_posX4;
-    logic [15:0] goal_posY4;
+    // logic [15:0] goal_posX4;
+    // logic [15:0] goal_posY4;
     logic found_pos1;
     logic found_pos2;
     logic found_pos3;
-    logic found_pos4;
+    // logic found_pos4;
 
 
     always_ff @(posedge clk_in) begin
@@ -43,8 +43,8 @@ module game_fsm #(
             goal_posY2 <= 0;
             goal_posX3 <= 0;
             goal_posY3 <= 0;
-            goal_posX4 <= 0;
-            goal_posY4 <= 0;
+            // goal_posX4 <= 0;
+            // goal_posY4 <= 0;
             game_sel <= NEON_OUT;
         end else begin
             case (game_state)
@@ -67,8 +67,8 @@ module game_fsm #(
                     end
                     else if (sw[4]) begin //hedge
                         game_sel <= HEDGE;
-                        goal_posX1 <= 0; //TODO: tori CHANGES this
-                        goal_posY1 <= 0;
+                        goal_posX1 <= 16'h00c0; //TODO: tori CHANGES this
+                        goal_posY1 <= 16'h0b00;
                     end
                     else if (sw[5]) begin //3 little pigs
                         game_sel <= THREE_PIGS;
@@ -125,7 +125,7 @@ module game_fsm #(
                     end
                 end
                 GAME_LOST: begin //5 seconds
-                    screen_display <= 2;
+                    screen_display <= 2; //game_lost
                 end
                 GAME_WON: begin //5 seconds
                     screen_display <= 3;
