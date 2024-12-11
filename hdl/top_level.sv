@@ -469,7 +469,7 @@ module top_level(
         .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
     ) worldMap1 (
         .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
         .dina(0),       // RAM input data, width determined from RAM_WIDTH
@@ -486,7 +486,7 @@ module top_level(
         .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
     ) worldMap2 (
         .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
         .dina(0),       // RAM input data, width determined from RAM_WIDTH
@@ -521,7 +521,7 @@ module top_level(
     );
 
     //map BRAM data
-    logic [2:0] map_data1_top_level, map_data2_top_level;
+    logic [3:0] map_data1_top_level, map_data2_top_level;
     logic [$clog2(N*N)-1:0] map_addra_top_level;
 
 

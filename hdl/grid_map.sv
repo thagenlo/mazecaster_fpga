@@ -15,12 +15,12 @@ module grid_map #(
     input wire dda_req_in,
     input wire trans_req_in,
     input wire [9:0] dda_address_in,
-    input wire [9:0] trans_address_in,
+    input wire [$clog2(N*N)-1:0] trans_address_in,
 
     output logic dda_valid_out,
     output logic trans_valid_out,
 
-    output logic [2:0] grid_data
+    output logic [3:0] grid_data
 );
 
     logic [1:0] dda_valid_pipe, trans_valid_pipe;
@@ -52,7 +52,7 @@ module grid_map #(
     assign trans_valid_out = trans_valid_pipe[1];
 
     logic [15:0] address;
-    logic [2:0] map_data1, map_data2, map_data3, map_data4;
+    logic [3:0] map_data1, map_data2, map_data3, map_data4;
     always_comb begin
         if (trans_req_in && dda_req_in) begin
             address = trans_address_in;
@@ -73,10 +73,10 @@ module grid_map #(
     end
     
     xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(3),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
     ) grid1 (
         .addra(address),     // Address bus, width determined from RAM_DEPTH
         .dina(0),       // RAM input data, width determined from RAM_WIDTH
@@ -90,10 +90,10 @@ module grid_map #(
 
     // MAP 2 TEXTURED: 3 little pigs
     xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(3),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
         .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
         .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(grid_24x24_onlywall_tex.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
     ) grid2 (
         .addra(address),     // Address bus, width determined from RAM_DEPTH
         .dina(0),       // RAM input data, width determined from RAM_WIDTH
