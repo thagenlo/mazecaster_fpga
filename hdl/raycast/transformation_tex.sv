@@ -96,26 +96,41 @@ assign shade_bit = ray_pixel_out[8];
 // end
 
 logic [7:0] sky, ground, solid;
+logic [7:0] neon_yellow, neon_blue, neon_pink, neon_green;
+
 
 always_comb begin
     case (map_select)
-        0: begin
+        0: begin // hedge
             sky = 249;
             ground = 239;
             solid = 14;
         end
-        // 1: begin
-        // end
-        // 3: begin
-        // end
-        // 4: begin
-        // end
+        1: begin // pigs
+            sky = 38;
+            ground = 45;
+            solid = 14;
+        end
+        3: begin // dino
+            sky = 38;
+            ground = 45;
+            solid = 14;
+        end
+        4: begin // neon
+            sky = 254; // black
+
+            ground = 254;
+        end
         default : begin
             sky = 249;
             ground = 239;
             solid = 14;
         end
     endcase
+    neon_yellow = 21;
+    neon_blue = 48;
+    neon_green = 32;
+    neon_pink = 181;
 end
 // localparam sky = 249; // sky BLUE
 // localparam ground = 8'hdc; // BROWN FLOOR
@@ -192,7 +207,7 @@ always_comb begin
     end else if (vcount_ray >= draw_end) begin
         region = FLOOR;
     end else begin
-        if (mapData_in < 2) begin
+        if (mapData_in < 2 || mapData_in > 22) begin
             region = PLAIN_WALL;
         end else begin
             region = TEX_WALL;
@@ -241,16 +256,14 @@ always_ff @(posedge pixel_clk_in) begin
                                 CEILING: ray_pixel_out <= {1'b0, sky};
                                 FLOOR: ray_pixel_out <= {1'b0, ground};
                             endcase
-                            // ray_pixel <= (region == CEILING) ? sky : ground;
                         end else begin
-                            // case (mapData_in)
-                            //     0: ray_pixel <= sky;
-                            //     1: ray_pixel <= BLACK_WALL;
-                            //     2: ray_pixel <= GREEN_WALL;
-                            // endcase
                             case (mapData_in)
                                 0: ray_pixel_out <= {1'b0, sky};
                                 1: ray_pixel_out <= (wallType_in) ? {1'b1, solid} : {1'b0, solid};
+                                23: ray_pixel_out <= (wallType_in) ? {1'b1, neon_yellow} : {1'b0, neon_yellow};
+                                24: ray_pixel_out <= (wallType_in) ? {1'b1, neon_blue} : {1'b0, neon_blue};
+                                25: ray_pixel_out <= (wallType_in) ? {1'b1, neon_green} : {1'b0, neon_green};
+                                26: ray_pixel_out <= (wallType_in) ? {1'b1, neon_pink} : {1'b0, neon_pink};
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
