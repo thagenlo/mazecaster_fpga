@@ -133,7 +133,8 @@ module top_level(
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
-        .planeY(planeY)
+        .planeY(planeY),
+        .map_select(map_select)
     );
 
     logic start_timer;
