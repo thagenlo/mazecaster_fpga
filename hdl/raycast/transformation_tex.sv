@@ -111,12 +111,12 @@ always_comb begin
             ground = 45;
             solid = 14;
         end
-        3: begin // dino
+        2: begin // dino
             sky = 38;
             ground = 45;
             solid = 14;
         end
-        4: begin // neon
+        3: begin // neon
             sky = 0; // black
 
             ground = 0;
