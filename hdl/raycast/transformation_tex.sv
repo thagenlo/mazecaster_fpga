@@ -46,7 +46,6 @@ module transformation_tex  #(
                         input wire pixel_clk_in,
                         input wire rst_in,
 
-                        // TODO: GRID STUFF
                         input wire [15:0] PosX,
                         input wire [15:0] PosY,
                         input wire [1:0] map_select,
@@ -134,16 +133,7 @@ logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
 logic valid_tex_out;
 
-// logic [7:0] ray_pixel;
-
-// adds one more pipeline stage
-// always_ff @(posedge pixel_clk_in) begin
-//     if (region == PLAIN_WALL || region == TEX_WALL) begin
-//         ray_pixel_out <= (wallType_in) ? {1'b1, ray_pixel} : {1'b0, ray_pixel}; // 1 in MSbit represents that we need to shade it
-//     end else begin
-//         ray_pixel_out <= {1'b0, ray_pixel};
-//     end
-// end
+// TODO: ADD SKY GROUND LOGIC
 
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),
