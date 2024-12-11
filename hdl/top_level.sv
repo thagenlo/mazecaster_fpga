@@ -136,13 +136,29 @@ module top_level(
         .planeY(planeY)
     );
 
+    logic start_timer;
+    logic [5:0] timer_out;
+    logic timer_done;
+
+    // TIMER
+    timer #(
+        .TIMER_SECONDS(60)
+    ) game_timer (
+        .clk_100mhz_in(clk_100mhz),
+        .rst_in(sys_rst),
+        .start_timer_in(start_timer),
+        .time_out(timer_out),
+        .timer_done_out(timer_done)
+    );
+
     logic [6:0] ss_c;
     assign ss0_c = ss_c; //control upper four digit's cathodes!
     assign ss1_c = ss_c;
 
     seven_segment_controller mssc(.clk_in(clk_pixel),
                                .rst_in(sys_rst),
-                               .val_in({posX,posY}),
+                            //    .val_in({posX,posY}),
+                               .val_in(timer_out),
                                .cat_out(ss_c),
                                .an_out({ss0_an, ss1_an}));
 

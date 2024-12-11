@@ -18,6 +18,9 @@ module frame_buffer #(
                     (
                     input wire pixel_clk_in,
                     input wire rst_in,
+
+                    input wire [1:0] game_state_in, // 0: start, 1: play, 2: win, 3: lose
+
                     input wire [10:0] hcount_in, // from video_sig_gen
                     input wire [9:0] vcount_in,
                     // input ray_valid_in, // DO I NEED TO HAVE A RAY VALID IN SIGNAL?
@@ -88,6 +91,9 @@ module frame_buffer #(
     always_comb begin
         palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
         shade = (state) ? pixel_out1[8] : pixel_out2[8];
+        case (game_state_in)
+            //TODO: FILL IN GAME STATES
+        endcase
         rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
         // if ((hcount_in == 640) || (vcount_in == 360)) begin
         //     rgb_out = 24'h92ff14;

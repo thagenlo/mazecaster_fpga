@@ -62,17 +62,17 @@ module game_fsm #(
                     end
                     if (sw[4] && sw[5]) begin //find dino
                         game_sel <= FIND_DINO;
-                        goal_posX1 <= 0; //cathy CHANGES this
+                        goal_posX1 <= 0; //TODO: cathy CHANGES this
                         goal_posY1 <= 0;
                     end
                     else if (sw[4]) begin //hedge
                         game_sel <= HEDGE;
-                        goal_posX1 <= 0; //tori CHANGES this
+                        goal_posX1 <= 0; //TODO: tori CHANGES this
                         goal_posY1 <= 0;
                     end
                     else if (sw[5]) begin //3 little pigs
                         game_sel <= THREE_PIGS;
-                        goal_posX1 <= 1; //tori CHANGES this
+                        goal_posX1 <= 1; //TODO: tori CHANGES this
                         goal_posY1 <= 2;
                         goal_posX2 <= 3;
                         goal_posY2 <= 4;
@@ -81,7 +81,7 @@ module game_fsm #(
                     end
                     else begin //neon out
                         game_sel <= NEON_OUT;
-                        goal_posX1 <= 0; //cathy CHANGES this
+                        goal_posX1 <= 0; //TODO: cathy CHANGES this
                         goal_posY1 <= 0;
                     end
                 end
