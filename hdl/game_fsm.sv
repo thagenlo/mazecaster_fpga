@@ -1,5 +1,4 @@
-module game_fsm #(
-    )(input wire clk_in,
+module game_fsm (input wire clk_in,
     input wire rst_in,
     input wire [3:0] btn,                   // buttons for move control and rotation
     input wire [15:0] sw, 
@@ -17,22 +16,22 @@ module game_fsm #(
     game_selection game_sel;
     game_state_type game_state;
     logic game_progress; //add which location they've hit
-    logic [15:0] goal_posX1;
-    logic [15:0] goal_posY1;
-    logic [15:0] goal_posX2;
-    logic [15:0] goal_posY2;
-    logic [15:0] goal_posX3;
-    logic [15:0] goal_posY3;
+    logic [7:0] goal_posX1;
+    logic [7:0] goal_posY1;
+    logic [7:0] goal_posX2;
+    logic [7:0] goal_posY2;
+    logic [7:0] goal_posX3;
+    logic [7:0] goal_posY3;
     // logic [15:0] goal_posX4;
     // logic [15:0] goal_posY4;
     logic found_pos1;
     logic found_pos2;
     logic found_pos3;
     // logic found_pos4; 
-    localparam screen_time = 600_000_000;
-    logic [$clog(screen_time):0] screen_time_count;
-    
-
+    localparam max_screen_time = 600_000_000;
+    logic [$clog2(max_screen_time):0] screen_time_count;
+    logic [7:0] mapX = posX[15:8];
+    logic [7:0] mapY = posY[15:8];
 
     always_ff @(posedge clk_in) begin
         if (rst_in) begin
@@ -64,6 +63,10 @@ module game_fsm #(
                         start_timer <= 1;
                         screen_display <= 0;
                     end
+                    else if (btn[3]) begin
+                        game_state <= IDLE; 
+                        screen_display <= 0;
+                    end
                     if (sw[4] && sw[5]) begin //find dino
                         game_sel <= FIND_DINO;
                         goal_posX1 <= 0; //TODO: cathy CHANGES this
@@ -71,8 +74,8 @@ module game_fsm #(
                     end
                     else if (sw[4]) begin //hedge
                         game_sel <= HEDGE;
-                        goal_posX1 <= 16'h00c0; //TODO: tori CHANGES this
-                        goal_posY1 <= 16'h0b00;
+                        goal_posX1 <= 8'hd0; //TODO: tori CHANGES this
+                        goal_posY1 <= 8'hb0;
                     end
                     else if (sw[5]) begin //3 little pigs
                         game_sel <= THREE_PIGS;
@@ -100,7 +103,7 @@ module game_fsm #(
                                     game_state <= GAME_WON;
                                     screen_time_count <= 0;
                                 end
-                                else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
+                                else if ((mapX == goal_posX1) && (mapY == goal_posY1)) begin
                                     found_pos1 <= 1;
                                 end
                             end
@@ -109,13 +112,13 @@ module game_fsm #(
                                     game_state <= GAME_WON;
                                     screen_time_count <= 0;
                                 end
-                                else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
+                                else if ((mapX == goal_posX1) && (mapY == goal_posY1)) begin
                                     found_pos1 <= 1;
                                 end
-                                else if ((posX == goal_posX2) && (posY == goal_posY2)) begin
+                                else if ((mapX == goal_posX2) && (mapY == goal_posY2)) begin
                                     found_pos2 <= 1;
                                 end
-                                else if ((posX == goal_posX3) && (posY == goal_posY3)) begin
+                                else if ((mapX == goal_posX3) && (mapY == goal_posY3)) begin
                                     found_pos3 <= 1;
                                 end
                             end
@@ -124,7 +127,7 @@ module game_fsm #(
                                     game_state <= GAME_WON;
                                     screen_time_count <= 0;
                                 end
-                                else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
+                                else if ((mapX == goal_posX1) && (mapY == goal_posY1)) begin
                                     found_pos1 <= 1;
                                 end
                             end
@@ -132,8 +135,12 @@ module game_fsm #(
                     end
                 end
                 GAME_LOST: begin //5 seconds
-                    if (btn[2]) begin
-                        screen_time_count <= screen_time_count+1;
+                    if (screen_time_count == max_screen_time) begin
+                        screen_time_count <= 0;
+                        screen_display <= 1;
+                        game_state <= START_GAME;
+                    end
+                    else if (btn[2]) begin
                         screen_display <= 1;
                         game_state <= START_GAME;
                     end 
@@ -143,20 +150,28 @@ module game_fsm #(
                     end
                     else begin
                         screen_display <= 2; //game_lost
+                        screen_time_count <= screen_time_count+1;
                         game_state <= GAME_LOST;
                     end
                 end
                 GAME_WON: begin //5 seconds
                     screen_time_count <= screen_time_count+1;
-                    if (btn[2]) begin
+                    if (screen_time_count == max_screen_time) begin
+                        screen_time_count <= 0;
                         screen_display <= 1;
                         game_state <= START_GAME;
+                    end
+                    else if (btn[2]) begin
+                        screen_display <= 1;
+                        game_state <= START_GAME;
+                    end
                     else if (btn[3]) begin
                         screen_display <= 0;
                         game_state <= IDLE;
                     end
-                    end else begin
+                    else begin
                         screen_display <= 3;
+                        screen_time_count <= screen_time_count+1;
                         game_state <= GAME_WON;
                     end
                 end

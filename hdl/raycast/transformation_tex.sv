@@ -78,23 +78,6 @@ t_state state;
 logic shade_bit;
 assign shade_bit = ray_pixel_out[8];
 
-// PARAMETERS
-// colors
-// always_comb begin
-//     case (map_select)
-//         0, 1: begin
-//             localparam sky = 8'h2a; // sky BLUE
-//             localparam ground = 8'hdc; // BROWN FLOOR
-//             localparam BLACK_WALL = 8'hFF;
-//             localparam GREEN_WALL = 8'h97;
-//         end
-//         3: begin
-//         end
-//         4: begin
-//         end
-//     endcase
-// end
-
 logic [7:0] sky, ground, solid;
 logic [7:0] neon_yellow, neon_blue, neon_pink, neon_green;
 
@@ -117,9 +100,8 @@ always_comb begin
             solid = 14;
         end
         3: begin // neon
-            sky = 0; // black
-
-            ground = 0;
+            sky = 255;
+            ground = 255;
         end
         default : begin
             sky = 249;

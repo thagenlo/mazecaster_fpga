@@ -519,6 +519,7 @@ module top_level(
     frame_buffer frame_buffer_module(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
+        .game_state_in(screen_display),
         .hcount_in(hcount_video),
         .vcount_in(vcount_video),
         .ray_address_in(ray_address_out),

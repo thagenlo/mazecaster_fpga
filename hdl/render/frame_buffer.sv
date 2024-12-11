@@ -84,23 +84,33 @@ module frame_buffer #(
     logic [7:0] palette_addr;
     logic [23:0] rgb;
 
-    // assign palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
-    // assign shade = (state) ? pixel_out1[8] : pixel_out2[8];
-    // assign rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
+    logic [7:0] start_pixel_out, lose_pixel_out, win_pixel_out;
+    logic [7:0] game_pixel_in;
+    logic [23:0] game_rgb_out;
 
     always_comb begin
         palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
         shade = (state) ? pixel_out1[8] : pixel_out2[8];
         case (game_state_in)
-            //TODO: FILL IN GAME STATES
-            // 0: raycasting, 1: start screen, 2-3: game won / lost
+            // normal raycasting
+            0: rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
+            // start
+            1: begin
+                game_pixel_in = start_pixel_out;
+                rgb_out = game_rgb_out;
+            end
+            // lose
+            // 2: begin
+            //     game_pixel_in = lose_pixel_out;
+            //     rgb_out = game_rgb_out;
+            // end
+            // // win
+            // 3: begin
+            //     game_pixel_in = win_pixel_out;
+            //     rgb_out = game_rgb_out;
+            // end
+            default : rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
         endcase
-        rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
-        // if ((hcount_in == 640) || (vcount_in == 360)) begin
-        //     rgb_out = 24'h92ff14;
-        // end else begin
-        //     rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
-        // end
     end
 
     // Pipeline for shade to rgb out
@@ -130,6 +140,23 @@ module frame_buffer #(
         .rsta(rst_in),  
         .regcea(1), 
         .douta(rgb)
+    );
+
+    // GAME PALETTE
+    xilinx_single_port_ram_read_first #(
+    .RAM_WIDTH(24),                          // 24 bit rgb representation
+    .RAM_DEPTH(32),                        // 2^6 = 64 possible pixels
+    .RAM_PERFORMANCE("HIGH_PERFORMANCE"),   
+    .INIT_FILE(`FPATH(game_palette.mem))       
+    ) game_palette (
+        .addra(game_pixel_in),
+        .dina(),
+        .clka(pixel_clk_in),
+        .wea(0),     
+        .ena(1), 
+        .rsta(rst_in),  
+        .regcea(1), 
+        .douta(game_rgb_out)
     );
 
     always_ff @(posedge pixel_clk_in) begin
@@ -166,6 +193,60 @@ module frame_buffer #(
             end
         end
     end
+
+logic [15:0] game_addr;
+assign game_addr = (hcount_in>>2) + SCREEN_WIDTH*(vcount_in>>2);
+
+// START FRAME
+xilinx_single_port_ram_read_first #(
+.RAM_WIDTH(5),
+.RAM_DEPTH(57600),                      // number of pixels = 320*180 = 57600
+.RAM_PERFORMANCE("HIGH_PERFORMANCE"),   // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+.INIT_FILE(`FPATH(homescreen.mem))                            // name of RAM initialization file = none
+) start_frame (
+    .addra(game_addr),           // address
+    .dina(),            // RAM input data = pixel_in from DDA_out buffer
+    .clka(pixel_clk_in),        // Clock
+    .wea(0),                // Write enabled when state == 1 AND ready_to_switch[0] != 1
+    .ena(1),   // RAM Enable = only enabled when we have a valid address
+    .rsta(rst_in),              // Output reset (does not affect memory contents)
+    .regcea(1),            // Output register enabled when state == 0
+    .douta(start_pixel_out)           // RAM output data, width determined from RAM_WIDTH
+);
+
+// // LOSE FRAME
+// xilinx_single_port_ram_read_first #(
+// .RAM_WIDTH(5),
+// .RAM_DEPTH(57600),                      // number of pixels = 320*180 = 57600
+// .RAM_PERFORMANCE("HIGH_PERFORMANCE"),   // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+// .INIT_FILE(`FPATH(end_screen.mem))                            // name of RAM initialization file = none
+// ) lose_frame (
+//     .addra(game_addr),           // address
+//     .dina(),            // RAM input data = pixel_in from DDA_out buffer
+//     .clka(pixel_clk_in),        // Clock
+//     .wea(0),                // Write enabled when state == 1 AND ready_to_switch[0] != 1
+//     .ena(1),   // RAM Enable = only enabled when we have a valid address
+//     .rsta(rst_in),              // Output reset (does not affect memory contents)
+//     .regcea(1),            // Output register enabled when state == 0
+//     .douta(lose_pixel_out)           // RAM output data, width determined from RAM_WIDTH
+// );
+
+// // WIN FRAME
+// xilinx_single_port_ram_read_first #(
+// .RAM_WIDTH(5),
+// .RAM_DEPTH(57600),                      // number of pixels = 320*180 = 57600
+// .RAM_PERFORMANCE("HIGH_PERFORMANCE"),   // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+// .INIT_FILE(`FPATH(win_game.mem))                            // name of RAM initialization file = none
+// ) win_frame (
+//     .addra(game_addr),           // address
+//     .dina(),            // RAM input data = pixel_in from DDA_out buffer
+//     .clka(pixel_clk_in),        // Clock
+//     .wea(0),                // Write enabled when state == 1 AND ready_to_switch[0] != 1
+//     .ena(1),   // RAM Enable = only enabled when we have a valid address
+//     .rsta(rst_in),              // Output reset (does not affect memory contents)
+//     .regcea(1),            // Output register enabled when state == 0
+//     .douta(win_pixel_out)           // RAM output data, width determined from RAM_WIDTH
+// );
 
 
 endmodule
