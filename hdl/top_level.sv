@@ -133,7 +133,8 @@ module top_level(
         .dirX(dirX),
         .dirY(dirY),
         .planeX(planeX), 
-        .planeY(planeY)
+        .planeY(planeY),
+        .map_select(map_select)
     );
 
     logic start_timer;
@@ -462,6 +463,11 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
+    ////######////######////######////######////######////######////######////######////######
+    ///                                                                                 ######
+    ///                              DDA MAP INSTANCE                                   ######
+    ///                                                                                 ######
+    ////######////######////######////######////######////######////######////######////######
 
     //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
     // MAP 1 UNTEXTURED
@@ -529,8 +535,8 @@ module top_level(
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
     logic [37:0] dda_fsm_out_tdata;
 
-    logic map_select;
-    assign map_select = sw[4]; //CHANGE TO MORE OPTIONS
+    logic [1:0] map_select;
+    assign map_select = sw[5:4]; //CHANGE TO MORE OPTIONS
 
     // DDA MODULE
     dda #(
