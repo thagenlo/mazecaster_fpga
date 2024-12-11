@@ -24,7 +24,7 @@ module dda_fsm
   input wire dda_fsm_out_tready, // FIFO has valid data available for the receiver
 
   //handling map data requests
-  input wire [3:0] map_data_in, // value 0 -> 16 output from BROM at map_addra_out
+  input wire [4:0] map_data_in, // value 0 -> 16 output from BROM at map_addra_out
   input wire map_data_valid_in, //single cycle high for new map data from BRAM is ready
   output logic [$clog2(N*N)-1:0] map_addra_out, //map_addra = mapX + (mapY × N) (e.g. 24*24, [9:0])
   output logic map_request_out, // high when new map_addra is requested, low after map_data_valid_in
@@ -32,7 +32,7 @@ module dda_fsm
   output logic [8:0] hcount_ray_out, // current ray/screen x-coordinate - (11-bit uint) (0 -> screenWidth)
   output logic [7:0] lineHeight_out, //log_2(180) - 8-bit uint
   output logic wallType_out, // 0 -> X wall hit, 1 -> Y wall hit (1-bit uint)
-  output logic [3:0] mapData_out,  // value 0 -> 16 at map[mapX][mapY] from BROM
+  output logic [4:0] mapData_out,  // value 0 -> 16 at map[mapX][mapY] from BROM
   output logic [15:0] wallX_out, //where on wall the ray hits - 16 bit fixed point (fractional part of 8.8 fixed point value)
 
     // handshakes

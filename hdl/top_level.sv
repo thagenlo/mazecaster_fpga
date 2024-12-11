@@ -463,51 +463,93 @@ module top_level(
         .receiver_axis_tlast(), // FIFO
         .receiver_axis_prog_empty());
 
+
     ////######////######////######////######////######////######////######////######////######
     ///                                                                                 ######
-    ///                              DDA MAP INSTANCE                                   ######
+    ///                         START DDA MAP INSTANCE                                   ######
     ///                                                                                 ######
     ////######////######////######////######////######////######////######////######////######
+
+
+    localparam MAP_SIZE = N*N;
+    localparam MAP_SIZE_2 = 2*MAP_SIZE;
+    localparam MAP_SIZE_3 = 3*MAP_SIZE;
+    localparam MAP_DATA_WIDTH = 5;
+
+    logic [$clog2(N*N*4)-1:0] address_dda;
+    //logic [4:0] dda_map_data1, dda_map_data2, dda_map_data3, dda_map_data4;
+    always_comb begin
+        case (map_select)
+            0: address_dda = map_addra_top_level;
+            1: address_dda = map_addra_top_level + MAP_SIZE;
+            2: address_dda = map_addra_top_level + MAP_SIZE_2;
+            3: address_dda = map_addra_top_level + MAP_SIZE_3;
+        endcase
+    end
+
+    xilinx_single_port_ram_read_first #(
+        .RAM_WIDTH(MAP_DATA_WIDTH),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+        .RAM_DEPTH(4*MAP_SIZE),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+        .INIT_FILE(`FPATH(all_maps.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    ) grid_dda (
+        .addra(address_dda),     // Address bus, width determined from RAM_DEPTH
+        .dina(0),       // RAM input data, width determined from RAM_WIDTH
+        .clka(clk_pixel),       // Clock
+        .wea(0),         // Write enable
+        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+        .rsta(sys_rst),       // Output reset (does not affect memory contents)
+        .regcea(1),   // Output register enable
+        .douta(map_data_top_level)      // RAM output data, width determined from RAM_WIDTH
+    );
+
 
     //  2D MAP - Xilinx Single Port Read First RAM (from lab06 image_sprite)
     // MAP 1 UNTEXTURED
-    xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-    ) worldMap1 (
-        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
-        .dina(0),       // RAM input data, width determined from RAM_WIDTH
-        .clka(clk_pixel),       // Clock
-        .wea(0),         // Write enable
-        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-        .rsta(sys_rst),       // Output reset (does not affect memory contents)
-        .regcea(1),   // Output register enable
-        .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
-    );
+    // xilinx_single_port_ram_read_first #(
+    //     .RAM_WIDTH(5),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+    //     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+    //     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    //     .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    // ) worldMap1 (
+    //     .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+    //     .dina(0),       // RAM input data, width determined from RAM_WIDTH
+    //     .clka(clk_pixel),       // Clock
+    //     .wea(0),         // Write enable
+    //     .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+    //     .rsta(sys_rst),       // Output reset (does not affect memory contents)
+    //     .regcea(1),   // Output register enable
+    //     .douta(map_data1_top_level)      // RAM output data, width determined from RAM_WIDTH
+    // );
 
-    // MAP 2 TEXTURED
-    xilinx_single_port_ram_read_first #(
-        .RAM_WIDTH(4),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
-        .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
-        .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-        .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
-    ) worldMap2 (
-        .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
-        .dina(0),       // RAM input data, width determined from RAM_WIDTH
-        .clka(clk_pixel),       // Clock
-        .wea(0),         // Write enable
-        .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
-        .rsta(sys_rst),       // Output reset (does not affect memory contents)
-        .regcea(1),   // Output register enable
-        .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
-    );
+    // // MAP 2 TEXTURED
+    // xilinx_single_port_ram_read_first #(
+    //     .RAM_WIDTH(5),                       // RAM data width (Int at map[mapX][mapY] from 0 -> 2^4, 16)
+    //     .RAM_DEPTH(N*N),                     // RAM depth (number of entries) - (24x24 = 576 entries)
+    //     .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    //     .INIT_FILE(`FPATH(hedge_maze_24x24.mem))          //TODO name/location of RAM initialization file if using one (leave blank if not)
+    // ) worldMap2 (
+    //     .addra(map_addra_top_level),     // Address bus, width determined from RAM_DEPTH
+    //     .dina(0),       // RAM input data, width determined from RAM_WIDTH
+    //     .clka(clk_pixel),       // Clock
+    //     .wea(0),         // Write enable
+    //     .ena(1),         // RAM Enable, for additional power savings, disable port when not in use
+    //     .rsta(sys_rst),       // Output reset (does not affect memory contents)
+    //     .regcea(1),   // Output register enable
+    //     .douta(map_data2_top_level)      // RAM output data, width determined from RAM_WIDTH
+    // );
 
-    logic trans_grid_req;
-    logic [9:0] trans_address;
-    logic trans_grid_valid;
-    logic [3:0] grid_data;
+
+    ////######////######////######////######////######////######////######////######////######
+    ///                                                                                 ######
+    ///                          END DDA MAP INSTANCE                                   ######
+    ///                                                                                 ######
+    ////######////######////######////######////######////######////######////######////######
+
+    logic grid_req;
+    logic [$clog2(N*N)-1:0] grid_address;
+    logic grid_valid;
+    logic [4:0] grid_data;
 
 
     grid_map grid_arbiter (
@@ -515,25 +557,22 @@ module top_level(
         .rst_in(sys_rst),
 
         .map_select(map_select), // 0, 1, 2, 3 (4 maps)
-        .dda_req_in(),
-        .trans_req_in(trans_grid_req),
-        .dda_address_in(),
-        .trans_address_in(trans_address),
-
-        .dda_valid_out(),
-        .trans_valid_out(trans_grid_valid),
+        .req_in(grid_req),
+        .address_in(grid_address),
+        .valid_out(grid_valid),
 
         .grid_data(grid_data)
     );
 
     //map BRAM data
-    logic [3:0] map_data1_top_level, map_data2_top_level;
+    //logic [4:0] map_data1_top_level, map_data2_top_level;
+    logic [4:0] map_data_top_level;
     logic [$clog2(N*N)-1:0] map_addra_top_level;
 
 
     // dda-out fifo senders
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
-    logic [37:0] dda_fsm_out_tdata;
+    logic [38:0] dda_fsm_out_tdata;
 
     logic [1:0] map_select;
     assign map_select = sw[5:4]; //CHANGE TO MORE OPTIONS
@@ -547,11 +586,11 @@ module top_level(
         .pixel_clk_in(clk_pixel),
         .rst_in(sys_rst),
 
-        .map_select(map_select),
+        //.map_select(map_select),
 
         //handle maps
-        .map_data1_top_level(map_data1_top_level),
-        .map_data2_top_level(map_data2_top_level),
+        //.map_data1_top_level(map_data1_top_level),
+        .map_data_top_level(map_data_top_level),
         .map_addra_top_level(map_addra_top_level),
         
         // DDA-in FIFO receiver
@@ -601,7 +640,7 @@ module top_level(
         .sender_clk(clk_pixel),
         .sender_axis_tvalid(dda_fsm_out_tvalid), // in - data on the sender_axis_tdata signal is valid and can be written into the FIFO
         .sender_axis_tready(dda_fsm_out_tready), // out - FIFO is ready to accept data from the sender
-        .sender_axis_tdata({2'b00, dda_fsm_out_tdata}), // in - actual data being written into the FIFO
+        .sender_axis_tdata({1'b0, dda_fsm_out_tdata}), // in - actual data being written into the FIFO
         .sender_axis_tlast(dda_fsm_out_tlast), // in - last piece of data in a frame or packet being sent to the FIFO
         .sender_axis_prog_full(),
         .receiver_clk(clk_pixel),
@@ -625,12 +664,12 @@ module top_level(
         .PosX(posX),
         .PosY(posY),
         .map_select(map_select),
-        .grid_valid_in(trans_grid_valid),
+        .grid_valid_in(grid_valid),
         .grid_data(grid_data),
-        .grid_req_out(trans_grid_req),
-        .grid_address_out(trans_address),
+        .grid_req_out(grid_req),
+        .grid_address_out(grid_address),
         .dda_fifo_tvalid_in(fifo_tvalid_out),
-        .dda_fifo_tdata_in(fifo_tdata_out[37:0]),
+        .dda_fifo_tdata_in(fifo_tdata_out[38:0]),
         .dda_fifo_tlast_in(fifo_tlast_out),
         .fb_ready_to_switch_in(frame_buff_ready),
         .transformer_tready_out(transformer_tready),

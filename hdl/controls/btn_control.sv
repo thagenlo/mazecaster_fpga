@@ -134,8 +134,8 @@ module btn_control #(
     logic [$clog2(N*N)-1:0] ray_map_addra;
 
     logic ray_grid_valid;
-    logic [1:0] map_select;
-    logic [3:0] ray_grid_data;
+    //logic [1:0] map_select;
+    logic [4:0] ray_grid_data;
 
     movement_control #(ROTATION_ANGLE) move (
         .clk_in(clk_in),
@@ -166,18 +166,16 @@ module btn_control #(
     ////######////######////######////######////######////######////######////######////######
 
     //INSERT RAY GRIDMAP HERE
+
+
     grid_map grid_arbiter2 (
         .pixel_clk_in(clk_in),
         .rst_in(rst_in),
 
         .map_select(map_select), // 0, 1, 2, 3 (4 maps)
-        .dda_req_in(),
-        .trans_req_in(ray_grid_req),
-        .dda_address_in(),
-        .trans_address_in(ray_map_addra),
-
-        .dda_valid_out(),
-        .trans_valid_out(ray_grid_valid),
+        .req_in(ray_grid_req),
+        .address_in(ray_map_addra),
+        .valid_out(ray_grid_valid),
 
         .grid_data(ray_grid_data)
     );

@@ -17,11 +17,11 @@ module dda
   input wire pixel_clk_in,
   input wire rst_in,
 
-  input wire map_select,
+  //input wire map_select,
 
   //handle maps
-  input wire [3:0] map_data1_top_level,
-  input wire [3:0] map_data2_top_level,
+  //input wire [4:0] map_data1_top_level,
+  input wire [4:0] map_data_top_level,
   output wire [$clog2(N*N)-1:0] map_addra_top_level,
 
 
@@ -33,7 +33,7 @@ module dda
 
   // dda_out FIFO sender
   input wire dda_fsm_out_tready,
-  output logic [37:0] dda_fsm_out_tdata,
+  output logic [38:0] dda_fsm_out_tdata,
         // [8:0] hcount_ray_out
         // [7:0] lineHeight_out (240/perpWallDist)
         // wallType_out (0 = X wall hit, 1 = Y wall hit)
@@ -50,7 +50,7 @@ module dda
   logic [8:0] dda_fsm0_hcount_ray_out, dda_fsm1_hcount_ray_out;
   logic [7:0] dda_fsm0_lineHeight_out, dda_fsm1_lineHeight_out;
   logic dda_fsm0_wallType_out, dda_fsm1_wallType_out;
-  logic [3:0] dda_fsm0_mapData_out, dda_fsm1_mapData_out;
+  logic [4:0] dda_fsm0_mapData_out, dda_fsm1_mapData_out;
   logic [15:0] dda_fsm0_wallX_out, dda_fsm1_wallX_out;
   logic tLast_out;
 
@@ -214,7 +214,7 @@ module dda
   ////############ MAP DATA BRAM REQUESTS ###############
 
   // signals for map data requests from each submodule
-  logic [3:0] dda_fsm0_map_data_in, dda_fsm1_map_data_in; //data output from bram (input to submodules)
+  logic [4:0] dda_fsm0_map_data_in, dda_fsm1_map_data_in; //data output from bram (input to submodules)
   logic dda_fsm0_map_data_valid_in, dda_fsm1_map_data_valid_in; //1 cycle high when bram done fetching (input to submodules)
   logic [$clog2(N*N)-1:0] dda_fsm0_map_addra_out, dda_fsm1_map_addra_out; //dda_fsm map data address (out from submodules)
   logic [$clog2(N*N)-1:0] dda_fsm0_map_request_out, dda_fsm1_map_request_out; // high while dda_fsm requesting map data (out from submodules)
@@ -223,12 +223,12 @@ module dda
 
   //general I/O from BRAM
   logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [3:0] map_data1, map_data2;
+  logic [4:0] map_data; //, map_data2;
 
   //handle maps in top level
   assign map_addra_top_level = map_addra;
-  assign map_data1 = map_data1_top_level;
-  assign map_data2 = map_data2_top_level;
+  assign map_data = map_data_top_level; //map_data1_top_level;
+  //assign map_data2 = map_data2_top_level;
 
 
   enum {
@@ -280,12 +280,12 @@ module dda
         ASSIGN: begin //cycle 2 (data ready) - connect BRAM data to the appropriate submodule based on arbiter state
           if (last_granted_fsm == 1'b1) begin //GRANT_FSM0
             dda_fsm0_map_data_valid_in <= 1'b1;
-            dda_fsm0_map_data_in <= (map_select == 1'b0)? map_data1:
-                                                        map_data2;
+            dda_fsm0_map_data_in <= map_data; //(map_select == 1'b0)? map_data1:
+                                                       // map_data2;
           end else begin
             dda_fsm1_map_data_valid_in <= 1'b1;
-            dda_fsm1_map_data_in <= (map_select == 1'b0)? map_data1:
-                                                        map_data2;
+            dda_fsm1_map_data_in <= map_data; //(map_select == 1'b0)? map_data1:
+                                                       // map_data2;
           end
           MAP_ARBITER_STATE <= IDLE;
         end

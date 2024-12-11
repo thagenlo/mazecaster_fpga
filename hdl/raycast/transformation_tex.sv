@@ -26,7 +26,7 @@ Inputs into frame_buffer module:
 
 /*
 data from DDA-out FIFO
-- 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
+- 9 (hcount) + 8 (line height) + 1 (wall type) + 5 (map data) + 16 (wallX) = 39 bits = [38:0]
 
 Version 1:
 - no textures, no shading, just black and white
@@ -36,6 +36,7 @@ The Approach:
 */
 
 module transformation_tex  #(
+                        parameter N = 24,
                         parameter [4:0] PIXEL_WIDTH = 16,
                         parameter [10:0] FULL_SCREEN_WIDTH = 1280,
                         parameter [9:0] FULL_SCREEN_HEIGHT = 720,
@@ -50,12 +51,12 @@ module transformation_tex  #(
                         input wire [15:0] PosY,
                         input wire [1:0] map_select,
                         input wire grid_valid_in,
-                        input wire [3:0] grid_data,
+                        input wire [4:0] grid_data,
                         output logic grid_req_out,
-                        output logic [9:0] grid_address_out,
+                        output logic [$clog2(N*N)-1:0] grid_address_out,
 
                         input wire dda_fifo_tvalid_in,
-                        input wire [37:0] dda_fifo_tdata_in,
+                        input wire [38:0] dda_fifo_tdata_in,
                         input wire dda_fifo_tlast_in,
                         input wire [1:0] fb_ready_to_switch_in,
 
@@ -95,26 +96,41 @@ assign shade_bit = ray_pixel_out[8];
 // end
 
 logic [7:0] sky, ground, solid;
+logic [7:0] neon_yellow, neon_blue, neon_pink, neon_green;
+
 
 always_comb begin
     case (map_select)
-        0: begin
+        0: begin // hedge
             sky = 249;
             ground = 239;
             solid = 14;
         end
-        // 1: begin
-        // end
-        // 3: begin
-        // end
-        // 4: begin
-        // end
+        1: begin // pigs
+            sky = 38;
+            ground = 45;
+            solid = 14;
+        end
+        3: begin // dino
+            sky = 38;
+            ground = 45;
+            solid = 14;
+        end
+        4: begin // neon
+            sky = 254; // black
+
+            ground = 254;
+        end
         default : begin
             sky = 249;
             ground = 239;
             solid = 14;
         end
     endcase
+    neon_yellow = 21;
+    neon_blue = 48;
+    neon_green = 32;
+    neon_pink = 181;
 end
 // localparam sky = 249; // sky BLUE
 // localparam ground = 8'hdc; // BROWN FLOOR
@@ -124,23 +140,24 @@ localparam  HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 // region bounds
 localparam GRID_SIDE = 24;
 localparam TOP_DOWN_BOUND = GRID_SIDE;
+logic [7:0] player_color = 75;
 
 // FROM DDA FIFO
 logic [8:0] hcount_ray_in; //pipelined x_coord
 logic [7:0] half_line_height; // = SCREEN_HEIGHT/perpWallDist
 
 logic wallType_in; // 0 = X wall hit, 1 = Y wall hit
-logic [3:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
+logic [4:0] mapData_in;  // value 0 -> 2^4 at map[mapX][mapY] from BROM
 logic [15:0] wallX_in; //where on wall the ray hits
 
 logic [38:0] fifo_data_store; // // 9 (hcount) + 8 (line height) + 1 (wall type) + 4 (map data) + 16 (wallX) = 38 bits = [37:0]
 logic fifo_tlast_store;
 
 // 000000000_00101000_1_0001_0000000000000000
-assign hcount_ray_in = fifo_data_store[37:29];
-assign half_line_height = (fifo_data_store[28:21] >> 1);
-assign wallType_in = fifo_data_store[20];
-assign mapData_in = fifo_data_store[19:16];
+assign hcount_ray_in = fifo_data_store[38:30];
+assign half_line_height = (fifo_data_store[29:22] >> 1);
+assign wallType_in = fifo_data_store[21];
+assign mapData_in = fifo_data_store[20:16];
 assign wallX_in = fifo_data_store[15:0];
 
 assign draw_start = HALF_SCREEN_HEIGHT - half_line_height;
@@ -163,7 +180,7 @@ textures texture_module (
     .rst_in(rst_in),
     .valid_req_in(tex_req),
     .wallX_in(wallX_in),
-    .lineheight_in(fifo_data_store[28:21]),
+    .lineheight_in(fifo_data_store[29:22]),
     .drawstart_in(draw_start),
     .vcount_ray_in(vcount_ray),
     .texture_in(mapData_in),
@@ -190,7 +207,7 @@ always_comb begin
     end else if (vcount_ray >= draw_end) begin
         region = FLOOR;
     end else begin
-        if (mapData_in < 2) begin
+        if (mapData_in < 2 || mapData_in > 22) begin
             region = PLAIN_WALL;
         end else begin
             region = TEX_WALL;
@@ -239,16 +256,14 @@ always_ff @(posedge pixel_clk_in) begin
                                 CEILING: ray_pixel_out <= {1'b0, sky};
                                 FLOOR: ray_pixel_out <= {1'b0, ground};
                             endcase
-                            // ray_pixel <= (region == CEILING) ? sky : ground;
                         end else begin
-                            // case (mapData_in)
-                            //     0: ray_pixel <= sky;
-                            //     1: ray_pixel <= BLACK_WALL;
-                            //     2: ray_pixel <= GREEN_WALL;
-                            // endcase
                             case (mapData_in)
                                 0: ray_pixel_out <= {1'b0, sky};
                                 1: ray_pixel_out <= (wallType_in) ? {1'b1, solid} : {1'b0, solid};
+                                23: ray_pixel_out <= (wallType_in) ? {1'b1, neon_yellow} : {1'b0, neon_yellow};
+                                24: ray_pixel_out <= (wallType_in) ? {1'b1, neon_blue} : {1'b0, neon_blue};
+                                25: ray_pixel_out <= (wallType_in) ? {1'b1, neon_green} : {1'b0, neon_green};
+                                26: ray_pixel_out <= (wallType_in) ? {1'b1, neon_pink} : {1'b0, neon_pink};
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;
@@ -307,7 +322,7 @@ always_ff @(posedge pixel_clk_in) begin
                         if (((hcount_ray_in) == (PosX >> 8)) && (((vcount_ray-1)) == (PosY >> 8))) begin
                             //||(((hcount_ray_in+1) >> 1) == (PosX >> 8)) && (((vcount_ray+1) >> 1) == (PosY >> 8))
                             // ray_pixel <= 8'd98;
-                            ray_pixel_out <= {1'b0, 8'd98};
+                            ray_pixel_out <= {1'b0, player_color};
                             if (vcount_ray < SCREEN_HEIGHT-1) begin
                                 vcount_ray <= vcount_ray + 1;
                                 ray_last_pixel_out <= 0;
