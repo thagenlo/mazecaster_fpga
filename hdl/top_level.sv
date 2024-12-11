@@ -525,7 +525,7 @@ module top_level(
     logic dda_fsm_out_tready, dda_fsm_out_tvalid, dda_fsm_out_tlast;
     logic [38:0] dda_fsm_out_tdata;
 
-    logic map_select;
+    logic [1:0] map_select;
     assign map_select = sw[5:4]; //CHANGE TO MORE OPTIONS
 
     // DDA MODULE
