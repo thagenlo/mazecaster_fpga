@@ -1,5 +1,6 @@
 module btn_control #(
-    parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000 // default = 45 degrees
+    parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000, // default = 45 degrees
+    parameter N = 24
     )(input wire clk_in,
     input wire rst_in,
     input wire fwd_btn, 
@@ -12,7 +13,11 @@ module btn_control #(
     output logic [15:0] dirX, 
     output logic [15:0] dirY,
     output logic [15:0] planeX, 
-    output logic [15:0] planeY);
+    output logic [15:0] planeY,
+
+    input logic [1:0] map_select
+    
+    );
 
     // localparam COS_OF_45 = 16'b0000000010110101; //cos(10) = 0.70703125 in FP
 
@@ -125,6 +130,13 @@ module btn_control #(
         end
     end
 
+    logic ray_grid_req;
+    logic [$clog2(N*N)-1:0] ray_map_addra;
+
+    logic ray_grid_valid;
+    logic [1:0] map_select;
+    logic [3:0] ray_grid_data;
+
     movement_control #(ROTATION_ANGLE) move (
         .clk_in(clk_in),
         .rst_in(rst_in),
@@ -138,6 +150,36 @@ module btn_control #(
         .dirX(dirX_pipe_1),
         .dirY(dirY_pipe_1),
         .planeX(planeX_pipe_1), 
-        .planeY(planeY_pipe_1));
+        .planeY(planeY_pipe_1),
+        
+        .ray_grid_req(ray_grid_req),
+        .ray_map_addra(ray_map_addra),
+        .ray_grid_valid(ray_grid_valid),
+        .ray_grid_data(ray_grid_data)
+        );
+
+
+     ////######////######////######////######////######////######////######////######////######
+    ///                                                                                 ######
+    ///                         RAY CALC MAP INSTANCE                                   ######
+    ///                                                                                 ######
+    ////######////######////######////######////######////######////######////######////######
+
+    //INSERT RAY GRIDMAP HERE
+    grid_map grid_arbiter2 (
+        .pixel_clk_in(clk_in),
+        .rst_in(rst_in),
+
+        .map_select(map_select), // 0, 1, 2, 3 (4 maps)
+        .dda_req_in(),
+        .trans_req_in(ray_grid_req),
+        .dda_address_in(),
+        .trans_address_in(ray_map_addra),
+
+        .dda_valid_out(),
+        .trans_valid_out(ray_grid_valid),
+
+        .grid_data(ray_grid_data)
+    );
     
 endmodule

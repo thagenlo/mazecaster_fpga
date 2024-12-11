@@ -1,5 +1,6 @@
 module movement_control #(
-    parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000 // default = 45 degrees
+    parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000, // default = 45 degrees
+    parameter N = 24
     )(input wire clk_in,
     input wire rst_in,
     input wire fwd_pulse, 
@@ -12,7 +13,13 @@ module movement_control #(
     output logic signed [15:0] dirX, 
     output logic signed [15:0] dirY,
     output logic signed [15:0] planeX, 
-    output logic signed [15:0] planeY
+    output logic signed [15:0] planeY,
+
+    output logic ray_grid_req,
+    output logic [$clog2(N*N)-1:0] ray_map_addra,
+    input wire ray_grid_valid,
+    input wire [3:0] ray_grid_data
+    //input wire [1:0] map_select
     );//
 
     localparam logic [15:0] COS_OF_45 = 16'sh3f07; //cos(10) = 3ff6 (0.9993896484375)
@@ -27,9 +34,9 @@ module movement_control #(
     logic signed [32:0] tempDirX, tempDirY;
     logic signed [31:0] tempPosX, tempPosY;
     logic signed [32:0] tempPlaneX, tempPlaneY;
-    logic signed [32:0] tempDirX2, tempDirY2;
-    logic signed [31:0] tempPosX2, tempPosY2;
-    logic signed [32:0] tempPlaneX2, tempPlaneY2;
+    // logic signed [32:0] tempDirX2, tempDirY2;
+    // logic signed [31:0] tempPosX2, tempPosY2;
+    // logic signed [32:0] tempPlaneX2, tempPlaneY2;
     logic signed [15:0] oldPosX;
     logic signed [15:0] oldPosY;
     logic signed [15:0] oldDirX;
@@ -37,12 +44,19 @@ module movement_control #(
     logic signed [15:0] oldPlaneX;
     logic signed [15:0] oldPlaneY;
 
+    // logic signed [15:0] holdPosX;
+    // logic signed [15:0] holdPosY;
+
     // always_comb begin
     // end
     logic second_stage;
     logic third_stage;
     // logic multiplying_logic;
     // logic addition_logic;
+
+    logic [7:0] mapX, mapY;
+    assign mapX = tempPosX[23:16];
+    assign mapY = tempPosY[23:16];
 
 
     // typedef enum {FWD, BWD, ROTLEFT, ROTRIGHT} divider_state;
@@ -56,6 +70,9 @@ module movement_control #(
             // oldDirY <= 16'shFF00; // -1
             // oldPlaneX <= 16'sh00A9; // 0.66
             // oldPlaneY <= 16'sh0000; // O
+            ray_map_addra <= 0;
+            ray_grid_req <= 0;
+
             tempPosX <= $signed({8'b0, 16'h0b80, 8'b0});
             tempPosY <= $signed({8'b0, 16'h0b80, 8'b0});
             tempDirX <= $signed({2'b0, 16'h0000, 14'b0});
@@ -63,8 +80,10 @@ module movement_control #(
             tempPlaneX <= $signed({2'b0, 16'h00A9, 14'b0});
             tempPlaneY <= $signed({2'b0, 16'h0000, 14'b0});
             // LOOKING INTO LOWER RIGHT CORNER
-            oldPosX <= 16'h0480; //4.5
-            oldPosY <= 16'h0c80; //12.5
+            // oldPosX <= 16'h0480; //4.5
+            // oldPosY <= 16'h0c80; //12.5
+            oldPosX <= 16'h0100; //1
+            oldPosY <= 16'h0100; //1
             oldDirX <= 16'h00b5; //.707
             oldDirY <= 16'h00b5; //.707
             oldPlaneX <= 16'shFF89; //-0.464
@@ -73,25 +92,34 @@ module movement_control #(
             third_stage<=0;
         end else begin
             if (third_stage) begin
-                third_stage<=0;
-                oldPosX <= $signed(tempPosX[23:8]);
-                oldPosY <= $signed(tempPosY[23:8]);
-                oldDirX <= $signed(tempDirX[29:14]);
-                oldDirY <= $signed(tempDirY[29:14]);
-                oldPlaneX <= $signed(tempPlaneX[29:14]);
-                oldPlaneY <= $signed(tempPlaneY[29:14]);
+                if (ray_grid_valid) begin
+                    third_stage<=0;
+                    if (ray_grid_data == 0) begin
+                        oldPosX <= $signed(tempPosX[23:8]);
+                        oldPosY <= $signed(tempPosY[23:8]);
+                    end
+                    oldDirX <= $signed(tempDirX[29:14]);
+                    oldDirY <= $signed(tempDirY[29:14]);
+                    oldPlaneX <= $signed(tempPlaneX[29:14]);
+                    oldPlaneY <= $signed(tempPlaneY[29:14]);
+                    
+                    ray_grid_req <= 0;
+                end
             end
             else if (second_stage) begin
                 second_stage <= 0;
-                tempPosX2 <= tempPosX;
-                tempPosY2 <= tempPosY;
-                tempDirX2 <= tempDirX;
-                tempDirY2 <= tempDirY;
-                tempPlaneX2 <= tempPlaneX;
-                tempPlaneY2 <= tempPlaneY;
+                // tempPosX2 <= tempPosX;
+                // tempPosY2 <= tempPosY;
+                // tempDirX2 <= tempDirX;
+                // tempDirY2 <= tempDirY;
+                // tempPlaneX2 <= tempPlaneX;
+                // tempPlaneY2 <= tempPlaneY;
                 third_stage <= 1;
-            end 
-            else if (is_pulse) begin
+                //map access
+                ray_map_addra <= mapX + (N * mapY);
+                ray_grid_req <= 1;
+
+            end else if (is_pulse) begin
                 second_stage <= 1;
                 if (fwd_pulse) begin
                     // second_stage <= 1;
