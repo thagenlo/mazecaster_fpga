@@ -117,9 +117,9 @@ always_comb begin
             solid = 14;
         end
         4: begin // neon
-            sky = 254; // black
+            sky = 0; // black
 
-            ground = 254;
+            ground = 0;
         end
         default : begin
             sky = 249;

@@ -92,19 +92,19 @@ module movement_control #(
             third_stage<=0;
         end else begin
             if (third_stage) begin
-                if (ray_grid_valid) begin
+                // if (ray_grid_valid) begin
                     third_stage<=0;
-                    if (ray_grid_data == 0) begin
+                    // if (ray_grid_data == 0) begin
                         oldPosX <= $signed(tempPosX[23:8]);
                         oldPosY <= $signed(tempPosY[23:8]);
-                    end
+                    // end
                     oldDirX <= $signed(tempDirX[29:14]);
                     oldDirY <= $signed(tempDirY[29:14]);
                     oldPlaneX <= $signed(tempPlaneX[29:14]);
                     oldPlaneY <= $signed(tempPlaneY[29:14]);
                     
-                    ray_grid_req <= 0;
-                end
+                    // ray_grid_req <= 0;
+                // end
             end
             else if (second_stage) begin
                 second_stage <= 0;
@@ -116,8 +116,8 @@ module movement_control #(
                 // tempPlaneY2 <= tempPlaneY;
                 third_stage <= 1;
                 //map access
-                ray_map_addra <= mapX + (N * mapY);
-                ray_grid_req <= 1;
+                // ray_map_addra <= mapX + (N * mapY);
+                // ray_grid_req <= 1;
 
                 //if oldDirX > 0 check mapX - oldPosX > .5
                 //if oldDirX < 0 check mapX - oldPosX < -.5

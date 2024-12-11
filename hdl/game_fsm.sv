@@ -1,5 +1,4 @@
 module game_fsm #(
-    parameter ROTATION_ANGLE = 16'b0010_1101_0000_0000 // default = 45 degrees
     )(input wire clk_in,
     input wire rst_in,
     input wire [3:0] btn,                   // buttons for move control and rotation
@@ -29,7 +28,10 @@ module game_fsm #(
     logic found_pos1;
     logic found_pos2;
     logic found_pos3;
-    // logic found_pos4;
+    // logic found_pos4; 
+    localparam screen_time = 600_000_000;
+    logic [$clog(screen_time):0] screen_time_count;
+    
 
 
     always_ff @(posedge clk_in) begin
@@ -43,12 +45,14 @@ module game_fsm #(
             goal_posY2 <= 0;
             goal_posX3 <= 0;
             goal_posY3 <= 0;
+            screen_time_count <= 0;
             // goal_posX4 <= 0;
             // goal_posY4 <= 0;
             game_sel <= NEON_OUT;
         end else begin
             case (game_state)
                 IDLE: begin
+                    screen_time_count <= 0;
                     if (sw[6]) begin
                         game_state <= START_GAME;
                         screen_display <= 1; //display start screen
@@ -94,6 +98,7 @@ module game_fsm #(
                             FIND_DINO: begin
                                 if (found_pos1) begin
                                     game_state <= GAME_WON;
+                                    screen_time_count <= 0;
                                 end
                                 else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
                                     found_pos1 <= 1;
@@ -102,6 +107,7 @@ module game_fsm #(
                             THREE_PIGS: begin
                                 if (found_pos1 && found_pos2 && found_pos3) begin
                                     game_state <= GAME_WON;
+                                    screen_time_count <= 0;
                                 end
                                 else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
                                     found_pos1 <= 1;
@@ -116,6 +122,7 @@ module game_fsm #(
                             HEDGE: begin
                                 if (found_pos1) begin
                                     game_state <= GAME_WON;
+                                    screen_time_count <= 0;
                                 end
                                 else if ((posX == goal_posX1) && (posY == goal_posY1)) begin
                                     found_pos1 <= 1;
@@ -125,10 +132,33 @@ module game_fsm #(
                     end
                 end
                 GAME_LOST: begin //5 seconds
-                    screen_display <= 2; //game_lost
+                    if (btn[2]) begin
+                        screen_time_count <= screen_time_count+1;
+                        screen_display <= 1;
+                        game_state <= START_GAME;
+                    end 
+                    else if (btn[3]) begin
+                        screen_display <= 0;
+                        game_state <= IDLE;
+                    end
+                    else begin
+                        screen_display <= 2; //game_lost
+                        game_state <= GAME_LOST;
+                    end
                 end
                 GAME_WON: begin //5 seconds
-                    screen_display <= 3;
+                    screen_time_count <= screen_time_count+1;
+                    if (btn[2]) begin
+                        screen_display <= 1;
+                        game_state <= START_GAME;
+                    else if (btn[3]) begin
+                        screen_display <= 0;
+                        game_state <= IDLE;
+                    end
+                    end else begin
+                        screen_display <= 3;
+                        game_state <= GAME_WON;
+                    end
                 end
             endcase
 
