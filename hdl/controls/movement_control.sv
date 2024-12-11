@@ -18,7 +18,7 @@ module movement_control #(
     output logic ray_grid_req,
     output logic [$clog2(N*N)-1:0] ray_map_addra,
     input wire ray_grid_valid,
-    input wire [3:0] ray_grid_data
+    input wire [4:0] ray_grid_data
     //input wire [1:0] map_select
     );//
 
@@ -44,6 +44,8 @@ module movement_control #(
     logic signed [15:0] oldPlaneX;
     logic signed [15:0] oldPlaneY;
 
+    logic signed [31:0] tempPosX_check, tempPosY_check;
+
     // logic signed [15:0] holdPosX;
     // logic signed [15:0] holdPosY;
 
@@ -55,8 +57,24 @@ module movement_control #(
     // logic addition_logic;
 
     logic [7:0] mapX, mapY;
-    assign mapX = tempPosX[23:16];
-    assign mapY = tempPosY[23:16];
+    assign mapX = tempPosX_check[23:16];
+    assign mapY = tempPosY_check[23:16];
+
+
+    // logic signed [15:0] deltaX, deltaY;
+    // logic mapX_pos_check, mapY_pos_check;
+    //logic [15:0] deltaX_uint, deltaY_uint;
+    // assign deltaX_uint = (deltaX < 0) ? -deltaX : deltaX;
+    // assign deltaY_uint = (deltaY < 0) ? -deltaY : deltaY;
+
+    //if oldDirX > 0 check mapX - oldPosX > .5
+    //if oldDirX < 0 check mapX - oldPosX < -.5
+    // assign mapX_pos_check = (oldDirX > 0) ? deltaX > 16'h0080 :
+    //                                       deltaX < 16'hff80;
+    // //if oldDirY > 0 check mapY - oldPosY > .5
+    // //if oldDirY < 0 check mapY - oldPosY < -.5
+    // assign mapY_pos_check = (oldDirY > 0) ? deltaY > 16'h0080 :
+    //                                       deltaY < 16'hff80;
 
 
     // typedef enum {FWD, BWD, ROTLEFT, ROTRIGHT} divider_state;
@@ -119,12 +137,21 @@ module movement_control #(
                 ray_map_addra <= mapX + (N * mapY);
                 ray_grid_req <= 1;
 
+                //if oldDirX > 0 check mapX - oldPosX > .5
+                //if oldDirX < 0 check mapX - oldPosX < -.5
+                // deltaX <= $signed(mapX) - oldPosX;
+                // //if oldDirY > 0 check mapY - oldPosY > .5
+                // //if oldDirY < 0 check mapY - oldPosY < -.5
+                // deltaY <= $signed(mapY) - oldPosY;
+
             end else if (is_pulse) begin
                 second_stage <= 1;
                 if (fwd_pulse) begin
                     // second_stage <= 1;
                     tempPosX <=  $signed({8'b0, oldPosX, 8'b0}) + oldDirX * MOVE_SPEED;
+                    tempPosX_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * (MOVE_SPEED*1.4);
                     tempPosY <=  $signed({8'b0, oldPosY, 8'b0}) + oldDirY * MOVE_SPEED;
+                    tempPosY_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * (MOVE_SPEED*1.4);
                     tempDirX <= $signed({2'b0, oldDirX, 14'b0});
                     tempDirY <= $signed({2'b0, oldDirY, 14'b0});
                     tempPlaneX <= $signed({2'b0, oldPlaneX, 14'b0});
@@ -133,7 +160,9 @@ module movement_control #(
                 else if (bwd_pulse) begin
                     // second_stage <= 1;
                     tempPosX <=  $signed({8'b0, oldPosX, 8'b0}) - oldDirX * MOVE_SPEED;
+                    tempPosX_check <=  $signed({8'b0, oldPosX, 8'b0}) - oldDirX * (MOVE_SPEED*1.4);
                     tempPosY <=  $signed({8'b0, oldPosY, 8'b0}) - oldDirY * MOVE_SPEED;
+                    tempPosY_check <=  $signed({8'b0, oldPosY, 8'b0}) - oldDirY * (MOVE_SPEED*1.4);
                     tempDirX <= $signed({2'b0, oldDirX, 14'b0});
                     tempDirY <= $signed({2'b0, oldDirY, 14'b0});
                     tempPlaneX <= $signed({2'b0, oldPlaneX, 14'b0});

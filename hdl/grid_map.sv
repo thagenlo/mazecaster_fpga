@@ -44,7 +44,7 @@ module grid_map #(
     assign valid_out = valid_pipe[1];
 
     logic [$clog2(N*N*4)-1:0] address;
-    logic [4:0] map_data1, map_data2, map_data3, map_data4;
+    //logic [4:0] map_data1, map_data2, map_data3, map_data4;
     always_comb begin
         case (map_select)
             0: address = address_in;
