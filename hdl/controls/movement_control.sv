@@ -29,6 +29,7 @@ module movement_control #(
 
     // localparam MOVE_SPEED = 32'sh00000100;
     localparam MOVE_SPEED = 32'sh0000_0080; //speed = .1
+    localparam INC_MOVE_SPEED = 32'sh00001eb8; //.12
     // localparam NEG_MOVE_SPEED = 16'sb1111_1111_0000_0000;
     
     logic signed [32:0] tempDirX, tempDirY;
@@ -44,10 +45,7 @@ module movement_control #(
     logic signed [15:0] oldPlaneX;
     logic signed [15:0] oldPlaneY;
 
-    logic signed [31:0] tempPosX_check, tempPosY_check;
-
-    // logic signed [15:0] holdPosX;
-    // logic signed [15:0] holdPosY;
+    //logic signed [31:0] tempPosX_check, tempPosY_check;
 
     // always_comb begin
     // end
@@ -56,25 +54,9 @@ module movement_control #(
     // logic multiplying_logic;
     // logic addition_logic;
 
-    logic [7:0] mapX, mapY;
-    assign mapX = tempPosX_check[23:16];
-    assign mapY = tempPosY_check[23:16];
-
-
-    // logic signed [15:0] deltaX, deltaY;
-    // logic mapX_pos_check, mapY_pos_check;
-    //logic [15:0] deltaX_uint, deltaY_uint;
-    // assign deltaX_uint = (deltaX < 0) ? -deltaX : deltaX;
-    // assign deltaY_uint = (deltaY < 0) ? -deltaY : deltaY;
-
-    //if oldDirX > 0 check mapX - oldPosX > .5
-    //if oldDirX < 0 check mapX - oldPosX < -.5
-    // assign mapX_pos_check = (oldDirX > 0) ? deltaX > 16'h0080 :
-    //                                       deltaX < 16'hff80;
-    // //if oldDirY > 0 check mapY - oldPosY > .5
-    // //if oldDirY < 0 check mapY - oldPosY < -.5
-    // assign mapY_pos_check = (oldDirY > 0) ? deltaY > 16'h0080 :
-    //                                       deltaY < 16'hff80;
+    // logic [7:0] mapX, mapY;
+    // assign mapX = tempPosX_check[23:16];
+    // assign mapY = tempPosY_check[23:16];
 
 
     // typedef enum {FWD, BWD, ROTLEFT, ROTRIGHT} divider_state;
@@ -149,9 +131,9 @@ module movement_control #(
                 if (fwd_pulse) begin
                     // second_stage <= 1;
                     tempPosX <=  $signed({8'b0, oldPosX, 8'b0}) + oldDirX * MOVE_SPEED;
-                    tempPosX_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * (MOVE_SPEED*1.4);
+                    //tempPosX_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * INC_MOVE_SPEED;
                     tempPosY <=  $signed({8'b0, oldPosY, 8'b0}) + oldDirY * MOVE_SPEED;
-                    tempPosY_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * (MOVE_SPEED*1.4);
+                    //tempPosY_check <= $signed({8'b0, oldPosX, 8'b0}) + oldDirX * INC_MOVE_SPEED;
                     tempDirX <= $signed({2'b0, oldDirX, 14'b0});
                     tempDirY <= $signed({2'b0, oldDirY, 14'b0});
                     tempPlaneX <= $signed({2'b0, oldPlaneX, 14'b0});
@@ -160,9 +142,9 @@ module movement_control #(
                 else if (bwd_pulse) begin
                     // second_stage <= 1;
                     tempPosX <=  $signed({8'b0, oldPosX, 8'b0}) - oldDirX * MOVE_SPEED;
-                    tempPosX_check <=  $signed({8'b0, oldPosX, 8'b0}) - oldDirX * (MOVE_SPEED*1.4);
+                    //tempPosX_check <=  $signed({8'b0, oldPosX, 8'b0}) - oldDirX * INC_MOVE_SPEED;
                     tempPosY <=  $signed({8'b0, oldPosY, 8'b0}) - oldDirY * MOVE_SPEED;
-                    tempPosY_check <=  $signed({8'b0, oldPosY, 8'b0}) - oldDirY * (MOVE_SPEED*1.4);
+                    //tempPosY_check <=  $signed({8'b0, oldPosY, 8'b0}) - oldDirY * INC_MOVE_SPEED;
                     tempDirX <= $signed({2'b0, oldDirX, 14'b0});
                     tempDirY <= $signed({2'b0, oldDirY, 14'b0});
                     tempPlaneX <= $signed({2'b0, oldPlaneX, 14'b0});
