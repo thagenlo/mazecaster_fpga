@@ -108,25 +108,25 @@ module top_level(
     logic fwd_btn;
     logic bwd_btn;
 
-    assign leftRot_btn = btn[1];
-    assign rightRot_btn = btn[0];
-    assign fwd_btn = btn[3];
-    assign bwd_btn = btn[2];
+    // assign leftRot_btn = btn[1];
+    // assign rightRot_btn = btn[0];
+    // assign fwd_btn = btn[3];
+    // assign bwd_btn = btn[2];
     // // logic start_raycaster;
 
-    // assign leftRot_btn = pmodb[1];
-    // assign rightRot_btn = pmodb[0];
-    // assign fwd_btn = pmodb[3];
-    // assign bwd_btn = pmodb[2];
+    assign leftRot_btn = pmodb[1];
+    assign rightRot_btn = pmodb[0];
+    assign fwd_btn = pmodb[3];
+    assign bwd_btn = pmodb[2];
     // logic start_raycaster;
 
     btn_control controller (
         .clk_in(clk_pixel),
         .rst_in(sys_rst),
-        .fwd_btn(fwd_btn),
-        .bwd_btn(bwd_btn),
-        .leftRot_btn(leftRot_btn),
-        .rightRot_btn(rightRot_btn),
+        .fwd_btn(!fwd_btn),
+        .bwd_btn(!bwd_btn),
+        .leftRot_btn(!leftRot_btn),
+        .rightRot_btn(!rightRot_btn),
         .frame_switch(frame_buff_ready[0]),
         .posX(posX),
         .posY(posY),
