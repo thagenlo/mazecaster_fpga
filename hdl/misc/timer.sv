@@ -17,14 +17,14 @@ typedef enum {
 
 t_state state; // 0 = not counting down, 1 = counting down
 
-// localparam COUNTS_FOR_ONE_SEC = 32'h5F5E100; // 100,000,000 (cycles in a second for our clock)
-localparam COUNTS_FOR_ONE_SEC = 10;
+localparam COUNTS_FOR_ONE_SEC = 32'h5F5E100; // 100,000,000 (cycles in a second for our clock)
+// localparam COUNTS_FOR_ONE_SEC = 10;
 logic [$clog2(COUNTS_FOR_ONE_SEC)-1:0] counter_to_sec;
 
 always_ff @(posedge clk_100mhz_in) begin
     if (rst_in) begin
       counter_to_sec <= 0;
-      time_out <= TIMER_SECONDS;
+      time_out <= 60;
       timer_done_out <= 0;
       state <= NOT_COUNTING;
     end else begin
@@ -36,7 +36,7 @@ always_ff @(posedge clk_100mhz_in) begin
                     counter_to_sec <= 0;
                 end else begin
                     counter_to_sec <= 0;             // reset counter
-                    time_out <= TIMER_SECONDS;  // reset timer
+                    time_out <= 60;  // reset timer
                 end
             end
             COUNTING: begin
