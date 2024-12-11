@@ -33,8 +33,8 @@ module ray_calculations (
   //TODO can I change the position for me to be posX and posY in fixed point for accuracy
   //and change mapX and mapY where player is integer wise in map
 
-  typedef enum {RESTING, START, RAY_DIR_CALC, DIVIDING, DELTA_DIST_CALC, SIDE_DIST_CALC, VALID_OUT} divider_state;
-  divider_state state;
+  typedef enum {RESTING, START, RAY_DIR_CALC, DIVIDING, DELTA_DIST_CALC, SIDE_DIST_CALC, VALID_OUT} ray_calculation_state;
+  ray_calculation_state state;
 
 
 

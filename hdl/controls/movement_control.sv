@@ -15,15 +15,6 @@ module movement_control #(
     output logic signed [15:0] planeY
     );//
 
-    // localparam logic [15:0] COS_OF_45 = 16'sh00B5; //cos(45) = 0.7071 in FP
-    // localparam logic [15:0] SIN_OF_45 = 16'sh00B5; //sin(45) = 0.7071 in FP (but it into Q1.15 )
-    // localparam logic [15:0] NEG_COS_OF_45 = 16'sh00B5;
-    // localparam logic [15:0] NEG_SIN_OF_45 = 16'shFF4B;
-
-    // localparam logic [15:0] COS_OF_45 = 16'sh2d41; //cos(45) = 0.7071 in FP
-    // localparam logic [15:0] SIN_OF_45 = 16'sh2d41; //sin(45) = 0.7071 in FP (but it into Q2.15 )
-    // localparam logic [15:0] NEG_COS_OF_45 = 16'sh2d41;
-    // localparam logic [15:0] NEG_SIN_OF_45 = 16'shd2bf; //cos(2) = 3ff6 (0.9993896484375)
     localparam logic [15:0] COS_OF_45 = 16'sh3f07; //cos(10) = 3ff6 (0.9993896484375)
     localparam logic [15:0] SIN_OF_45 = 16'sh0b1d; //sin(10) = 0.7071 in FP (but it into Q2.15 )
     localparam logic [15:0] NEG_COS_OF_45 = 16'sh3f07;
@@ -136,30 +127,8 @@ module movement_control #(
                     tempDirY <= $signed(oldDirX) * $signed(SIN_OF_45) + $signed(oldDirY) * $signed(COS_OF_45);
                     tempPlaneX <= $signed(oldPlaneX) * $signed(COS_OF_45) - $signed(oldPlaneY) * $signed(SIN_OF_45);
                     tempPlaneY <= $signed(oldPlaneX) * $signed(SIN_OF_45) + $signed(oldPlaneY) * $signed(COS_OF_45);
-                    // tempDirX <= $$signed(oldDirX) * $signed(NEG_COS_OF_45[15:0]) - $signed(oldDirY[15:0]) * $signed(NEG_SIN_OF_45[15:0]);
-                    // tempDirY <= $signed(oldDirX) * $signed(NEG_SIN_OF_45[15:0]) + $signed(oldDirY[15:0]) * $signed(NEG_COS_OF_45[15:0]);
-                    // tempPlaneX <= $signed(oldPlaneX) * $signed(NEG_COS_OF_45[15:0]) - $signed(oldPlaneY[15:0]) * $signed(NEG_SIN_OF_45[15:0]);
-                    // tempPlaneY <= $signed(oldPlaneX) * $signed(NEG_SIN_OF_45[15:0]) + $signed(oldPlaneY[15:0]) * $signed(NEG_COS_OF_45[15:0]);
                 end
             end
-            // else if (second_stage) begin
-            //     second_stage <= 0;
-            //     tempPosX2 <= tempPosX;
-            //     tempPosY2 <= tempPosY;
-            //     tempDirX2 <= tempDirX;
-            //     tempDirY2 <= tempDirY;
-            //     tempPlaneX2 <= tempPlaneX;
-            //     tempPlaneY2 <= tempPlaneY;
-            //     third_stage <= 1;
-            // end else if (third_stage) begin
-            //     third_stage<=0;
-            //     oldPosX <= $signed(tempPosX[23:8]);
-            //     oldPosY <= $signed(tempPosY[23:8]);
-            //     oldDirX <= $signed(tempDirX[29:14]);
-            //     oldDirY <= $signed(tempDirY[29:14]);
-            //     oldPlaneX <= $signed(tempPlaneX[29:14]);
-            //     oldPlaneY <= $signed(tempPlaneY[29:14]);
-            // end
         end
     end
     

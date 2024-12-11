@@ -1,6 +1,6 @@
 module cocotb_iverilog_dump();
 initial begin
-    $dumpfile("/Users/cathyhu/Documents/GitHub/mazecaster_fpga/sim_build/grid_map.fst");
-    $dumpvars(0, grid_map);
+    $dumpfile("/Users/heba/Documents/GitHub/mazecaster_fpga/sim_build/game_fsm.fst");
+    $dumpvars(0, game_fsm);
 end
 endmodule
