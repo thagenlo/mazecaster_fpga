@@ -82,8 +82,8 @@ assign shade_bit = ray_pixel_out[8];
 // always_comb begin
 //     case (map_select)
 //         0, 1: begin
-//             localparam SKY = 8'h2a; // SKY BLUE
-//             localparam GROUND = 8'hdc; // BROWN FLOOR
+//             localparam sky = 8'h2a; // sky BLUE
+//             localparam ground = 8'hdc; // BROWN FLOOR
 //             localparam BLACK_WALL = 8'hFF;
 //             localparam GREEN_WALL = 8'h97;
 //         end
@@ -93,10 +93,33 @@ assign shade_bit = ray_pixel_out[8];
 //         end
 //     endcase
 // end
-localparam SKY = 8'h2a; // SKY BLUE
-localparam GROUND = 8'hdc; // BROWN FLOOR
-localparam BLACK_WALL = 8'hFF;
-localparam GREEN_WALL = 8'h97;
+
+logic [7:0] sky, ground, solid;
+
+always_comb begin
+    case (map_select)
+        0: begin
+            sky = 249;
+            ground = 239;
+            solid = 14;
+        end
+        // 1: begin
+        // end
+        // 3: begin
+        // end
+        // 4: begin
+        // end
+        default : begin
+            sky = 249;
+            ground = 239;
+            solid = 14;
+        end
+    endcase
+end
+// localparam sky = 249; // sky BLUE
+// localparam ground = 8'hdc; // BROWN FLOOR
+// localparam BLACK_WALL = 8'hFF;
+// localparam GREEN_WALL = 8'h97;
 localparam  HALF_SCREEN_HEIGHT = (SCREEN_HEIGHT >> 1);
 // region bounds
 localparam GRID_SIDE = 24;
@@ -133,7 +156,7 @@ logic [1:0] tex_counter; // counts from 0 to 2
 logic tex_req; // 1 = valid request, 0 = no request
 logic valid_tex_out;
 
-// TODO: ADD SKY GROUND LOGIC
+// TODO: ADD sky ground LOGIC
 
 textures texture_module (
     .pixel_clk_in(pixel_clk_in),
@@ -167,7 +190,7 @@ always_comb begin
     end else if (vcount_ray >= draw_end) begin
         region = FLOOR;
     end else begin
-        if (mapData_in < 3) begin
+        if (mapData_in < 2) begin
             region = PLAIN_WALL;
         end else begin
             region = TEX_WALL;
@@ -213,20 +236,19 @@ always_ff @(posedge pixel_clk_in) begin
                     CEILING, FLOOR, PLAIN_WALL: begin
                         if (region == CEILING || region == FLOOR) begin
                             case (region)
-                                CEILING: ray_pixel_out <= {1'b0, SKY};
-                                FLOOR: ray_pixel_out <= {1'b0, GROUND};
+                                CEILING: ray_pixel_out <= {1'b0, sky};
+                                FLOOR: ray_pixel_out <= {1'b0, ground};
                             endcase
-                            // ray_pixel <= (region == CEILING) ? SKY : GROUND;
+                            // ray_pixel <= (region == CEILING) ? sky : ground;
                         end else begin
                             // case (mapData_in)
-                            //     0: ray_pixel <= SKY;
+                            //     0: ray_pixel <= sky;
                             //     1: ray_pixel <= BLACK_WALL;
                             //     2: ray_pixel <= GREEN_WALL;
                             // endcase
                             case (mapData_in)
-                                0: ray_pixel_out <= {1'b0, SKY};
-                                1: ray_pixel_out <= (wallType_in) ? {1'b1, BLACK_WALL} : {1'b0, BLACK_WALL};
-                                2: ray_pixel_out <= (wallType_in) ? {1'b1, GREEN_WALL} : {1'b0, GREEN_WALL};
+                                0: ray_pixel_out <= {1'b0, sky};
+                                1: ray_pixel_out <= (wallType_in) ? {1'b1, solid} : {1'b0, solid};
                             endcase
                         end
                         ray_address_out <= hcount_ray_in + vcount_ray*SCREEN_WIDTH;

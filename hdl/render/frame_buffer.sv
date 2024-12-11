@@ -93,6 +93,7 @@ module frame_buffer #(
         shade = (state) ? pixel_out1[8] : pixel_out2[8];
         case (game_state_in)
             //TODO: FILL IN GAME STATES
+            // 0: raycasting, 1: start screen, 2-3: game won / lost
         endcase
         rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
         // if ((hcount_in == 640) || (vcount_in == 360)) begin
@@ -119,7 +120,7 @@ module frame_buffer #(
     .RAM_WIDTH(24),                          // 24 bit rgb representation
     .RAM_DEPTH(256),                        // 2^8 = 256 possible pixels
     .RAM_PERFORMANCE("HIGH_PERFORMANCE"),   
-    .INIT_FILE(`FPATH(pallete.mem))       
+    .INIT_FILE(`FPATH(palette.mem))       
     ) palette (
         .addra(palette_addr),
         .dina(),

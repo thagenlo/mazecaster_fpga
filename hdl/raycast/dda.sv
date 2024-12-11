@@ -20,8 +20,8 @@ module dda
   input wire map_select,
 
   //handle maps
-  input wire [2:0] map_data1_top_level,
-  input wire [2:0] map_data2_top_level,
+  input wire [3:0] map_data1_top_level,
+  input wire [3:0] map_data2_top_level,
   output wire [$clog2(N*N)-1:0] map_addra_top_level,
 
 
@@ -223,7 +223,7 @@ module dda
 
   //general I/O from BRAM
   logic [$clog2(N*N)-1:0] map_addra; //(hcount_in - x_in) + ((vcount_in - y_in) * WIDTH);
-  logic [2:0] map_data1, map_data2;
+  logic [3:0] map_data1, map_data2;
 
   //handle maps in top level
   assign map_addra_top_level = map_addra;
