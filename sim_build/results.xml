@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1733772770" />
-    <testcase name="test_a" classname="test_grid_map" file="/Users/cathyhu/Documents/GitHub/mazecaster_fpga/sim/test_grid_map.py" lineno="32" time="0.0027091503143310547" sim_time_ns="13.001" ratio_time="4798.921614362404" />
+    <property name="random_seed" value="1733876086" />
+    <testcase name="test_a" classname="test_timer" file="/Users/cathyhu/Documents/GitHub/mazecaster_fpga/sim/test_timer.py" lineno="24" time="0.030108928680419922" sim_time_ns="10030.001" ratio_time="333123.8087698082" />
   </testsuite>
 </testsuites>
