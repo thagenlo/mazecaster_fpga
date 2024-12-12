@@ -111,7 +111,7 @@ always_comb begin
     endcase
     neon_yellow = 21;
     neon_blue = 48;
-    neon_green = 32;
+    neon_green = 50;
     neon_pink = 181;
 end
 // localparam sky = 249; // sky BLUE
