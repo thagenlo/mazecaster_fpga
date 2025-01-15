@@ -30,18 +30,16 @@ module frame_buffer #(
                     input wire video_last_pixel_in, // indicates the last 
                     output logic [1:0] fb_ready_to_switch_out,
                     output logic [23:0] rgb_out);
-
-    logic state; // state = 0 (write to fb1, read from fb2), state = 1 (read from fb1, write to fb2)
-
-    logic good_address;
+    // state = 0: writing to FB1, reading from FB2 (pixel_out_2)
+    // state = 1: writing to FB2, reading from FB1 (pixel_out_1)
+    logic state;
 
     logic [15:0] address1, address2;
 
-    // state = 0: writing to FB1, reading from FB2 (pixel_out_2)
-    // state = 1: writing to FB2, reading from FB1 (pixel_out_1)
+    // address1 = address into frame buffer 1
+    // address2 = address into frame buffer 2
     assign address1 = (!state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2)); // if writing, address = ray_address_in. if reading, video sig indexing
     assign address2 = (state) ? ray_address_in : (((hcount_in>>2)) + SCREEN_WIDTH*(vcount_in>>2));
-    assign good_address = (hcount_in < FULL_SCREEN_WIDTH && vcount_in < FULL_SCREEN_HEIGHT); // valid when hcount_in and vcount_in are in active draw
 
     logic [8:0] pixel_out1, pixel_out2;
     logic switched; // to indicate to combinational logic that we have switched states and fb_ready_to_switch_out can go back to 2'b00
@@ -88,32 +86,23 @@ module frame_buffer #(
     logic [7:0] game_pixel_in;
     logic [23:0] game_rgb_out;
 
+    // rgb output onto the screen
     always_comb begin
         palette_addr = (state) ? pixel_out1[7:0] : pixel_out2[7:0];
         shade = (state) ? pixel_out1[8] : pixel_out2[8];
         case (game_state_in)
             // normal raycasting
             0: rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
-            // start
+            // start screen
             1: begin
                 game_pixel_in = start_pixel_out;
                 rgb_out = game_rgb_out;
             end
-            // lose
-            // 2: begin
-            //     game_pixel_in = lose_pixel_out;
-            //     rgb_out = game_rgb_out;
-            // end
-            // // win
-            // 3: begin
-            //     game_pixel_in = win_pixel_out;
-            //     rgb_out = game_rgb_out;
-            // end
             default : rgb_out = (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
         endcase
     end
 
-    // Pipeline for shade to rgb out
+    // Pipeline for shade
     logic [1:0] shade_pipe;
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
@@ -122,7 +111,6 @@ module frame_buffer #(
             shade_pipe[0] <= shade;
             shade_pipe[1] <= shade_pipe[0];
         end
-        // rgb_out <= (!shade_pipe[1]) ? rgb : ((rgb >> 1) & 24'b011111110111111101111111);
     end
     
     // PALETTE
@@ -159,6 +147,7 @@ module frame_buffer #(
         .douta(game_rgb_out)
     );
 
+    // frame buffer switching logic
     always_ff @(posedge pixel_clk_in) begin
         if (rst_in) begin
             state <= 0;

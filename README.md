@@ -78,7 +78,9 @@ The corresponding `hcount` and calculated ray direction (`rayDirX` and `rayDirY`
 The Digital Differential Analyzer (DDA) module is responsible for calculating ray-wall intersection distances and related hit information, including wall type and precise hit location. The DDA algorithm incrementally steps along a ray's path by precomputed steps deltaDist until it detects a wall intersection using grid map data. This information is used for perspective and texture rendering, providing wall height and shading details.
 - DDA FIFOs: To handle the variable latency of the DDA algorithm, the DDA module is buffered with two FIFOs implemented via AXI stream interfaces: one for input data and one for output. These FIFOs ensure that preceding and following modules can operate independently at their own rates. The DDA input FIFO buffers ray data between the controller/ray calculation modules and the DDA module. It stores 139-bit wide inputs in a FIFO of size 144 × 256. The DDA output FIFO collects processed data from the DDA module into a single 38-bit wide data line stored in a FIFO of size 40 × 256.
 - Grid Map in BRAM: An instance of the grid is stored in a single-port read-first Block RAM (BRAM) in the top level, where each cell contains data indicating wall type or passability. A shared arbiter resolves access conflicts between DDA FSM submodules, granting BRAM access alternately as needed.
-<img src="images/dda_fsm.png" width="622" height="430">
+<div style="text-align: center;">
+    <img src="images/dda_fsm.png" width="622" height="430">
+</div>
 
 ### Parallel Processing with Finite State Machines (FSMs)
 *Parallel DDA Finite State Machines (FSMs)*
@@ -106,8 +108,9 @@ For each horizontal position on the screen, the DDA algorithm described above ef
 - `wallType` tells us which face of the wall we have hit (which is used for the differential shading of different faces of a cube). 0 refers to a `X wall` and 1 refers to a `Y wall`
 - `mapData` gives us a 4 bit representation of the color or texture of the specific block we’ve hit.
 - `wallX` is the exact position of the wall we have hit which is used to index into the appropriate vertical stripe of the texture BRAM
-
-<img src="images/yellowblock.png" width="518" height="333">
+<div style="text-align: center;">
+    <img src="images/yellowblock.png" width="518" height="333">
+</div>
 
 The transformation essentially flattens this vertical line data into pixel-level information by providing a specified pixel color at a specified pixel address: (hcount, vcount) for each pixel in the frame.
 
@@ -121,8 +124,9 @@ Depending on the region of the screen in which the currently calculated pixel is
 
 The three states within the transformation module:
 Since the vertical line data used for this transformation calculation is taken from the DDA-out FIFO, there needs to be ready-valid handshakes between the FIFO and the transformation module so ensure data is robustly dequeued. Therefore, there are three states within the transformation module described below and in Figure 5: the `FIFO_WAIT`, `FIFO_WAIT_NEW_PACKET`, and `FLATTENING` states. 
-
-<img src="images/transformation_fsm.png" width="518" height="509">
+<div style="text-align: center;">
+    <img src="images/transformation_fsm.png" width="518" height="509">
+</div>
 
 - `FIFO_WAIT`: the transformation module signals to the FIFO that it’s ready for new data. Once new valid data is received from the FIFO, the data is stored in a register and the module transitions to the flattening state. 
 - `FIFO_WAIT_NEW_PACKET`: After rendering the last pixel of a frame, the transformation module waits for an additional signal from the frame buffer to confirm that the frame buffer is done rasterizing to the screen and is ready to receive new frame data.
@@ -132,7 +136,9 @@ Since the vertical line data used for this transformation calculation is taken f
 Additionally, the `tlast` bit that accompanies each data set from the DDA-out FIFO enables the transformation module to signal to the downstream frame buffer when the last pixel of the current frame is being processed.
 
 ### Frame Buffer
-<img src="images/frame_buffer.png" width="700" height="750">
+<div style="text-align: center;">
+    <img src="images/frame_buffer.png" width="700" height="750">
+</div>
 
 There are two frame buffers which store the pixel data for each pixel location on the HDMI connected display. At any given moment, one of the frame buffers is being written to with the output of the preceding raycasting logic, while the other fully calculated frame buffer is being read from by the `video_signal` generation module to be displayed on the screen. This effectively pipelines the output to the display so that while one of them is still computing a frame, the other is outputting an already completed frame.
 
