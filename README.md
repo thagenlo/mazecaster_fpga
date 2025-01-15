@@ -60,7 +60,6 @@ The ray calculation module operates as a finite state machine (FSM), sequentiall
 
 <div style="text-align: center;">
     <img src="images/raycast_fsm.jpg" width="622" height="356"><br>
-    <em>Ray Calculation FSM</em><br>
 </div>
 
 
