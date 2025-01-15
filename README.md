@@ -13,7 +13,9 @@ This is our final project for 6.205 (Digital Systems Laboratory) Fall 2024 at MI
 ## Description
 This project developed a pseudo-3D world renderer by ray-casting on an FPGA to simulate a first-person view within a 2D grid-based environment.
 <img src="images/neon_maze.jpg" width="400" height="200">
+
 <img src="images/threepigs_maze.png" width="400" height="200">
+
 <img src="images/castle_maze.png" width="400" height="200">
 
 
@@ -55,7 +57,11 @@ To render the scene, for each x-coordinate on the screen, a ray is cast from the
 
 The ray calculation module operates as a finite state machine (FSM), sequentially performing: (1) the ray direction computation. (2) the step and delta distance calculation. (3) the side distance initialization for the DDA algorithm.
 
-<img src="images/raycast_fsm.jpg" width="622" height="356">
+<div style="text-align: center;">
+    <img src="images/raycast_fsm.jpg" width="622" height="356"><br>
+    <em>Ray Calculation FSM</em><br>
+</div>
+
 
 The ray’s direction is determined by the player’s direction, camera plane vector, and a variable known as `cameraX`, which normalizes the `hcount` within the FOV.
 Delta distance is the distance the ray must travel in x and y to move from one grid cell to the next.
