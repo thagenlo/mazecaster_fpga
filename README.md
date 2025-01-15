@@ -12,6 +12,7 @@ This is our final project for 6.205 (Digital Systems Laboratory) Fall 2024 at MI
 
 ## Description
 This project developed a pseudo-3D world renderer by ray-casting on an FPGA to simulate a first-person view within a 2D grid-based environment.
+<br>
 <img src="images/neon_maze.jpg" width="400" height="200">
 
 <img src="images/threepigs_maze.png" width="400" height="200">
